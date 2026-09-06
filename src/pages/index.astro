@@ -1,0 +1,45 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout>
+	<main>
+		<p class="mark">a6n</p>
+		<h1>Aether</h1>
+		<p class="lede">Site scaffold is ready. Design lands next.</p>
+	</main>
+</Layout>
+
+<style>
+	main {
+		min-height: 100%;
+		display: grid;
+		place-content: center;
+		text-align: center;
+		padding: 2rem;
+		font-family: ui-sans-serif, system-ui, sans-serif;
+		background: #0b0b0c;
+		color: #f4f1ea;
+	}
+
+	.mark {
+		margin: 0 0 0.75rem;
+		letter-spacing: 0.28em;
+		text-transform: uppercase;
+		font-size: 0.75rem;
+		color: #8a8680;
+	}
+
+	h1 {
+		margin: 0;
+		font-size: clamp(3rem, 8vw, 6rem);
+		font-weight: 520;
+		letter-spacing: -0.04em;
+	}
+
+	.lede {
+		margin: 1rem 0 0;
+		color: #b8b3aa;
+		font-size: 1.05rem;
+	}
+</style>
