@@ -1,0 +1,48 @@
+---
+export type Pose = 'stand' | 'talk' | 'hold' | 'wave' | 'desk' | 'shrug' | 'walk';
+
+interface Props {
+	x?: number;
+	y?: number;
+	pose?: Pose;
+}
+
+const { x = 80, y = 70, pose = 'stand' } = Astro.props;
+
+function arms(kind: Pose): string {
+	switch (kind) {
+		case 'stand':
+			return `M ${x - 16} ${y + 22} L ${x} ${y + 14} L ${x + 16} ${y + 22}`;
+		case 'talk':
+			return `M ${x - 14} ${y + 24} L ${x} ${y + 14} L ${x + 22} ${y + 6}`;
+		case 'hold':
+			return `M ${x - 18} ${y + 20} L ${x} ${y + 14} L ${x + 20} ${y + 22}`;
+		case 'wave':
+			return `M ${x - 14} ${y + 24} L ${x} ${y + 14} L ${x + 16} ${y + 0}`;
+		case 'desk':
+			return `M ${x - 20} ${y + 28} L ${x} ${y + 16} L ${x + 20} ${y + 28}`;
+		case 'shrug':
+			return `M ${x - 22} ${y + 10} L ${x - 6} ${y + 16} L ${x} ${y + 14} L ${x + 6} ${y + 16} L ${x + 22} ${y + 10}`;
+		case 'walk':
+			return `M ${x - 14} ${y + 24} L ${x} ${y + 14} L ${x + 18} ${y + 8}`;
+		default: {
+			const _never: never = kind;
+			return _never;
+		}
+	}
+}
+---
+
+<g
+	fill="none"
+	stroke="currentColor"
+	stroke-width="2.2"
+	stroke-linecap="round"
+	stroke-linejoin="round"
+>
+	<circle cx={x} cy={y} r="10" fill="var(--paper)"></circle>
+	<path d={`M ${x} ${y + 10} L ${x} ${y + 38}`}></path>
+	<path d={arms(pose)}></path>
+	<path d={`M ${x} ${y + 38} L ${x - 13} ${y + 62}`}></path>
+	<path d={`M ${x} ${y + 38} L ${x + 13} ${y + 62}`}></path>
+</g>

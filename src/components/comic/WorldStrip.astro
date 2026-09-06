@@ -1,0 +1,42 @@
+---
+import Stick from './Stick.astro';
+---
+
+<figure class="gazette" data-strip="places">
+	<figcaption>No. 03 · Any business</figcaption>
+	<div class="gazette-row gazette-row-4">
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 200 180" role="img" aria-label="A person in a shop">
+				<polygon points="40,70 100,28 160,70" fill="none" stroke="currentColor" stroke-width="1.8"></polygon>
+				<rect x="50" y="70" width="100" height="72" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+				<Stick x={100} y={78} pose="stand" />
+			</svg>
+			<p>A shop.</p>
+		</div>
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 200 180" role="img" aria-label="A person in a clinic">
+				<rect x="44" y="36" width="112" height="108" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+				<line x1="100" y1="36" x2="100" y2="56" stroke="currentColor" stroke-width="1.8"></line>
+				<line x1="90" y1="46" x2="110" y2="46" stroke="currentColor" stroke-width="1.8"></line>
+				<Stick x={100} y={72} pose="hold" />
+			</svg>
+			<p>A clinic.</p>
+		</div>
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 200 180" role="img" aria-label="A person at a laptop">
+				<rect x="48" y="28" width="104" height="58" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+				<line x1="36" y1="96" x2="164" y2="96" stroke="currentColor" stroke-width="1.8"></line>
+				<Stick x={100} y={72} pose="desk" />
+			</svg>
+			<p>Online.</p>
+		</div>
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 200 180" role="img" aria-label="A person on a shop floor">
+				<rect x="36" y="118" width="40" height="28" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+				<rect x="124" y="108" width="40" height="38" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+				<Stick x={100} y={58} pose="walk" />
+			</svg>
+			<p>On the floor.</p>
+		</div>
+	</div>
+</figure>

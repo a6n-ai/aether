@@ -1,0 +1,28 @@
+---
+import Stick from './Stick.astro';
+---
+
+<figure class="gazette" data-strip="mail">
+	<figcaption>No. 05 · Write us</figcaption>
+	<div class="gazette-row gazette-row-2">
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 400 220" role="img" aria-label="A person holding an envelope">
+				<Stick x={150} y={68} pose="hold" />
+				<g data-envelope>
+					<rect x="188" y="84" width="72" height="46" fill="var(--paper)" stroke="currentColor" stroke-width="2"></rect>
+					<path d="M188 84 L224 110 L260 84" fill="none" stroke="currentColor" stroke-width="2"></path>
+				</g>
+			</svg>
+			<p>A note from anywhere.</p>
+		</div>
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 400 220" role="img" aria-label="Mailbox for hi@a6n.ai">
+				<rect x="140" y="58" width="120" height="88" fill="none" stroke="currentColor" stroke-width="2.2"></rect>
+				<rect x="188" y="78" width="24" height="36" fill="none" stroke="currentColor" stroke-width="1.8"></rect>
+				<line x1="200" y1="146" x2="200" y2="176" stroke="currentColor" stroke-width="2"></line>
+				<line x1="176" y1="176" x2="224" y2="176" stroke="currentColor" stroke-width="2"></line>
+			</svg>
+			<p>We read every letter.</p>
+		</div>
+	</div>
+</figure>

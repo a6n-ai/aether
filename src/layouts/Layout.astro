@@ -1,24 +1,36 @@
+---
+import '../styles/global.css';
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Aether — a6n</title>
-		<meta name="description" content="Aether, the a6n website." />
+		<title>(Ai)ny Management System — a6n</title>
+		<meta
+			name="description"
+			content="a6n is (Ai)ny Management System. Blueprints to success for any business — online or on the floor, all over the world. Write hi@a6n.ai."
+		/>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=Geist+Mono:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
 	</head>
 	<body>
+		<!--
+			THESIS: (Ai)ny Management System — any business, a plan with AI on it.
+			OWN-WORLD: Cyanotype sheet. Stick-figure comics; a small gear as a prop.
+			STORY: The day, how it helps, any business, the world, the letter.
+			FIRST VIEWPORT: (Ai)ny wordmark, then strip no. 01.
+			TYPE: Architects Daughter on comics. Geist Mono everywhere else.
+			FORM: Cyanotype. FINISH: browser.
+		-->
 		<slot />
 	</body>
 </html>
-
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>

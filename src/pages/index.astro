@@ -1,45 +1,479 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import DayStrip from '../components/comic/DayStrip.astro';
+import GlobeStrip from '../components/comic/GlobeStrip.astro';
+import HowStrip from '../components/comic/HowStrip.astro';
+import MailStrip from '../components/comic/MailStrip.astro';
+import WorldStrip from '../components/comic/WorldStrip.astro';
 ---
 
 <Layout>
-	<main>
-		<p class="mark">a6n</p>
-		<h1>Aether</h1>
-		<p class="lede">Site scaffold is ready. Design lands next.</p>
-	</main>
+	<a class="skip" href="#top">Skip to story</a>
+
+	<div class="sheet">
+		<div class="frame" aria-hidden="true"></div>
+
+		<header class="bar">
+			<a class="mark" href="#top">A6N</a>
+			<nav class="bar-nav" aria-label="On this page">
+				<a href="#top">Home</a>
+				<a href="#how">How</a>
+				<a href="#world">World</a>
+				<a href="#write">Write</a>
+			</nav>
+			<div class="bar-actions">
+				<button class="ghost" id="theme-toggle" type="button">Whiteprint</button>
+				<a class="solid bar-mail" href="mailto:hi@a6n.ai">hi@a6n.ai</a>
+				<button class="menu" id="menu-toggle" type="button" aria-expanded="false" aria-controls="index">
+					<span></span>
+					<span></span>
+					Menu
+				</button>
+			</div>
+		</header>
+
+		<div class="index" id="index" aria-hidden="true">
+			<button class="index-close" id="menu-close" type="button">Close</button>
+			<nav class="index-grid" aria-label="Menu">
+				<a href="#top" data-close>Home</a>
+				<a href="#how" data-close>How it helps</a>
+				<a href="#world" data-close>All over the world</a>
+				<a href="#write" data-close>Write us</a>
+				<a href="mailto:hi@a6n.ai" data-close>hi@a6n.ai</a>
+			</nav>
+		</div>
+
+		<main>
+			<section class="cover" id="top">
+				<div class="cover-copy">
+					<p class="eyebrow">any management system</p>
+					<h1>
+						<span class="ai">(Ai)</span>ny
+					</h1>
+					<p class="product">Management System</p>
+					<p class="lede">
+						Blueprints to success for any business. Your people, your day — online or on the floor. We act
+						like small gears in your machine to make everything smoother.
+					</p>
+				</div>
+				<DayStrip />
+			</section>
+
+			<section class="block" id="how" data-reveal>
+				<div class="copy">
+					<h2>Not extra tools. The work you already have.</h2>
+					<p class="lede">
+						Running a business is a lot of little jobs. Operations, attendance, clients, team, customers —
+						any management. a6n keeps them on one plan. AI sits on that plan with you. It does not replace
+						your judgment.
+					</p>
+				</div>
+				<HowStrip />
+			</section>
+
+			<section class="block" id="world" data-reveal>
+				<div class="copy">
+					<h2>If you run a business, this is for you.</h2>
+					<p class="lede">
+						A shop, a clinic, a studio, an office — the jobs rhyme. Lean, fast-forward, future-ready. Same
+						kind of plan, drawn around the work you already do. Not a system built for one trade, or one
+						city.
+					</p>
+				</div>
+				<WorldStrip />
+				<div class="globe-follow">
+					<GlobeStrip />
+				</div>
+			</section>
+
+			<section class="block" id="write" data-reveal>
+				<div class="copy">
+					<h2>Start with what you already do.</h2>
+					<p class="lede">Bring the business you have. Write us from anywhere. We read every letter.</p>
+				</div>
+				<MailStrip />
+			</section>
+		</main>
+
+		<footer class="colophon">
+			<div class="colophon-world">
+				<p>All over the world</p>
+				<p>a6n is drawn for work on every meridian — same plan, local day.</p>
+			</div>
+			<div class="colophon-links">
+				<a href="mailto:hi@a6n.ai">hi@a6n.ai</a>
+				<a href="https://github.com/a6n-ai">GitHub</a>
+			</div>
+			<div class="stamp">
+				<div>
+					<small>System</small>
+					<strong>(Ai)ny</strong>
+				</div>
+				<div>
+					<small>For</small>
+					<strong>Any business</strong>
+				</div>
+				<div>
+					<small>Write</small>
+					<strong>hi@a6n.ai</strong>
+				</div>
+			</div>
+		</footer>
+	</div>
 </Layout>
 
+<script>
+	import { initMenu } from '../scripts/menu';
+	import { initScroll } from '../scripts/scroll';
+
+	const root = document.documentElement;
+	const themeBtn = document.getElementById('theme-toggle') as HTMLButtonElement;
+
+	function setTheme(mode: 'cyanotype' | 'whiteprint') {
+		if (mode === 'whiteprint') root.dataset.theme = 'whiteprint';
+		else delete root.dataset.theme;
+		themeBtn.textContent = mode === 'cyanotype' ? 'Whiteprint' : 'Cyanotype';
+	}
+
+	setTheme('cyanotype');
+	themeBtn.addEventListener('click', () => {
+		setTheme(root.dataset.theme === 'whiteprint' ? 'cyanotype' : 'whiteprint');
+	});
+
+	initMenu();
+	initScroll();
+</script>
+
 <style>
-	main {
-		min-height: 100%;
+	.skip {
+		position: absolute;
+		left: 16px;
+		top: -48px;
+		z-index: 80;
+		padding: 8px 12px;
+		background: var(--ink);
+		color: var(--paper);
+		font-size: 13px;
+	}
+	.skip:focus {
+		top: 16px;
+	}
+
+	.sheet {
+		position: relative;
+		min-height: 100dvh;
+		overflow-x: hidden;
+		background-color: var(--paper);
+		background-image:
+			linear-gradient(var(--grid) 1px, transparent 1px),
+			linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+		background-size: 32px 32px;
+		color: var(--ink);
+		padding: 16px;
+	}
+
+	.frame {
+		pointer-events: none;
+		position: fixed;
+		inset: 8px;
+		z-index: 1;
+		border: 1px solid var(--line);
+		box-shadow:
+			inset 0 0 0 6px var(--paper),
+			inset 0 0 0 7px var(--line-soft);
+	}
+
+	.bar {
+		position: sticky;
+		top: 16px;
+		z-index: 50;
 		display: grid;
-		place-content: center;
-		text-align: center;
-		padding: 2rem;
-		font-family: ui-sans-serif, system-ui, sans-serif;
-		background: #0b0b0c;
-		color: #f4f1ea;
+		grid-template-columns: auto 1fr auto;
+		align-items: center;
+		column-gap: 16px;
+		min-height: 64px;
+		margin: 8px 8px 0;
+		padding: 0 16px;
+		border: 1px solid var(--line-soft);
+		background: color-mix(in srgb, var(--paper) 80%, transparent);
+		backdrop-filter: blur(18px) saturate(140%);
 	}
 
 	.mark {
-		margin: 0 0 0.75rem;
-		letter-spacing: 0.28em;
+		justify-self: start;
+		font-family: var(--display);
+		font-size: 28px;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		color: var(--ink);
+		text-decoration: none;
+		line-height: 1;
+	}
+
+	.bar-nav {
+		display: none;
+		justify-self: center;
+		gap: 24px;
+	}
+	.bar-nav a {
+		color: var(--ink-dim);
+		text-decoration: none;
+		font-family: var(--mono);
+		font-size: 12px;
+		letter-spacing: 0.08em;
 		text-transform: uppercase;
-		font-size: 0.75rem;
-		color: #8a8680;
+	}
+	.bar-nav a:hover {
+		color: var(--ink);
 	}
 
-	h1 {
+	.bar-actions {
+		display: flex;
+		justify-self: end;
+		align-items: center;
+		gap: 8px;
+	}
+	.bar-mail {
+		display: none;
+	}
+
+	.ghost,
+	.solid,
+	.menu,
+	.index-close {
+		min-height: 44px;
+		padding: 0 14px;
+		border: 1px solid var(--line);
+		background: transparent;
+		color: var(--ink);
+		font: 500 12px/1 var(--mono);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		text-decoration: none;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		cursor: pointer;
+		transition:
+			transform 140ms var(--ease),
+			background-color 180ms var(--ease);
+	}
+	.solid {
+		background: var(--ink);
+		color: var(--paper);
+		border-color: var(--ink);
+	}
+	.ghost:hover,
+	.menu:hover,
+	.index-close:hover {
+		background: color-mix(in srgb, var(--ink) 8%, transparent);
+	}
+	.ghost:active,
+	.solid:active,
+	.menu:active,
+	.index-close:active {
+		transform: scale(0.96);
+	}
+	.menu span {
+		display: block;
+		width: 14px;
+		height: 1px;
+		background: currentColor;
+	}
+
+	.index {
+		position: fixed;
+		inset: 10px;
+		z-index: 90;
+		display: none;
+		flex-direction: column;
+		padding: 24px 28px 40px;
+		background: var(--paper);
+		border: 1px solid var(--line);
+		overflow: auto;
+	}
+	.index-close {
+		align-self: flex-end;
+		margin-bottom: 24px;
+	}
+	.index-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		max-width: 640px;
+	}
+	.index-grid a {
+		display: block;
+		padding: 12px 0;
+		color: var(--ink);
+		text-decoration: none;
+		font-family: var(--display);
+		font-size: clamp(32px, 7vw, 56px);
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		line-height: 1.1;
+	}
+	.index-grid a:hover {
+		color: var(--ink-dim);
+	}
+
+	main {
+		position: relative;
+		z-index: 2;
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 32px 16px 48px;
+	}
+
+	.cover {
+		padding: 32px 0 48px;
+	}
+	.cover-copy {
+		max-width: 40rem;
+		margin-bottom: 32px;
+	}
+	.eyebrow,
+	.product {
 		margin: 0;
-		font-size: clamp(3rem, 8vw, 6rem);
-		font-weight: 520;
+		font-family: var(--mono);
+		font-size: 13px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--ink-dim);
+	}
+	h1 {
+		margin: 8px 0 0;
+		font-family: var(--display);
+		font-size: clamp(56px, 14vw, 120px);
+		font-weight: 700;
 		letter-spacing: -0.04em;
+		line-height: 1;
+	}
+	.product {
+		margin: 8px 0 20px;
+		font-family: var(--display);
+		font-size: clamp(20px, 3.5vw, 32px);
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		color: var(--ink);
+	}
+	h2 {
+		margin: 0 0 12px;
+		font-family: var(--display);
+		font-size: clamp(28px, 4.5vw, 44px);
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		line-height: 1.15;
+		text-wrap: balance;
+	}
+	.lede {
+		max-width: 38rem;
+		margin: 0;
+		text-wrap: pretty;
+	}
+	.copy {
+		margin-bottom: 24px;
+	}
+	.globe-follow {
+		margin-top: 40px;
 	}
 
-	.lede {
-		margin: 1rem 0 0;
-		color: #b8b3aa;
-		font-size: 1.05rem;
+	.block {
+		padding: 64px 0;
+		border-top: 1px solid var(--line-soft);
+	}
+
+	.colophon {
+		position: relative;
+		z-index: 2;
+		max-width: 1120px;
+		margin: 0 auto;
+		padding: 32px 16px 40px;
+		border-top: 1px solid var(--line);
+	}
+	.colophon-world p:first-child {
+		margin: 0 0 6px;
+		font-family: var(--display);
+		font-size: 32px;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+	}
+	.colophon-world p:last-child {
+		margin: 0 0 20px;
+		max-width: 36rem;
+		color: var(--ink-dim);
+	}
+	.colophon-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 16px 28px;
+		margin-bottom: 24px;
+	}
+	.colophon-links a {
+		color: var(--ink);
+		font-family: var(--mono);
+		letter-spacing: 0.08em;
+	}
+	.stamp {
+		display: grid;
+		grid-template-columns: 1fr;
+		border: 1px solid var(--line);
+	}
+	.stamp div {
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--line-soft);
+	}
+	.stamp div:last-child {
+		border-bottom: 0;
+	}
+	.stamp small {
+		display: block;
+		font-family: var(--mono);
+		font-size: 10px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--ink-dim);
+	}
+	.stamp strong {
+		font-family: var(--display);
+		font-size: 20px;
+		font-weight: 700;
+		letter-spacing: -0.02em;
+	}
+
+	@media (min-width: 880px) {
+		.bar {
+			grid-template-columns: 1fr auto 1fr;
+		}
+		.bar-nav {
+			display: flex;
+		}
+		.bar-mail {
+			display: inline-flex;
+		}
+		main,
+		.colophon {
+			padding-right: 48px;
+			padding-left: 48px;
+		}
+		.stamp {
+			grid-template-columns: repeat(3, 1fr);
+		}
+		.stamp div {
+			border-bottom: 0;
+			border-right: 1px solid var(--line-soft);
+		}
+		.stamp div:last-child {
+			border-right: 0;
+		}
+	}
+
+	@media (prefers-reduced-transparency: reduce) {
+		.bar,
+		.index {
+			background: var(--paper);
+			backdrop-filter: none;
+		}
 	}
 </style>

@@ -1,0 +1,40 @@
+---
+interface Props {
+	cx?: number;
+	cy?: number;
+	r?: number;
+	teeth?: number;
+	kind?: 'host' | 'small';
+}
+
+const { cx = 100, cy = 100, r = 36, teeth = 10, kind = 'host' } = Astro.props;
+const hub = r * (kind === 'small' ? 0.28 : 0.22);
+const inner = r * 0.62;
+const toothW = (Math.PI * 2 * r) / teeth / 2.4;
+const toothH = r * 0.22;
+const hubFill = kind === 'small' ? 'currentColor' : 'none';
+
+const cogs = Array.from({ length: teeth }, (_, i) => {
+	const a = (i / teeth) * Math.PI * 2 - Math.PI / 2;
+	const x = cx + Math.cos(a) * inner;
+	const y = cy + Math.sin(a) * inner;
+	const deg = (a * 180) / Math.PI + 90;
+	return { x, y, deg };
+});
+---
+
+<g fill="none" stroke="currentColor" stroke-width={kind === 'small' ? 1.6 : 1.8} stroke-linejoin="round">
+	<circle cx={cx} cy={cy} r={inner}></circle>
+	<circle cx={cx} cy={cy} r={hub} fill={hubFill}></circle>
+	{
+		cogs.map((cog) => (
+			<rect
+				x={cog.x - toothW / 2}
+				y={cog.y - toothH}
+				width={toothW}
+				height={toothH}
+				transform={`rotate(${cog.deg} ${cog.x} ${cog.y})`}
+			/>
+		))
+	}
+</g>

@@ -1,0 +1,199 @@
+:root {
+	--paper: #0a4a86;
+	--paper-2: #083d70;
+	--ink: #f4fbff;
+	--ink-dim: #b9dcf0;
+	--line: #d7eef8;
+	--line-soft: rgba(244, 251, 255, 0.22);
+	--grid: rgba(244, 251, 255, 0.07);
+	--display: 'Geist Mono', ui-monospace, monospace;
+	--body: 'Geist Mono', ui-monospace, monospace;
+	--hand: 'Architects Daughter', 'Comic Sans MS', cursive;
+	--mono: 'Geist Mono', ui-monospace, monospace;
+	--ease: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html[data-theme='whiteprint'] {
+	--paper: #f4fbff;
+	--paper-2: #e4f2fa;
+	--ink: #0a4a86;
+	--ink-dim: #2f6fa3;
+	--line: #0a4a86;
+	--line-soft: rgba(10, 74, 134, 0.18);
+	--grid: rgba(10, 74, 134, 0.06);
+}
+
+html {
+	scroll-padding-top: 96px;
+}
+
+html,
+body {
+	margin: 0;
+	min-height: 100%;
+	background: var(--paper);
+	color: var(--ink);
+	-webkit-font-smoothing: antialiased;
+	font-family: var(--body);
+	font-size: 17px;
+	line-height: 1.55;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 3px;
+}
+
+.gazette {
+	margin: 0;
+	color: var(--ink);
+}
+.gazette figcaption {
+	margin: 0 0 10px;
+	font-family: var(--mono);
+	font-size: 12px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ink-dim);
+}
+.gazette-row {
+	display: grid;
+	border: 2px solid var(--line);
+	background: color-mix(in srgb, var(--paper) 88%, black);
+	overflow: hidden;
+}
+html[data-theme='whiteprint'] .gazette-row {
+	background: var(--paper-2);
+}
+.gazette-row-2,
+.gazette-row-3,
+.gazette-row-4,
+.gazette-row-6 {
+	grid-template-columns: 1fr;
+}
+.cell {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	align-items: stretch;
+	padding: 16px 16px 12px;
+	border-bottom: 2px solid var(--line);
+}
+.cell:last-child {
+	border-bottom: 0;
+}
+.cell svg {
+	display: block;
+	width: 100%;
+	height: auto;
+	flex: 1 1 auto;
+}
+.cell p {
+	margin: 8px 4px 0;
+	min-height: 2.6em;
+	text-align: center;
+	font-family: var(--hand);
+	font-size: 18px;
+	font-weight: 400;
+	line-height: 1.3;
+}
+.gazette-globe {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.globe-frame {
+	width: min(420px, 100%);
+	padding: 16px;
+	border: 2px solid var(--line);
+	background: color-mix(in srgb, var(--paper) 88%, black);
+}
+html[data-theme='whiteprint'] .globe-frame {
+	background: var(--paper-2);
+}
+.globe-frame p {
+	margin: 8px 0 0;
+	text-align: center;
+	font-family: var(--hand);
+	font-size: 18px;
+	font-weight: 400;
+	line-height: 1.3;
+}
+
+@media (min-width: 720px) {
+	.gazette-row-2 {
+		grid-template-columns: 1fr 1fr;
+	}
+	.gazette-row-3 {
+		grid-template-columns: repeat(3, 1fr);
+	}
+	.gazette-row-6 {
+		grid-template-columns: repeat(3, 1fr);
+	}
+	.gazette-row-2 .cell,
+	.gazette-row-3 .cell {
+		border-bottom: 0;
+		border-right: 2px solid var(--line);
+	}
+	.gazette-row-2 .cell:last-child,
+	.gazette-row-3 .cell:last-child {
+		border-right: 0;
+	}
+	.gazette-row-4 {
+		grid-template-columns: 1fr 1fr;
+	}
+	.gazette-row-4 .cell {
+		border-right: 2px solid var(--line);
+	}
+	.gazette-row-4 .cell:nth-child(2n) {
+		border-right: 0;
+	}
+	.gazette-row-4 .cell:nth-child(-n + 2) {
+		border-bottom: 2px solid var(--line);
+	}
+	.gazette-row-4 .cell:nth-child(n + 3) {
+		border-bottom: 0;
+	}
+	.gazette-row-6 .cell {
+		border-right: 2px solid var(--line);
+	}
+	.gazette-row-6 .cell:nth-child(3n) {
+		border-right: 0;
+	}
+	.gazette-row-6 .cell:nth-child(-n + 3) {
+		border-bottom: 2px solid var(--line);
+	}
+	.gazette-row-6 .cell:nth-child(n + 4) {
+		border-bottom: 0;
+	}
+}
+
+@media (min-width: 1000px) {
+	.gazette-row-4 {
+		grid-template-columns: repeat(4, 1fr);
+	}
+	.gazette-row-4 .cell {
+		border-bottom: 0;
+		border-right: 2px solid var(--line);
+	}
+	.gazette-row-4 .cell:nth-child(2n) {
+		border-right: 2px solid var(--line);
+	}
+	.gazette-row-4 .cell:last-child {
+		border-right: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		transition-duration: 0.2s !important;
+		scroll-behavior: auto !important;
+	}
+}

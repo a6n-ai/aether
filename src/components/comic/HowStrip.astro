@@ -1,0 +1,31 @@
+---
+import Gear from './Gear.astro';
+import Stick from './Stick.astro';
+---
+
+<figure class="gazette" data-strip="how">
+	<figcaption>No. 02 · How it helps</figcaption>
+	<div class="gazette-row gazette-row-2">
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 400 220" role="img" aria-label="Two people with a tangle of extra steps between them">
+				<Stick x={70} y={78} pose="walk" />
+				<Stick x={330} y={78} pose="shrug" />
+				<path d="M110 110 C 160 40, 240 180, 290 110" fill="none" stroke="currentColor" stroke-width="1.6"></path>
+				<path d="M110 130 C 180 190, 250 50, 290 130" fill="none" stroke="currentColor" stroke-width="1.6"></path>
+			</svg>
+			<p>Extra steps. Extra wait.</p>
+		</div>
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 400 220" role="img" aria-label="Two people at a counter with a small gear on the plan">
+				<Stick x={140} y={72} pose="talk" />
+				<Stick x={250} y={72} pose="stand" />
+				<line x1="70" y1="156" x2="330" y2="156" stroke="currentColor" stroke-width="2"></line>
+				<rect x="150" y="128" width="100" height="28" fill="var(--paper)" stroke="currentColor" stroke-width="1.6"></rect>
+				<g data-gear="small">
+					<Gear cx={300} cy={118} r={16} teeth={8} kind="small" />
+				</g>
+			</svg>
+			<p>AI on the plan. Less friction.</p>
+		</div>
+	</div>
+</figure>

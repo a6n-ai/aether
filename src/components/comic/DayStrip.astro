@@ -1,0 +1,43 @@
+---
+import Gear from './Gear.astro';
+import Stick from './Stick.astro';
+---
+
+<figure class="gazette" data-strip="day">
+	<figcaption>No. 01 · The day</figcaption>
+	<div class="gazette-row gazette-row-3">
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 240 200" role="img" aria-label="A person surrounded by too many jobs">
+				<Stick x={120} y={78} pose="shrug" />
+				<rect x="36" y="36" width="28" height="36" fill="none" stroke="currentColor" stroke-width="1.6"></rect>
+				<line x1="40" y1="46" x2="56" y2="46" stroke="currentColor" stroke-width="1.4"></line>
+				<circle cx="196" cy="52" r="16" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+				<line x1="196" y1="52" x2="196" y2="42" stroke="currentColor" stroke-width="1.6"></line>
+				<circle cx="48" cy="150" r="8" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+				<circle cx="200" cy="148" r="8" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+			</svg>
+			<p>Too many jobs.</p>
+		</div>
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 240 200" role="img" aria-label="A person sitting at a table with a plan">
+				<Stick x={120} y={68} pose="desk" />
+				<line x1="48" y1="138" x2="192" y2="138" stroke="currentColor" stroke-width="2"></line>
+				<rect x="78" y="108" width="84" height="30" fill="var(--paper)" stroke="currentColor" stroke-width="1.6"></rect>
+				<line x1="90" y1="118" x2="150" y2="118" stroke="currentColor" stroke-width="1.3"></line>
+				<line x1="90" y1="126" x2="136" y2="126" stroke="currentColor" stroke-width="1.3"></line>
+			</svg>
+			<p>a6n is the plan.</p>
+		</div>
+		<div class="cell" data-cell>
+			<svg viewBox="0 0 240 200" role="img" aria-label="A person at the same table with a small gear on the plan">
+				<Stick x={110} y={68} pose="desk" />
+				<line x1="48" y1="138" x2="192" y2="138" stroke="currentColor" stroke-width="2"></line>
+				<rect x="70" y="108" width="100" height="30" fill="var(--paper)" stroke="currentColor" stroke-width="1.6"></rect>
+				<g data-gear="small">
+					<Gear cx={160} cy={90} r={16} teeth={8} kind="small" />
+				</g>
+			</svg>
+			<p>Small gears in the work.</p>
+		</div>
+	</div>
+</figure>
