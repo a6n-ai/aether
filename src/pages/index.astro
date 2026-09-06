@@ -4,6 +4,7 @@ import DayStrip from '../components/comic/DayStrip.astro';
 import GlobeStrip from '../components/comic/GlobeStrip.astro';
 import HowStrip from '../components/comic/HowStrip.astro';
 import MailStrip from '../components/comic/MailStrip.astro';
+import Mark from '../components/Mark.astro';
 import WorldStrip from '../components/comic/WorldStrip.astro';
 ---
 
@@ -14,7 +15,10 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		<div class="frame" aria-hidden="true"></div>
 
 		<header class="bar">
-			<a class="mark" href="#top">A6N</a>
+			<a class="mark" href="#top">
+				<Mark animated />
+				<span>A6N</span>
+			</a>
 			<nav class="bar-nav" aria-label="On this page">
 				<a href="#top">Home</a>
 				<a href="#how">How</a>
@@ -22,7 +26,14 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 				<a href="#write">Write</a>
 			</nav>
 			<div class="bar-actions">
-				<button class="ghost" id="theme-toggle" type="button">Whiteprint</button>
+				<button
+					class="ghost bar-theme"
+					data-theme-toggle
+					type="button"
+					aria-pressed="false"
+				>
+					Whiteprint
+				</button>
 				<a class="solid bar-mail" href="mailto:hi@a6n.ai">hi@a6n.ai</a>
 				<button class="menu" id="menu-toggle" type="button" aria-expanded="false" aria-controls="index">
 					<span></span>
@@ -39,8 +50,11 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 				<a href="#how" data-close>How it helps</a>
 				<a href="#world" data-close>All over the world</a>
 				<a href="#write" data-close>Write us</a>
-				<a href="mailto:hi@a6n.ai" data-close>hi@a6n.ai</a>
+				<a class="index-mail" href="mailto:hi@a6n.ai" data-close>hi@a6n.ai</a>
 			</nav>
+			<button class="ghost index-theme" data-theme-toggle type="button" aria-pressed="false">
+				Whiteprint
+			</button>
 		</div>
 
 		<main>
@@ -55,6 +69,7 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 						Blueprints to success for any business. Your people, your day — online or on the floor. We act
 						like small gears in your machine to make everything smoother.
 					</p>
+					<a class="solid cover-write" href="mailto:hi@a6n.ai">Write hi@a6n.ai</a>
 				</div>
 				<DayStrip />
 			</section>
@@ -127,17 +142,23 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 	import { initScroll } from '../scripts/scroll';
 
 	const root = document.documentElement;
-	const themeBtn = document.getElementById('theme-toggle') as HTMLButtonElement;
+	const themeBtns = [...document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')];
 
 	function setTheme(mode: 'cyanotype' | 'whiteprint') {
 		if (mode === 'whiteprint') root.dataset.theme = 'whiteprint';
 		else delete root.dataset.theme;
-		themeBtn.textContent = mode === 'cyanotype' ? 'Whiteprint' : 'Cyanotype';
+		const label = mode === 'cyanotype' ? 'Whiteprint' : 'Cyanotype';
+		themeBtns.forEach((btn) => {
+			btn.textContent = label;
+			btn.setAttribute('aria-pressed', String(mode === 'whiteprint'));
+		});
 	}
 
 	setTheme('cyanotype');
-	themeBtn.addEventListener('click', () => {
-		setTheme(root.dataset.theme === 'whiteprint' ? 'cyanotype' : 'whiteprint');
+	themeBtns.forEach((btn) => {
+		btn.addEventListener('click', () => {
+			setTheme(root.dataset.theme === 'whiteprint' ? 'cyanotype' : 'whiteprint');
+		});
 	});
 
 	initMenu();
@@ -147,62 +168,66 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 <style>
 	.skip {
 		position: absolute;
-		left: 16px;
-		top: -48px;
+		left: max(16px, env(safe-area-inset-left, 0px));
+		top: -64px;
 		z-index: 80;
-		padding: 8px 12px;
+		min-height: 44px;
+		padding: 12px 14px;
 		background: var(--ink);
 		color: var(--paper);
 		font-size: 13px;
 	}
 	.skip:focus {
-		top: 16px;
+		top: max(12px, env(safe-area-inset-top, 0px));
 	}
 
 	.sheet {
 		position: relative;
 		min-height: 100dvh;
-		overflow-x: hidden;
+		overflow-x: clip;
 		background-color: var(--paper);
 		background-image:
 			linear-gradient(var(--grid) 1px, transparent 1px),
 			linear-gradient(90deg, var(--grid) 1px, transparent 1px);
 		background-size: 32px 32px;
 		color: var(--ink);
-		padding: 16px;
+		padding: max(8px, env(safe-area-inset-top, 0px)) max(8px, env(safe-area-inset-right, 0px))
+			max(8px, env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px));
 	}
 
 	.frame {
 		pointer-events: none;
 		position: fixed;
-		inset: 8px;
+		inset: 0;
 		z-index: 1;
 		border: 1px solid var(--line);
-		box-shadow:
-			inset 0 0 0 6px var(--paper),
-			inset 0 0 0 7px var(--line-soft);
 	}
 
 	.bar {
 		position: sticky;
-		top: 16px;
+		top: max(8px, env(safe-area-inset-top, 0px));
 		z-index: 50;
 		display: grid;
-		grid-template-columns: auto 1fr auto;
+		grid-template-columns: 1fr auto;
 		align-items: center;
-		column-gap: 16px;
-		min-height: 64px;
-		margin: 8px 8px 0;
-		padding: 0 16px;
+		column-gap: 12px;
+		min-height: 56px;
+		margin: 0;
+		padding: 0 8px 0 12px;
 		border: 1px solid var(--line-soft);
-		background: color-mix(in srgb, var(--paper) 80%, transparent);
+		background: color-mix(in srgb, var(--paper) 88%, transparent);
 		backdrop-filter: blur(18px) saturate(140%);
 	}
 
 	.mark {
 		justify-self: start;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		min-height: 44px;
+		min-width: 44px;
 		font-family: var(--display);
-		font-size: 28px;
+		font-size: 22px;
 		font-weight: 700;
 		letter-spacing: -0.03em;
 		color: var(--ink);
@@ -213,9 +238,13 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 	.bar-nav {
 		display: none;
 		justify-self: center;
-		gap: 24px;
+		gap: 8px;
 	}
 	.bar-nav a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0 8px;
 		color: var(--ink-dim);
 		text-decoration: none;
 		font-family: var(--mono);
@@ -223,18 +252,12 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		letter-spacing: 0.08em;
 		text-transform: uppercase;
 	}
-	.bar-nav a:hover {
-		color: var(--ink);
-	}
 
 	.bar-actions {
 		display: flex;
 		justify-self: end;
 		align-items: center;
 		gap: 8px;
-	}
-	.bar-mail {
-		display: none;
 	}
 
 	.ghost,
@@ -264,16 +287,19 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		color: var(--paper);
 		border-color: var(--ink);
 	}
-	.ghost:hover,
-	.menu:hover,
-	.index-close:hover {
-		background: color-mix(in srgb, var(--ink) 8%, transparent);
+	.bar-theme,
+	.bar-mail {
+		display: none;
 	}
 	.ghost:active,
 	.solid:active,
 	.menu:active,
-	.index-close:active {
+	.index-close:active,
+	.mark:active {
 		transform: scale(0.96);
+	}
+	.menu {
+		padding: 0 12px;
 	}
 	.menu span {
 		display: block;
@@ -284,14 +310,15 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 
 	.index {
 		position: fixed;
-		inset: 10px;
+		inset: 0;
 		z-index: 90;
 		display: none;
 		flex-direction: column;
-		padding: 24px 28px 40px;
+		padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
+			max(24px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
 		background: var(--paper);
-		border: 1px solid var(--line);
 		overflow: auto;
+		overscroll-behavior: contain;
 	}
 	.index-close {
 		align-self: flex-end;
@@ -304,18 +331,21 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		max-width: 640px;
 	}
 	.index-grid a {
-		display: block;
+		display: flex;
+		align-items: center;
+		min-height: 44px;
 		padding: 12px 0;
 		color: var(--ink);
 		text-decoration: none;
 		font-family: var(--display);
-		font-size: clamp(32px, 7vw, 56px);
+		font-size: clamp(28px, 8vw, 56px);
 		font-weight: 700;
 		letter-spacing: -0.03em;
 		line-height: 1.1;
 	}
-	.index-grid a:hover {
-		color: var(--ink-dim);
+	.index-theme {
+		margin-top: auto;
+		align-self: flex-start;
 	}
 
 	main {
@@ -323,21 +353,26 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		z-index: 2;
 		max-width: 1120px;
 		margin: 0 auto;
-		padding: 32px 16px 48px;
+		padding: 20px 8px 40px;
 	}
 
 	.cover {
-		padding: 32px 0 48px;
+		padding: 20px 0 36px;
 	}
 	.cover-copy {
 		max-width: 40rem;
-		margin-bottom: 32px;
+		margin-bottom: 28px;
+	}
+	.cover-write {
+		margin-top: 20px;
+		width: max-content;
+		max-width: 100%;
 	}
 	.eyebrow,
 	.product {
 		margin: 0;
 		font-family: var(--mono);
-		font-size: 13px;
+		font-size: 12px;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--ink-dim);
@@ -345,15 +380,16 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 	h1 {
 		margin: 8px 0 0;
 		font-family: var(--display);
-		font-size: clamp(56px, 14vw, 120px);
+		font-size: clamp(2.75rem, 16vw, 7.5rem);
 		font-weight: 700;
-		letter-spacing: -0.04em;
+		letter-spacing: -0.03em;
 		line-height: 1;
+		text-wrap: balance;
 	}
 	.product {
-		margin: 8px 0 20px;
+		margin: 8px 0 16px;
 		font-family: var(--display);
-		font-size: clamp(20px, 3.5vw, 32px);
+		font-size: clamp(1.25rem, 5vw, 2rem);
 		font-weight: 600;
 		letter-spacing: -0.02em;
 		color: var(--ink);
@@ -361,7 +397,7 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 	h2 {
 		margin: 0 0 12px;
 		font-family: var(--display);
-		font-size: clamp(28px, 4.5vw, 44px);
+		font-size: clamp(1.75rem, 7vw, 2.75rem);
 		font-weight: 700;
 		letter-spacing: -0.03em;
 		line-height: 1.15;
@@ -376,11 +412,11 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		margin-bottom: 24px;
 	}
 	.globe-follow {
-		margin-top: 40px;
+		margin-top: 32px;
 	}
 
 	.block {
-		padding: 64px 0;
+		padding: 48px 0;
 		border-top: 1px solid var(--line-soft);
 	}
 
@@ -389,13 +425,13 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		z-index: 2;
 		max-width: 1120px;
 		margin: 0 auto;
-		padding: 32px 16px 40px;
+		padding: 28px 8px 36px;
 		border-top: 1px solid var(--line);
 	}
 	.colophon-world p:first-child {
 		margin: 0 0 6px;
 		font-family: var(--display);
-		font-size: 32px;
+		font-size: clamp(1.75rem, 7vw, 2rem);
 		font-weight: 700;
 		letter-spacing: -0.03em;
 	}
@@ -407,10 +443,13 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 	.colophon-links {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 16px 28px;
+		gap: 8px 20px;
 		margin-bottom: 24px;
 	}
 	.colophon-links a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
 		color: var(--ink);
 		font-family: var(--mono);
 		letter-spacing: 0.08em;
@@ -442,20 +481,79 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		letter-spacing: -0.02em;
 	}
 
+	@media (hover: hover) and (pointer: fine) {
+		.bar-nav a:hover {
+			color: var(--ink);
+		}
+		.ghost:hover,
+		.menu:hover,
+		.index-close:hover {
+			background: color-mix(in srgb, var(--ink) 8%, transparent);
+		}
+		.index-grid a:hover {
+			color: var(--ink-dim);
+		}
+	}
+
 	@media (min-width: 880px) {
+		.sheet {
+			padding: 16px;
+		}
+		.frame {
+			inset: 8px;
+			box-shadow:
+				inset 0 0 0 6px var(--paper),
+				inset 0 0 0 7px var(--line-soft);
+		}
 		.bar {
 			grid-template-columns: 1fr auto 1fr;
+			column-gap: 16px;
+			min-height: 64px;
+			margin: 8px 8px 0;
+			padding: 0 16px;
+			top: 16px;
+			background: color-mix(in srgb, var(--paper) 80%, transparent);
+		}
+		.mark {
+			gap: 10px;
+			font-size: 28px;
 		}
 		.bar-nav {
 			display: flex;
 		}
+		.bar-theme,
 		.bar-mail {
 			display: inline-flex;
+		}
+		.cover-write,
+		.index-theme {
+			display: none;
+		}
+		.index {
+			inset: 10px;
+			border: 1px solid var(--line);
+			padding: 24px 28px 40px;
+		}
+		.menu {
+			padding: 0 14px;
 		}
 		main,
 		.colophon {
 			padding-right: 48px;
 			padding-left: 48px;
+		}
+		main {
+			padding-top: 32px;
+			padding-bottom: 48px;
+		}
+		.cover {
+			padding: 32px 0 48px;
+		}
+		.block {
+			padding: 64px 0;
+		}
+		.globe-follow {
+			margin-top: 40px;
 		}
 		.stamp {
 			grid-template-columns: repeat(3, 1fr);
@@ -466,6 +564,18 @@ import WorldStrip from '../components/comic/WorldStrip.astro';
 		}
 		.stamp div:last-child {
 			border-right: 0;
+		}
+	}
+
+	@media (max-height: 480px) and (orientation: landscape) {
+		.cover {
+			padding: 12px 0 24px;
+		}
+		h1 {
+			font-size: clamp(2.25rem, 12vh, 4rem);
+		}
+		.bar {
+			min-height: 48px;
 		}
 	}
 

@@ -11,6 +11,7 @@
 	--hand: 'Architects Daughter', 'Comic Sans MS', cursive;
 	--mono: 'Geist Mono', ui-monospace, monospace;
 	--ease: cubic-bezier(0.23, 1, 0.32, 1);
+	--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 html[data-theme='whiteprint'] {
@@ -21,22 +22,33 @@ html[data-theme='whiteprint'] {
 	--line: #0a4a86;
 	--line-soft: rgba(10, 74, 134, 0.18);
 	--grid: rgba(10, 74, 134, 0.06);
+	color-scheme: light;
 }
 
 html {
-	scroll-padding-top: 96px;
+	scroll-padding-top: calc(72px + env(safe-area-inset-top, 0px));
+	color-scheme: dark;
+	-webkit-text-size-adjust: 100%;
+	text-size-adjust: 100%;
 }
 
 html,
 body {
 	margin: 0;
 	min-height: 100%;
+	overflow-x: clip;
 	background: var(--paper);
 	color: var(--ink);
 	-webkit-font-smoothing: antialiased;
+	-webkit-tap-highlight-color: color-mix(in srgb, var(--ink) 16%, transparent);
 	font-family: var(--body);
 	font-size: 17px;
 	line-height: 1.55;
+}
+
+a,
+button {
+	touch-action: manipulation;
 }
 
 * {
@@ -80,7 +92,7 @@ html[data-theme='whiteprint'] .gazette-row {
 	min-width: 0;
 	flex-direction: column;
 	align-items: stretch;
-	padding: 16px 16px 12px;
+	padding: 12px 12px 10px;
 	border-bottom: 2px solid var(--line);
 }
 .cell:last-child {
@@ -125,6 +137,9 @@ html[data-theme='whiteprint'] .globe-frame {
 }
 
 @media (min-width: 720px) {
+	.cell {
+		padding: 16px 16px 12px;
+	}
 	.gazette-row-2 {
 		grid-template-columns: 1fr 1fr;
 	}

@@ -1,0 +1,91 @@
+---
+interface Props {
+	class?: string;
+	animated?: boolean;
+}
+
+const { class: className, animated = false } = Astro.props;
+---
+
+<svg
+	class:list={['a6n-mark', className, animated && 'is-live']}
+	viewBox="0 0 64 64"
+	aria-hidden="true"
+	focusable="false"
+>
+	<g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linejoin="round">
+		<circle class="ring ring-out" cx="32" cy="32" r="26"></circle>
+		<circle class="ring ring-mid" cx="21" cy="32" r="15"></circle>
+		<circle class="ring ring-in" cx="28.8" cy="32" r="7.2"></circle>
+	</g>
+</svg>
+
+<style>
+	.a6n-mark {
+		display: block;
+		width: 28px;
+		height: 28px;
+		overflow: visible;
+	}
+
+	.a6n-mark.is-live .ring-out {
+		stroke-dasharray: 164;
+		stroke-dashoffset: 164;
+		animation: mark-draw 700ms var(--ease) forwards;
+	}
+	.a6n-mark.is-live .ring-mid {
+		stroke-dasharray: 95;
+		stroke-dashoffset: 95;
+		animation:
+			mark-draw 700ms var(--ease) 90ms forwards,
+			mark-shift 8s var(--ease-in-out) 900ms infinite alternate;
+	}
+	.a6n-mark.is-live .ring-in {
+		stroke-dasharray: 46;
+		stroke-dashoffset: 46;
+		animation:
+			mark-draw 700ms var(--ease) 180ms forwards,
+			mark-glance 8s var(--ease-in-out) 900ms infinite alternate;
+	}
+
+	@keyframes mark-draw {
+		to {
+			stroke-dashoffset: 0;
+		}
+	}
+	@keyframes mark-shift {
+		from {
+			transform: translateX(0);
+		}
+		to {
+			transform: translateX(1.5px);
+		}
+	}
+	@keyframes mark-glance {
+		from {
+			transform: translateX(0);
+		}
+		to {
+			transform: translateX(-1.5px);
+		}
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		:global(.mark:hover) .a6n-mark {
+			transform: scale(1.06);
+			transition: transform 160ms var(--ease);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.a6n-mark.is-live .ring-out,
+		.a6n-mark.is-live .ring-mid,
+		.a6n-mark.is-live .ring-in {
+			animation: none;
+			stroke-dashoffset: 0;
+		}
+		:global(.mark:hover) .a6n-mark {
+			transform: none;
+		}
+	}
+</style>

@@ -32,7 +32,13 @@ function drawMeridians(): void {
 		'[data-meridians] ellipse, [data-meridians] line',
 	);
 	marks.forEach((mark) => {
-		const length = mark.getTotalLength();
+		let length = 0;
+		try {
+			length = mark.getTotalLength();
+		} catch {
+			return;
+		}
+		if (!length) return;
 		mark.style.strokeDasharray = `${length}`;
 		gsap.fromTo(
 			mark,
