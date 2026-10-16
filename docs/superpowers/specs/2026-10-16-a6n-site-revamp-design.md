@@ -51,7 +51,25 @@ Tokens come from Anatomy's light theme. A dark theme is optional, using Anatomy'
 | text | `#57575a` | body |
 | muted | `#8c8c90` | labels, captions |
 | faint | `#d4d4d6` | hairlines |
-| **sanguine** (lit accent) | `#b5523b` (my call, red chalk) | the one lit part in each machine, CTA, links |
+| **sanguine** | `#b5523b` (red chalk) | CTA, links |
+
+**Fresco palette (owner's choice: colored diagrams).** These override Anatomy's monochrome default. Each product owns one Sistine pigment, and color means "this product". Each machine uses its hue across all its parts, shaded in Anatomy's four face tones (`color-mix` of the hue with paper or ink). Every color is a token.
+
+| Product | Pigment | Hex |
+|---|---|---|
+| TiffinGrab | ochre | `#c8902e` |
+| Puchkaman | verdigris | `#4f8a6e` |
+| Xplorers | lapis | `#2f5d9e` |
+| Copper + Cloves | sanguine | `#b5523b` |
+| Relay | violet umber | `#6b4f7a` |
+| Foundry / How it works | raw umber | `#7a5c3e` |
+
+Sanguine is also the site's CTA and link accent.
+
+**WebGL (owner's choice: hero and inside machines).** Follow `~/.claude/skills/anatomy/references/webgl.md` (layer stack, camera contract, section 8 light-theme inks, and "nothing pops, nothing is cut") and use the `raptor-engine` and `ripple-tank` examples as models.
+- Hero: soft light drifting across the Creation of Adam gap. The painting is the back layer and the shader only adds light.
+- In machines, a shader is used only for things lines can't draw: kitchen steam (TiffinGrab), light travelling through the tube (Relay), forge glow (Foundry). Solids always stay SVG.
+- Performance: each canvas starts only when it's in view and pauses off-screen. The SVG fallback looks the same without WebGL and under reduced motion. WebGL must not push phone LCP past 2.5s, so the hero shader starts after first paint.
 
 Type: **EB Garamond** for display (the Renaissance voice), **Inter** for body and UI, `ui-monospace` for plate labels ("PLATE III · TIFFINGRAB"). These match Anatomy's own pairing.
 
