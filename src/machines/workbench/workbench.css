@@ -1,0 +1,46 @@
+/* Raw umber body, sanguine lit parts. Anatomy shades come from tokens, so a pigment is a token override. */
+.wb {
+	--pigment: var(--umber);
+	--anatomy-face: color-mix(in oklab, var(--pigment) 14%, var(--card));
+	--anatomy-top: color-mix(in oklab, var(--pigment) 24%, var(--card));
+	--anatomy-shade-3: color-mix(in oklab, var(--pigment) 36%, var(--card));
+	--anatomy-shade-2: color-mix(in oklab, var(--pigment) 50%, var(--card));
+	--anatomy-shade-1: color-mix(in oklab, var(--pigment) 64%, var(--card));
+	--anatomy-shade-0: color-mix(in oklab, var(--pigment) 80%, var(--card));
+	--anatomy-hi: color-mix(in oklab, var(--pigment) 45%, var(--strong));
+	--anatomy-mid: color-mix(in oklab, var(--pigment) 78%, var(--card));
+	--anatomy-lo: color-mix(in oklab, var(--pigment) 48%, var(--card));
+	--anatomy-faint: color-mix(in oklab, var(--pigment) 26%, var(--card));
+	--anatomy-halo: var(--pigment);
+	--anatomy-dot: color-mix(in oklab, var(--pigment) 50%, var(--strong));
+	--anatomy-lit: var(--sanguine);
+	--anatomy-lit-top: color-mix(in oklab, var(--sanguine) 62%, var(--card));
+	--anatomy-lit-shade: color-mix(in oklab, var(--sanguine) 88%, var(--card));
+}
+
+/* The movers are the subject: a warmer, lighter umber so they read against the bench. */
+.wb .wb-mover {
+	--anatomy-top: color-mix(in oklab, var(--pigment) 6%, var(--card));
+	--anatomy-shade-3: color-mix(in oklab, var(--pigment) 14%, var(--card));
+	--anatomy-shade-2: color-mix(in oklab, var(--pigment) 22%, var(--card));
+	--anatomy-shade-1: color-mix(in oklab, var(--pigment) 32%, var(--card));
+	--anatomy-shade-0: color-mix(in oklab, var(--pigment) 44%, var(--card));
+	transition: transform 700ms var(--ease);
+}
+
+/* Unlit windows: when not on the last step the panes fall back to body tones. */
+.wb:not([data-at='4']) .wb-pane {
+	--anatomy-lit: var(--anatomy-mid);
+	--anatomy-lit-top: var(--anatomy-shade-3);
+	--anatomy-lit-shade: var(--anatomy-shade-2);
+}
+.wb .wb-pane :is(path) {
+	transition: fill 500ms var(--ease), stroke 500ms var(--ease);
+}
+.wb .wb-spare {
+	transition: opacity 500ms var(--ease);
+}
+.wb[data-at='3'] .wb-spare,
+.wb[data-at='4'] .wb-spare {
+	opacity: 0.55;
+}

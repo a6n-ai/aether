@@ -35,6 +35,19 @@ if (at800) {
 	check(kb <= 180, `hero 800w avif is ${kb.toFixed(0)} KB, limit 180`);
 } else check(false, 'hero has no 800w avif candidate');
 
+const plate = markup.match(/<figure[^>]*data-machine="workbench"[\s\S]*?<\/figure>/)?.[0] ?? '';
+check(plate !== '', 'missing workbench figure');
+const svgLabel = plate.match(/<svg[^>]*role="img"[^>]*aria-label="([^"]*)"/)?.[1] ?? '';
+check(svgLabel.length >= 60, 'workbench svg needs role="img" and a 60+ char aria-label');
+const STEP_LABELS = ['parts that already work', 'pick what you need', 'fitted to your business', 'your app, open for customers'];
+const stepTexts = [...plate.matchAll(/<li[^>]*data-step="\d"[^>]*>([\s\S]*?)<\/li>/g)].map((m) => m[1].replace(/<[^>]+>/g, '').trim());
+check(JSON.stringify(stepTexts) === JSON.stringify(STEP_LABELS), `workbench step labels wrong: ${JSON.stringify(stepTexts)}`);
+check(
+	plate.includes("We don't start from a blank page. Your app is put together from parts already running for other businesses, then shaped around yours.") ||
+		plate.includes('We don&#39;t start from a blank page. Your app is put together from parts already running for other businesses, then shaped around yours.'),
+	'workbench caption missing',
+);
+
 if (failures.length) {
 	for (const f of failures) console.error(`FAIL: ${f}`);
 	process.exit(1);
