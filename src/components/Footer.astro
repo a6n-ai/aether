@@ -1,0 +1,42 @@
+---
+import Mark from './Mark.astro';
+import { CONTACT_EMAIL } from '../lib/cta';
+---
+
+<footer class="foot">
+	<div class="wrap foot-row">
+		<div class="brand"><Mark /><span>a6n</span></div>
+		<a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+		<p class="credit">Paintings: Michelangelo, Sistine Chapel, public domain.</p>
+	</div>
+</footer>
+
+<style>
+	.foot {
+		border-top: 1px solid var(--faint);
+		padding-block: 40px 56px;
+		font-size: 0.9rem;
+		color: var(--muted);
+	}
+	.foot-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px 32px;
+	}
+	.brand {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		color: var(--strong);
+		font: 500 1.2rem/1 var(--font-display);
+	}
+	.credit {
+		margin-left: auto;
+	}
+	@media (max-width: 560px) {
+		.credit {
+			margin-left: 0;
+		}
+	}
+</style>

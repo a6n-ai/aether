@@ -1,0 +1,47 @@
+---
+import Mark from './Mark.astro';
+import { BOOK_CALL_HREF } from '../lib/cta';
+---
+
+<header class="nav">
+	<div class="wrap nav-row">
+		<a class="mark" href="/" aria-label="a6n home">
+			<Mark animated />
+			<span>a6n</span>
+		</a>
+		<a class="btn-call small" href={BOOK_CALL_HREF}>Book a call</a>
+	</div>
+</header>
+
+<style>
+	.nav {
+		position: sticky;
+		top: 0;
+		z-index: 20;
+		background: color-mix(in oklab, var(--page) 82%, transparent);
+		-webkit-backdrop-filter: saturate(160%) blur(16px);
+		backdrop-filter: saturate(160%) blur(16px);
+		border-bottom: 1px solid color-mix(in oklab, var(--faint) 60%, transparent);
+	}
+	.nav-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 64px;
+	}
+	.mark {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		min-height: 44px;
+		color: var(--strong);
+		text-decoration: none;
+		font: 500 1.35rem/1 var(--font-display);
+	}
+	@media (prefers-reduced-transparency: reduce) {
+		.nav {
+			background: var(--page);
+			backdrop-filter: none;
+		}
+	}
+</style>
