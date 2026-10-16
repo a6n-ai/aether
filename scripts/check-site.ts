@@ -15,13 +15,28 @@ const markup = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g
 const ariaLabels = [...markup.matchAll(/aria-label="([^"]*)"/g)].map((m) => m[1]);
 const visible = markup.replace(/<[^>]+>/g, ' ') + ' ' + ariaLabels.join(' ');
 
-const BANNED = ['API', 'LLM', 'agentic', 'platform', 'SaaS', 'stack', 'integration', 'backend', 'webhook', 'AI-powered', 'Realm', 'Aether'];
-for (const word of BANNED) {
-	check(!new RegExp(`\\b${word}\\b`, 'i').test(visible), `banned word in copy: ${word}`);
+const BANNED = ['API', 'LLM', 'agentic', 'platform', 'SaaS', 'tech stack', 'integration', 'backend', 'webhook', 'AI-powered', 'AI-native', 'Realm', 'Aether'];
+const PAGES = ['index.html', 'how-it-works/index.html', ...['tiffingrab', 'puchkaman', 'xplorers', 'copper-cloves'].map((s) => `clients/${s}/index.html`)];
+for (const page of PAGES) {
+	const path = `dist/${page}`;
+	if (!existsSync(path)) {
+		check(false, `${page} missing`);
+		continue;
+	}
+	const raw = readFileSync(path, 'utf8');
+	const body = raw.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '');
+	const text = body.replace(/<[^>]+>/g, ' ') + ' ' + [...body.matchAll(/aria-label="([^"]*)"/g)].map((m) => m[1]).join(' ');
+	for (const word of BANNED) check(!new RegExp(`\\b${word}\\b`, 'i').test(text), `${page}: banned word in copy: ${word}`);
+	check(/href="mailto:hi@a6n\.ai\?subject=Book%20a%20call/.test(body), `${page}: no Book a call mailto link`);
+	check((body.match(/<h1[\s>]/g) ?? []).length === 1, `${page}: expected exactly one <h1>`);
+	check(/<html[^>]*lang="en"/.test(raw), `${page}: missing <html lang="en">`);
+	for (const fig of body.matchAll(/<figure[^>]*data-machine="([^"]+)"[\s\S]*?<\/figure>/g)) {
+		const label = fig[0].match(/<svg[^>]*role="img"[^>]*aria-label="([^"]*)"/)?.[1] ?? '';
+		check(label.length >= 60, `${page}: plate ${fig[1]} needs an svg aria-label of 60+ chars`);
+	}
 }
-check(/href="mailto:hi@a6n\.ai\?subject=Book%20a%20call/.test(markup), 'no Book a call mailto link');
-check((markup.match(/<h1[\s>]/g) ?? []).length === 1, 'expected exactly one <h1>');
-check(/<html[^>]*lang="en"/.test(html), 'missing <html lang="en">');
+check(/We work mainly from Singapore and India/.test(visible), 'FAQ location answer missing');
+check(/\(Ai\)ny Management System/.test(visible), 'brand line missing');
 
 const heroImg = markup.match(/<img[^>]*fetchpriority="high"[^>]*>/)?.[0] ?? '';
 check(/alt="[^"]*Creation of Adam[^"]*"/.test(heroImg), 'hero <img> needs fetchpriority="high" and alt mentioning Creation of Adam');

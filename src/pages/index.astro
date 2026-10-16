@@ -1,19 +1,27 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import Clients from '../components/Clients.astro';
+import WhoWeAre from '../components/WhoWeAre.astro';
 import Workbench from '../machines/workbench/Workbench.astro';
+import Tracks from '../components/Tracks.astro';
+import Messages from '../components/Messages.astro';
+import Clients from '../components/Clients.astro';
+import Faq from '../components/Faq.astro';
 import ClosingCall from '../components/ClosingCall.astro';
 ---
 
 <Layout
-	title="a6n: the website and app your business runs on"
+	title="a6n · (Ai)ny Management System: built for businesses like yours"
 	description="We build the website and app your business runs on: orders, bookings, payments and messages, all in one place. You keep doing the work you love."
 >
 	<main>
 		<Hero />
+		<WhoWeAre />
 		<Workbench />
+		<Tracks />
+		<Messages />
 		<Clients />
+		<Faq />
 		<ClosingCall />
 	</main>
 </Layout>

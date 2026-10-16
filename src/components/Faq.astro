@@ -1,0 +1,142 @@
+---
+import { BOOK_CALL_HREF } from '../lib/cta';
+
+const FAQ = [
+	{
+		q: 'Do I need to know anything about tech?',
+		a: 'No. You tell us how your business works today, in your own words. We handle everything technical and explain choices in plain language.',
+	},
+	{
+		q: 'What does a6n actually build?',
+		a: 'The software your business runs on: a website your customers use, an app for them on their phone, and one screen where you and your staff run orders, bookings, payments and messages.',
+	},
+	{
+		q: 'Why is it called a6n?',
+		a: 'It stands for (Ai)ny Management System: one system that can run any kind of business, built for yours.',
+	},
+	{
+		q: 'How long does it take?',
+		a: "It depends on what you need. Because we start from parts already running for other businesses, a first version comes together much faster than building from zero. We'll give you a clear plan after the first call.",
+	},
+	{
+		q: 'How much does it cost?',
+		a: 'Every business is different, so we quote after a short call, once we understand what you need.',
+	},
+	{
+		q: 'I already use spreadsheets or another system. Can you move it over?',
+		a: 'Yes. We bring your customers and records across, so you start in the new app without losing anything.',
+	},
+	{
+		q: 'Can my customers pay online?',
+		a: 'Yes. Our clients take card payments, bank transfers, UPI and cash, depending on the country and what suits the business.',
+	},
+	{
+		q: 'Can I send messages to my customers?',
+		a: 'Yes. Order emails, reminders and offers go out automatically, with in-app notices too. If a message fails, it is sent again.',
+	},
+	{
+		q: 'What happens if something breaks?',
+		a: 'We keep watch every day and fix it. We work like your own tech team, so you talk to the same people who built it.',
+	},
+	{
+		q: 'Where are you based?',
+		a: 'We work mainly from Singapore and India, and we build for businesses anywhere. Our clients today are in Canada, Singapore and India.',
+	},
+];
+---
+
+<section class="faq" id="faq">
+	<div class="wrap">
+		<p class="mono">Questions</p>
+		<h2>Things owners ask us.</h2>
+		<div class="list">
+			{
+				FAQ.map((item, i) => (
+					<details>
+						<summary>
+							<span class="n">{String(i + 1).padStart(2, '0')}</span>
+							<span class="q">{item.q}</span>
+							<span class="plus" aria-hidden="true" />
+						</summary>
+						<p>{item.a}</p>
+					</details>
+				))
+			}
+		</div>
+		<p class="more">
+			Something else? <a href={BOOK_CALL_HREF}>Ask us on a call.</a>
+		</p>
+	</div>
+</section>
+
+<style>
+	.faq {
+		padding-block: 88px;
+	}
+	h2 {
+		margin-top: 12px;
+		font-size: clamp(2rem, 4vw, 3rem);
+	}
+	.list {
+		margin-top: 36px;
+		border-top: 1px solid var(--faint);
+	}
+	details {
+		border-bottom: 1px solid var(--faint);
+	}
+	summary {
+		list-style: none;
+		display: grid;
+		grid-template-columns: 2.6em 1fr 24px;
+		align-items: baseline;
+		gap: 12px;
+		min-height: 44px;
+		padding: 20px 0;
+		cursor: pointer;
+		color: var(--strong);
+		font: 500 clamp(1.05rem, 1.8vw, 1.25rem) / 1.3 var(--font-body);
+	}
+	summary::-webkit-details-marker {
+		display: none;
+	}
+	.n {
+		font: 0.75rem var(--font-mono);
+		color: var(--muted);
+	}
+	.plus {
+		position: relative;
+		width: 14px;
+		height: 14px;
+		align-self: center;
+	}
+	.plus::before,
+	.plus::after {
+		content: '';
+		position: absolute;
+		inset: 6px 0 auto;
+		height: 2px;
+		background: var(--sanguine);
+		transition: transform 200ms var(--ease);
+	}
+	.plus::after {
+		transform: rotate(90deg);
+	}
+	details[open] .plus::after {
+		transform: rotate(0deg);
+	}
+	details p {
+		max-width: 64ch;
+		padding: 0 0 22px calc(2.6em + 12px);
+	}
+	.more {
+		margin-top: 24px;
+	}
+	@media (max-width: 560px) {
+		.faq {
+			padding-block: 56px;
+		}
+		details p {
+			padding-left: 0;
+		}
+	}
+</style>

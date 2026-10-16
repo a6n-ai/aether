@@ -1,0 +1,91 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Plate from '../components/Plate.astro';
+import { buildProcess, CAPTION } from '../machines/build-process/geometry';
+import { BOOK_CALL_HREF } from '../lib/cta';
+
+const STEPS = [
+	{ title: 'We talk', body: "A short call about how your business works today, what's slow, and what you wish your customers could do on their own." },
+	{ title: 'We plan', body: 'We write down, in plain words, what we will build first, and show you how it will look before anything is built.' },
+	{ title: 'Built from parts', body: 'Sign-in, payments, bookings, delivery and messages are parts already running for other businesses. We fit them to yours and build only what is unique to you.' },
+	{ title: 'Goes live', body: 'We move your customers and records across, train your staff, and open it to your customers.' },
+	{ title: 'Kept running', body: 'We keep watch, fix what breaks and add what you need next. Same team, every week.' },
+];
+---
+
+<Layout
+	title="How it works: from first call to an app your business runs on | a6n"
+	description="Every a6n project follows the same path: a conversation, a plan, a build from parts that already work, a launch, and then we keep it running."
+>
+	<main>
+		<div class="wrap head">
+			<p class="mono">How it works</p>
+			<h1>From first call to <em>open for customers.</em></h1>
+		</div>
+		<div class="wrap">
+			<Plate name="build-process" machine={buildProcess()} fig="Plate VIII" title="The build" caption={CAPTION} />
+		</div>
+		<ol class="wrap steps">
+			{
+				STEPS.map((step, i) => (
+					<li>
+						<span class="n">{String(i + 1).padStart(2, '0')}</span>
+						<h2>{step.title}</h2>
+						<p>{step.body}</p>
+					</li>
+				))
+			}
+		</ol>
+		<section class="wrap cta">
+			<h2>Ready for the first step?</h2>
+			<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
+		</section>
+	</main>
+</Layout>
+
+<style>
+	.head {
+		display: grid;
+		gap: 14px;
+		padding-block: 56px 40px;
+	}
+	h1 {
+		font-size: clamp(2.6rem, 6vw, 4.6rem);
+		max-width: 16ch;
+	}
+	h1 em {
+		color: var(--sanguine);
+	}
+	.steps {
+		list-style: none;
+		margin: 0 auto;
+		padding-block: 64px 24px;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 28px;
+	}
+	.steps li {
+		display: grid;
+		align-content: start;
+		gap: 8px;
+		border-top: 1px solid var(--faint);
+		padding-top: 16px;
+	}
+	.n {
+		font: 0.75rem var(--font-mono);
+		color: var(--sanguine-ink);
+	}
+	.steps h2 {
+		font-size: 1.5rem;
+	}
+	.cta {
+		display: grid;
+		justify-items: center;
+		gap: 20px;
+		padding-block: 72px 104px;
+		text-align: center;
+	}
+	.cta h2 {
+		font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+	}
+</style>

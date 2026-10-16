@@ -1,0 +1,55 @@
+---
+import Plate from './Plate.astro';
+import { team, CAPTION } from '../machines/team/geometry';
+---
+
+<section class="who" id="who">
+	<div class="wrap grid">
+		<div class="copy">
+			<p class="mono">(Ai)ny Management System</p>
+			<h2>Built for businesses like yours.</h2>
+			<p class="lead">
+				a6n is a small team of engineers in Singapore and India. We build the software your business runs on, for
+				businesses anywhere in the world.
+			</p>
+			<p>
+				Not a vendor you chase. More like your own tech team: the same people, every week, working inside your
+				business.
+			</p>
+			<p>We use AI where it saves you time, and plain good engineering everywhere else.</p>
+		</div>
+		<Plate name="team" machine={team()} fig="Plate II" title="Your own team" caption={CAPTION} compact />
+	</div>
+</section>
+
+<style>
+	.who {
+		padding-block: 104px 32px;
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+		gap: 48px;
+		align-items: center;
+	}
+	.copy {
+		display: grid;
+		gap: 16px;
+		max-width: 46ch;
+	}
+	h2 {
+		font-size: clamp(2.2rem, 4.4vw, 3.4rem);
+	}
+	.lead {
+		color: var(--strong);
+		font-size: 1.15rem;
+	}
+	@media (max-width: 899px) {
+		.grid {
+			grid-template-columns: 1fr;
+		}
+		.who {
+			padding-top: 64px;
+		}
+	}
+</style>

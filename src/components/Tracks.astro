@@ -1,0 +1,66 @@
+---
+import Plate from './Plate.astro';
+import { buildNew, CAPTION as BUILD_NEW } from '../machines/build-new/geometry';
+import { moveOver, CAPTION as MOVE_OVER } from '../machines/move-over/geometry';
+import { runGrow, CAPTION as RUN_GROW } from '../machines/run-grow/geometry';
+---
+
+<section class="tracks" id="ways">
+	<div class="wrap">
+		<p class="mono">Ways to work with us</p>
+		<h2>Start where you are.</h2>
+		<p class="lead">Starting fresh, moving off spreadsheets, or keeping what you have running well: pick the one that fits.</p>
+		<div class="grid">
+			<div class="track">
+				<h3>Build something new</h3>
+				<Plate name="build-new" machine={buildNew()} fig="Plate IV" title="New" caption={BUILD_NEW} compact />
+			</div>
+			<div class="track">
+				<h3>Move you over</h3>
+				<Plate name="move-over" machine={moveOver()} fig="Plate V" title="Move over" caption={MOVE_OVER} compact />
+			</div>
+			<div class="track">
+				<h3>Run and grow</h3>
+				<Plate name="run-grow" machine={runGrow()} fig="Plate VI" title="Run and grow" caption={RUN_GROW} compact />
+			</div>
+		</div>
+		<p class="more"><a href="/how-it-works/">See how a build works, step by step</a></p>
+	</div>
+</section>
+
+<style>
+	.tracks {
+		padding-block: 88px;
+	}
+	h2 {
+		margin-top: 12px;
+		font-size: clamp(2rem, 4vw, 3rem);
+	}
+	.lead {
+		margin-top: 12px;
+		max-width: 56ch;
+		font-size: 1.1rem;
+	}
+	.grid {
+		margin-top: 40px;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 20px;
+	}
+	.track {
+		display: grid;
+		align-content: start;
+		gap: 14px;
+	}
+	h3 {
+		font-size: 1.5rem;
+	}
+	.more {
+		margin-top: 28px;
+	}
+	@media (max-width: 560px) {
+		.tracks {
+			padding-block: 56px;
+		}
+	}
+</style>

@@ -1,0 +1,49 @@
+---
+import Plate from './Plate.astro';
+import { relay, CAPTION } from '../machines/relay/geometry';
+---
+
+<section class="messages">
+	<div class="wrap grid">
+		<div class="copy">
+			<p class="mono">Messages</p>
+			<h2>Every message, delivered.</h2>
+			<p>
+				Order confirmations, reminders, receipts and offers go out on their own. Customers who opt out of offers still
+				get their receipts. You can see every message that went out.
+			</p>
+		</div>
+		<Plate name="relay" machine={relay()} fig="Plate VII" title="The post" caption={CAPTION} pigment="var(--violet)" compact />
+	</div>
+</section>
+
+<style>
+	.messages {
+		padding-block: 56px 88px;
+	}
+	.grid {
+		display: grid;
+		grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+		gap: 48px;
+		align-items: center;
+	}
+	.grid > :global(figure) {
+		order: -1;
+	}
+	.copy {
+		display: grid;
+		gap: 16px;
+		max-width: 44ch;
+	}
+	h2 {
+		font-size: clamp(2rem, 4vw, 3rem);
+	}
+	@media (max-width: 899px) {
+		.grid {
+			grid-template-columns: 1fr;
+		}
+		.grid > :global(figure) {
+			order: 0;
+		}
+	}
+</style>

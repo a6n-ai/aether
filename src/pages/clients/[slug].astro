@@ -1,0 +1,132 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Plate from '../../components/Plate.astro';
+import { CLIENTS, type Client } from '../../data/clients';
+import { BOOK_CALL_HREF } from '../../lib/cta';
+import type { Machine } from '../../lib/plate';
+import * as tiffingrab from '../../machines/tiffingrab/geometry';
+import * as puchkaman from '../../machines/puchkaman/geometry';
+import * as xplorers from '../../machines/xplorers/geometry';
+import * as copperCloves from '../../machines/copper-cloves/geometry';
+
+const MACHINES: Record<Client['slug'], { machine: () => Machine; caption: string }> = {
+	tiffingrab: { machine: tiffingrab.tiffingrab, caption: tiffingrab.CAPTION },
+	puchkaman: { machine: puchkaman.puchkaman, caption: puchkaman.CAPTION },
+	xplorers: { machine: xplorers.xplorers, caption: xplorers.CAPTION },
+	'copper-cloves': { machine: copperCloves.copperCloves, caption: copperCloves.CAPTION },
+};
+
+export function getStaticPaths() {
+	return CLIENTS.map((client) => ({ params: { slug: client.slug }, props: { client } }));
+}
+
+const { client } = Astro.props as { client: Client };
+const { machine, caption } = MACHINES[client.slug];
+---
+
+<Layout title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} ${client.line}`}>
+	<main class="client" style={`--pigment:${client.pigment}`}>
+		<div class="wrap head">
+			<a class="back" href="/#clients">All clients</a>
+			<p class="mono">{client.kind} · {client.where}</p>
+			<h1>{client.name}</h1>
+			<p class="intro">{client.intro}</p>
+			<p class="line">{client.line}</p>
+		</div>
+		<div class="wrap">
+			<Plate name={client.slug} machine={machine()} fig="Plate" title={client.name} caption={caption} pigment={client.pigment} />
+		</div>
+		<section class="wrap features">
+			<h2>What it does</h2>
+			<div class="groups">
+				{
+					client.features.map((group) => (
+						<div class="group">
+							<h3>{group.title}</h3>
+							<ul>
+								{group.items.map((item) => (
+									<li>{item}</li>
+								))}
+							</ul>
+						</div>
+					))
+				}
+			</div>
+		</section>
+		<section class="wrap cta">
+			<h2>Want one like this for your business?</h2>
+			<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
+		</section>
+	</main>
+</Layout>
+
+<style>
+	.head {
+		display: grid;
+		gap: 14px;
+		padding-block: 56px 40px;
+	}
+	.back {
+		justify-self: start;
+		min-height: 44px;
+		display: inline-flex;
+		align-items: center;
+		font-size: 0.95rem;
+	}
+	.back::before {
+		content: '‹ ';
+		white-space: pre;
+	}
+	h1 {
+		font-size: clamp(2.8rem, 7vw, 5rem);
+		border-bottom: 3px solid var(--pigment);
+		justify-self: start;
+		padding-bottom: 6px;
+	}
+	.intro {
+		max-width: 56ch;
+		font-size: 1.2rem;
+		color: var(--strong);
+	}
+	.line {
+		max-width: 60ch;
+	}
+	.features {
+		padding-block: 72px 24px;
+	}
+	.features h2,
+	.cta h2 {
+		font-size: clamp(1.8rem, 3.6vw, 2.6rem);
+	}
+	.groups {
+		margin-top: 28px;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+		gap: 16px;
+	}
+	.group {
+		padding: 22px;
+		background: var(--card);
+		border-top: 3px solid var(--pigment);
+		box-shadow: 0 0 0 1px color-mix(in oklab, var(--pigment) 18%, var(--faint));
+	}
+	h3 {
+		font-size: 1.35rem;
+	}
+	ul {
+		margin: 12px 0 0;
+		padding-left: 1.1em;
+		display: grid;
+		gap: 8px;
+	}
+	li::marker {
+		color: var(--pigment);
+	}
+	.cta {
+		display: grid;
+		justify-items: center;
+		gap: 20px;
+		padding-block: 72px 104px;
+		text-align: center;
+	}
+</style>

@@ -9,7 +9,11 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 			<Mark animated />
 			<span>a6n</span>
 		</a>
-		<a class="btn-call small" href={BOOK_CALL_HREF}>Book a call</a>
+		<nav aria-label="Main">
+			<a class="link" href="/how-it-works/">How it works</a>
+			<a class="link hide-sm" href="/#clients">Clients</a>
+			<a class="btn-call small" href={BOOK_CALL_HREF}>Book a call</a>
+		</nav>
 	</div>
 </header>
 
@@ -37,6 +41,34 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		color: var(--strong);
 		text-decoration: none;
 		font: 500 1.35rem/1 var(--font-display);
+	}
+	nav {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+	.link {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0 10px;
+		color: var(--strong);
+		font-size: 0.92rem;
+		text-decoration: none;
+		border-radius: 8px;
+		transition: background-color 160ms var(--ease);
+	}
+	.link:hover {
+		background: color-mix(in oklab, var(--faint) 50%, transparent);
+	}
+	@media (max-width: 480px) {
+		.hide-sm {
+			display: none;
+		}
+		.link {
+			padding: 0 6px;
+			font-size: 0.85rem;
+		}
 	}
 	@media (prefers-reduced-transparency: reduce) {
 		.nav {
