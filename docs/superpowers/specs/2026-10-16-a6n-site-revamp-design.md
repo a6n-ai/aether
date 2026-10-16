@@ -169,3 +169,27 @@ Collection pieces are only *reference* until their source is confirmed reusable 
 - **Book a call** is `mailto:hi@a6n.ai?subject=Book%20a%20call` (the address the current site already uses), with a prefilled body that asks the visitor about their business and a good time to talk.
 - **About:** the builder drafts a short first-person story with no names or photos, and the owner edits it.
 - **Proof** (logos, testimonials, numbers) is **out of scope for now**, per the owner.
+
+## Addendum, 2026-10-16: owner changes after Phase 1
+
+The owner's answers in chat:
+- **Positioning block** in plain words, inspired by 360labs.ai's intro (not copied). a6n works mainly from **Singapore and India** and builds for businesses worldwide. "Not a vendor, more like your own tech team."
+- **Home FAQ** with 8–10 plain questions as an accordion (360labs pattern). Answers carry no unverified numbers or prices.
+- **Clients get their own pages** at `/clients/<slug>`. Home shows clickable client cards.
+- **Processes, both kinds:** "Ways to work with us" tracks on home (Build new, Move you over, Run and grow), and the detailed build process on a How it works page.
+- **Every section gets an Anatomy plate**, a machine with real items on it, the way the workshop has.
+
+Pigments: a6n's own machines use **raw umber** with a sanguine lit part. Relay uses **violet umber** `#6b4f7a`. Each client machine uses its client pigment (TiffinGrab ochre, Puchkaman verdigris, Xplorers lapis, Copper + Cloves sanguine).
+
+| Plate | Where | Story, four steps (labels) |
+|---|---|---|
+| In-house team | home, Who we are | your shop · our bench inside it · fixed on the spot · one team, yours |
+| Build new | home, tracks | your idea · drawn up · built from parts · open for customers |
+| Move you over | home, tracks | paper and spreadsheets · fed in · sorted into your app · nothing lost |
+| Run and grow | home, tracks | your app running · checked every day · fixed and improved · grows with you |
+| Relay | home, Messages | you send a message · kept safe · tried again if needed · it arrives |
+| TiffinGrab | client page | customer picks meals · kitchen packs · labelled tins · driver delivers |
+| Puchkaman | client page | menu on your till · same menu online · customer orders and pays · order lands on the till |
+| Xplorers | client page | classes on the board · family picks a seat · pays · seat booked |
+| Copper + Cloves | client page | member buys a pass · books a class · scans at the door · class, cafe and shop |
+| Build process | How it works | we talk · we plan · built from parts · goes live · kept running (5 steps) |
