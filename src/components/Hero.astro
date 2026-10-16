@@ -1,0 +1,127 @@
+---
+import { Picture } from 'astro:assets';
+import hands from '../assets/art/hands.jpg';
+import { BOOK_CALL_HREF } from '../lib/cta';
+---
+
+<section class="hero" data-hero>
+	<div class="wrap hero-copy">
+		<p class="mono">Plate I · The touch</p>
+		<h1>Your business, <em>working on its own.</em></h1>
+		<p class="sub">
+			We build the website and app your business runs on: orders, bookings, payments and messages, all in one
+			place. You keep doing the work you love.
+		</p>
+	</div>
+
+	<figure class="hero-figure">
+		<div class="hero-art" data-hero-art>
+			<Picture
+				src={hands}
+				formats={['avif', 'webp']}
+				widths={[480, 800, 1280, 1533]}
+				sizes="100vw"
+				alt="Michelangelo's Creation of Adam: two hands reaching toward each other, almost touching."
+				loading="eager"
+				fetchpriority="high"
+			/>
+			<a class="btn-call in-gap" href={BOOK_CALL_HREF}>Book a call</a>
+		</div>
+		<figcaption class="wrap">Michelangelo, <i>The Creation of Adam</i>, c. 1512.</figcaption>
+	</figure>
+	<div class="wrap below-gap">
+		<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
+	</div>
+</section>
+
+<style>
+	.hero {
+		padding-top: 56px;
+	}
+	.hero-copy {
+		display: grid;
+		gap: 18px;
+		justify-items: center;
+		text-align: center;
+		animation: rise 600ms var(--ease) both;
+	}
+	h1 {
+		font-size: clamp(2.4rem, 5.6vw, 4.4rem);
+		max-width: 20ch;
+	}
+	h1 em {
+		color: var(--sanguine);
+	}
+	.sub {
+		max-width: 52ch;
+		font-size: clamp(1.05rem, 1.6vw, 1.22rem);
+	}
+	.hero-figure {
+		margin: 28px 0 0;
+	}
+	.hero-art {
+		position: relative;
+		aspect-ratio: 1533 / 863;
+		max-height: 68vh;
+		margin-inline: auto;
+		overflow: hidden;
+	}
+	.hero-art :global(img) {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: 49.6% 50%;
+		filter: saturate(0.86) contrast(0.97);
+	}
+	.hero-art::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		background: linear-gradient(var(--page), transparent 14%, transparent 86%, var(--page));
+	}
+	.in-gap {
+		position: absolute;
+		left: 49.6%;
+		top: 61%;
+		z-index: 2;
+		translate: -50% 0;
+		box-shadow: 0 8px 28px -10px color-mix(in oklab, var(--sanguine) 70%, transparent);
+	}
+	figcaption {
+		margin-top: 10px;
+		font-size: 0.82rem;
+		color: var(--muted);
+		text-align: right;
+	}
+	.below-gap {
+		display: none;
+	}
+
+	@media (max-width: 899px) {
+		.hero {
+			padding-top: 48px;
+		}
+		.hero-art {
+			aspect-ratio: 16 / 10;
+		}
+		.in-gap {
+			display: none;
+		}
+		.below-gap {
+			display: flex;
+			justify-content: center;
+			margin-top: 24px;
+		}
+		figcaption {
+			text-align: center;
+		}
+	}
+
+	@keyframes rise {
+		from {
+			opacity: 0;
+			transform: translateY(12px);
+		}
+	}
+</style>

@@ -1,4 +1,4 @@
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, statSync } from 'node:fs';
 
 const failures: string[] = [];
 const check = (ok: boolean, message: string) => {
@@ -22,6 +22,18 @@ for (const word of BANNED) {
 check(/href="mailto:hi@a6n\.ai\?subject=Book%20a%20call/.test(markup), 'no Book a call mailto link');
 check((markup.match(/<h1[\s>]/g) ?? []).length === 1, 'expected exactly one <h1>');
 check(/<html[^>]*lang="en"/.test(html), 'missing <html lang="en">');
+
+const heroImg = markup.match(/<img[^>]*fetchpriority="high"[^>]*>/)?.[0] ?? '';
+check(/alt="[^"]*Creation of Adam[^"]*"/.test(heroImg), 'hero <img> needs fetchpriority="high" and alt mentioning Creation of Adam');
+const heroPicture = markup.match(/<picture[^>]*>[\s\S]*?fetchpriority="high"[\s\S]*?<\/picture>/)?.[0] ?? '';
+check(/srcset="[^"]*\.(avif|webp)/.test(heroPicture), 'hero must be served as avif/webp');
+const avif = heroPicture.match(/<source[^>]*srcset="([^"]+)"[^>]*type="image\/avif"/)?.[1] ?? '';
+const at800 = avif.split(',').map((s) => s.trim().split(' ')).find(([, w]) => w === '800w')?.[0];
+if (at800) {
+	const path = 'dist' + decodeURIComponent(at800.split('?')[0]);
+	const kb = existsSync(path) ? statSync(path).size / 1024 : Infinity;
+	check(kb <= 180, `hero 800w avif is ${kb.toFixed(0)} KB, limit 180`);
+} else check(false, 'hero has no 800w avif candidate');
 
 if (failures.length) {
 	for (const f of failures) console.error(`FAIL: ${f}`);
