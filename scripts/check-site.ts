@@ -48,6 +48,15 @@ check(
 	'workbench caption missing',
 );
 
+const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
+check(/color-scheme:\s*light/.test(css), 'page must set color-scheme: light');
+for (const client of ['TiffinGrab', 'Puchkaman', 'Xplorers', 'Copper + Cloves']) {
+	check(markup.includes(client), `missing client card: ${client}`);
+}
+const order = ['data-machine="workbench"', 'data-section="clients"', 'Tell us about your business.'].map((s) => markup.indexOf(s));
+check(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), 'clients section must sit after the workshop and before the closing call');
+check(markup.includes('Tell us about your business.'), 'missing closing call heading');
+
 if (failures.length) {
 	for (const f of failures) console.error(`FAIL: ${f}`);
 	process.exit(1);

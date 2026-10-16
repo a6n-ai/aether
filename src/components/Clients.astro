@@ -1,0 +1,106 @@
+---
+const CLIENTS = [
+	{
+		pigment: 'var(--ochre)',
+		name: 'TiffinGrab',
+		kind: 'Meal plans, delivered',
+		where: 'Greater Toronto Area',
+		line: 'Customers build their own plan, pick meals each week and pause when away. The kitchen gets its packing sheet, the drivers get their routes.',
+	},
+	{
+		pigment: 'var(--verdigris)',
+		name: 'Puchkaman',
+		kind: 'Restaurant ordering',
+		where: 'Scarborough, Ontario',
+		line: 'Their own ordering website that reads the menu from the restaurant till and sends paid orders straight back to it.',
+	},
+	{
+		pigment: 'var(--lapis)',
+		name: 'Xplorers',
+		kind: 'Kids science classes',
+		where: 'Singapore',
+		line: "Families see what's on, book seats and pay. Staff run classes, payments and promotions from one screen.",
+	},
+	{
+		pigment: 'var(--sanguine)',
+		name: 'Copper + Cloves',
+		kind: 'Boutique studio',
+		where: 'Bangalore',
+		line: 'Passes, class booking, check-in at the door, a cafe and a shop, all in one member app.',
+	},
+];
+---
+
+<section class="clients" data-section="clients">
+	<div class="wrap">
+		<p class="mono">Already running</p>
+		<h2>Businesses we've already built for.</h2>
+		<ul>
+			{
+				CLIENTS.map((c) => (
+					<li style={`--pigment:${c.pigment}`}>
+						<span class="swatch" aria-hidden="true" />
+						<h3>{c.name}</h3>
+						<p class="kind">
+							{c.kind}
+							<span class="mono">{c.where}</span>
+						</p>
+						<p>{c.line}</p>
+					</li>
+				))
+			}
+		</ul>
+	</div>
+</section>
+
+<style>
+	.clients {
+		padding-block: 24px 96px;
+	}
+	h2 {
+		margin-top: 12px;
+		font-size: clamp(2rem, 4vw, 3rem);
+		max-width: 20ch;
+	}
+	ul {
+		list-style: none;
+		margin: 40px 0 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 16px;
+	}
+	li {
+		display: grid;
+		align-content: start;
+		gap: 10px;
+		padding: 24px 22px 26px;
+		background: var(--card);
+		border-top: 3px solid var(--pigment);
+		box-shadow: 0 0 0 1px color-mix(in oklab, var(--pigment) 18%, var(--faint));
+	}
+	.swatch {
+		width: 28px;
+		height: 18px;
+		background: linear-gradient(135deg, color-mix(in oklab, var(--pigment) 40%, var(--card)), var(--pigment));
+		clip-path: polygon(0 30%, 50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%);
+	}
+	h3 {
+		font-size: 1.6rem;
+		line-height: 1.1;
+	}
+	.kind {
+		display: grid;
+		gap: 4px;
+		color: var(--strong);
+		font-weight: 500;
+	}
+	p {
+		font-size: 0.98rem;
+	}
+	@media (max-width: 560px) {
+		.clients {
+			padding-bottom: 64px;
+		}
+	}
+</style>

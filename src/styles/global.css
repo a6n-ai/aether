@@ -3,10 +3,14 @@
 	--card: #fbfbfa;
 	--strong: #18181a;
 	--text: #57575a;
-	--muted: #8c8c90;
+	--muted: #68686c;
 	--faint: #d4d4d6;
 	--sanguine: #b5523b;
+	--sanguine-ink: #a3472f;
 	--umber: #7a5c3e;
+	--ochre: #c8902e;
+	--verdigris: #4f8a6e;
+	--lapis: #2f5d9e;
 	--font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 	--ease: cubic-bezier(0.22, 1, 0.36, 1);
 	--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
@@ -57,7 +61,7 @@ img {
 }
 
 a {
-	color: var(--sanguine);
+	color: var(--sanguine-ink);
 	text-underline-offset: 3px;
 }
 

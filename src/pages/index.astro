@@ -1,9 +1,19 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
+import Clients from '../components/Clients.astro';
 import Workbench from '../machines/workbench/Workbench.astro';
+import ClosingCall from '../components/ClosingCall.astro';
 ---
 
-<Layout title="a6n" description="a6n builds the website and app your business runs on.">
-	<main><Hero /><Workbench /></main>
+<Layout
+	title="a6n: the website and app your business runs on"
+	description="We build the website and app your business runs on: orders, bookings, payments and messages, all in one place. You keep doing the work you love."
+>
+	<main>
+		<Hero />
+		<Workbench />
+		<Clients />
+		<ClosingCall />
+	</main>
 </Layout>

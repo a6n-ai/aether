@@ -5,6 +5,9 @@ import { fitProjection } from '../lib/anatomy/iso-kit';
 // The finger gap in the cropped painting (see src/assets/art/SOURCES.md). object-position keeps it here at every size.
 const GAP = [0.496, 0.5];
 const BREATH_S = 6;
+// The glow is a wide blur: half resolution and 24 fps are invisible, and keep software renderers (and Lighthouse) cool.
+const RATIO = 0.5;
+const FRAME_S = 1 / 24;
 
 // Light that only adds: a warm body with a pale core, alpha capped so the painting always shows through.
 const FRAGMENT = `
@@ -34,8 +37,11 @@ export function mountHeroLight(art: HTMLElement): () => void {
 	art.append(canvas);
 	const view: [number, number] = [art.clientWidth || 1, art.clientHeight || 1];
 	const camera = glCamera(fitProjection([[0, 0, 0], [1, 1, 1]], view[0], view[1]));
-	const layer = glLayer({ canvas, fragment: FRAGMENT, view, camera, uniforms: ['uLevel'], fixed: { uGap: GAP }, maxRatio: 1.5, onError: () => {} });
-	if (!layer) {
+	const layer = glLayer({ canvas, fragment: FRAGMENT, view, camera, uniforms: ['uLevel'], fixed: { uGap: GAP }, maxRatio: RATIO, onError: () => {} });
+	const gl = layer?.gl as WebGLRenderingContext | undefined;
+	const info = gl?.getExtension('WEBGL_debug_renderer_info');
+	const software = info ? /swiftshader|llvmpipe|software/i.test(gl!.getParameter(info.UNMASKED_RENDERER_WEBGL)) : false;
+	if (!layer || software) {
 		canvas.remove();
 		return () => {};
 	}
@@ -46,7 +52,11 @@ export function mountHeroLight(art: HTMLElement): () => void {
 	let clock = 0;
 	let visible = false;
 	const tick = (now: number) => {
-		const dt = last ? Math.min((now - last) / 1000, 1 / 30) : 1 / 60;
+		const dt = last ? Math.min((now - last) / 1000, 1 / 10) : FRAME_S;
+		if (last && dt < FRAME_S) {
+			frame = visible ? requestAnimationFrame(tick) : 0;
+			return;
+		}
 		last = now;
 		clock += dt;
 		settle(level, 1, dt, 1.2);
