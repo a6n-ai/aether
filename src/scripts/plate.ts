@@ -1,30 +1,29 @@
-import { translateAlong } from '../../lib/anatomy/iso-kit';
-import type { Projection } from '../../lib/anatomy/iso-kit';
-import { poseAt } from './geometry';
-
-const STEPS = 4;
 const DWELL_MS = 2400;
 
-export function mountWorkbench(root: HTMLElement): () => void {
+export function mountPlate(root: HTMLElement): () => void {
 	if (matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
 
-	const P: Projection = JSON.parse(root.dataset.projection!);
-	const movers = [...root.querySelectorAll<SVGGElement>('[data-part]')];
+	const transforms: Record<string, string[]> = JSON.parse(root.dataset.transforms ?? '{}');
+	const steps = Number(root.dataset.steps);
+	const movers = [...root.querySelectorAll<SVGGElement>('.mover[data-part]')];
+	const staged = [...root.querySelectorAll<SVGGElement>('[data-at]')].filter((g) => g.closest('svg'));
 	const labels = [...root.querySelectorAll<HTMLLIElement>('li[data-step]')];
 	const readout = root.querySelector<HTMLElement>('[data-readout]')!;
-	let step = STEPS;
+	let step = steps;
 	let timer = 0;
 	let touring = true;
 	let visible = false;
 	let paused = false;
 
 	const show = (next: number) => {
-		step = ((next - 1 + STEPS) % STEPS) + 1;
-		const pose = poseAt(step);
-		for (const g of movers) g.setAttribute('transform', translateAlong(P, pose[g.dataset.part as keyof typeof pose]));
-		root.dataset.at = String(step);
+		step = ((next - 1 + steps) % steps) + 1;
+		for (const g of movers) {
+			const t = transforms[g.dataset.part!]?.[step - 1];
+			if (t) g.setAttribute('transform', t);
+		}
+		for (const g of staged) g.classList.toggle('on', step >= Number(g.dataset.at));
 		labels.forEach((li, i) => (i + 1 === step ? li.setAttribute('aria-current', 'step') : li.removeAttribute('aria-current')));
-		readout.textContent = `${step} / ${STEPS}`;
+		readout.textContent = `${step} / ${steps}`;
 	};
 	const schedule = () => {
 		clearTimeout(timer);

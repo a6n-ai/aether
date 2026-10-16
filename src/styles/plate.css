@@ -1,5 +1,6 @@
-/* Raw umber body, sanguine lit parts. Anatomy shades come from tokens, so a pigment is a token override. */
-.wb {
+/* Every machine: one pigment, shaded in Anatomy's four tones, one sanguine lit part.
+   Anatomy shades come from tokens, so a pigment is a token override. Set --pigment on the figure. */
+.machine {
 	--pigment: var(--umber);
 	--anatomy-face: color-mix(in oklab, var(--pigment) 14%, var(--card));
 	--anatomy-top: color-mix(in oklab, var(--pigment) 24%, var(--card));
@@ -18,29 +19,34 @@
 	--anatomy-lit-shade: color-mix(in oklab, var(--sanguine) 88%, var(--card));
 }
 
-/* The movers are the subject: a warmer, lighter umber so they read against the bench. */
-.wb .wb-mover {
+/* The ingredients that move are the subject: a lighter tint so they read against their base. */
+.machine .mover {
 	--anatomy-top: color-mix(in oklab, var(--pigment) 6%, var(--card));
 	--anatomy-shade-3: color-mix(in oklab, var(--pigment) 14%, var(--card));
 	--anatomy-shade-2: color-mix(in oklab, var(--pigment) 22%, var(--card));
 	--anatomy-shade-1: color-mix(in oklab, var(--pigment) 32%, var(--card));
 	--anatomy-shade-0: color-mix(in oklab, var(--pigment) 44%, var(--card));
-	transition: transform 700ms var(--ease);
+	transition: transform 700ms var(--ease), opacity 500ms var(--ease);
 }
 
-/* Unlit windows: when not on the last step the panes fall back to body tones. */
-.wb:not([data-at='4']) .wb-pane {
+/* .lit-at-N parts stay in body tones until step N, then take the sanguine lit tones. */
+.machine .lit-at path {
+	transition: fill 500ms var(--ease), stroke 500ms var(--ease);
+}
+.machine .lit-at:not(.on) {
 	--anatomy-lit: var(--anatomy-mid);
 	--anatomy-lit-top: var(--anatomy-shade-3);
 	--anatomy-lit-shade: var(--anatomy-shade-2);
 }
-.wb .wb-pane :is(path) {
-	transition: fill 500ms var(--ease), stroke 500ms var(--ease);
+
+/* .show-from parts fade in from their step; .dim-from parts fade back. Toggled by plate.ts via .on. */
+.machine .show-from:not(.on) {
+	opacity: 0;
 }
-.wb .wb-spare {
-	transition: opacity 500ms var(--ease);
-}
-.wb[data-at='3'] .wb-spare,
-.wb[data-at='4'] .wb-spare {
+.machine .dim-from.on {
 	opacity: 0.55;
+}
+.machine .show-from,
+.machine .dim-from {
+	transition: opacity 500ms var(--ease);
 }

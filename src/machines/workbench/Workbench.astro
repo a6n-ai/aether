@@ -1,147 +1,27 @@
 ---
-import '../../styles/anatomy.css';
-import './workbench.css';
-import { buildWorkbench, STEP_LABELS } from './geometry';
-
-const { svg, steps, projection } = buildWorkbench(720, 480);
+import Plate from '../../components/Plate.astro';
+import { workbench } from './geometry';
 ---
 
 <section class="workshop">
 	<div class="wrap">
-		<figure class="iso wb plate" data-machine="workbench" data-at={steps} data-projection={JSON.stringify(projection)}>
-			<div class="corners" aria-hidden="true">
-				<span data-corner="fig">Plate II</span>
-				<span data-corner="title">The workshop</span>
-			</div>
-			<div class="stage" set:html={svg} />
-			<div class="controls">
-				<ol class="steps">
-					{STEP_LABELS.map((label, i) => <li data-step={i + 1}>{label}</li>)}
-				</ol>
-				<div class="nav">
-					<button type="button" data-prev aria-label="Previous step">‹</button>
-					<span class="readout" data-readout aria-live="polite">{steps} / {steps}</span>
-					<button type="button" data-next aria-label="Next step">›</button>
-				</div>
-			</div>
-			<figcaption>
-				We don't start from a blank page. Your app is put together from parts already running for other businesses, then
-				shaped around yours.
-			</figcaption>
-		</figure>
+		<Plate
+			name="workbench"
+			machine={workbench()}
+			fig="Plate II"
+			title="The workshop"
+			caption="We don't start from a blank page. Your app is put together from parts already running for other businesses, then shaped around yours."
+		/>
 	</div>
 </section>
-
-<script>
-	import { mountWorkbench } from './live';
-	document.querySelectorAll<HTMLElement>('[data-machine="workbench"]').forEach((root) => mountWorkbench(root));
-</script>
 
 <style>
 	.workshop {
 		padding-block: 88px;
 	}
-	.plate {
-		position: relative;
-		margin: 0;
-		padding: 48px 28px 28px;
-		background: var(--card);
-		box-shadow: 0 0 0 1px color-mix(in oklab, var(--umber) 30%, var(--card));
-		display: grid;
-		gap: 20px;
-	}
-	.corners span {
-		position: absolute;
-		top: 18px;
-		font: 10.5px/1 var(--font-mono);
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--muted);
-	}
-	.corners [data-corner='fig'] {
-		left: 22px;
-		color: var(--text);
-	}
-	.corners [data-corner='title'] {
-		right: 22px;
-	}
-	.stage {
-		max-width: 880px;
-		width: 100%;
-		margin-inline: auto;
-	}
-	.controls {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
-		gap: 16px 24px;
-		border-top: 1px solid var(--faint);
-		padding-top: 18px;
-	}
-	.steps {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 8px 22px;
-		counter-reset: s;
-	}
-	.steps li {
-		counter-increment: s;
-		color: var(--muted);
-		font-size: 0.95rem;
-		transition: color 300ms var(--ease);
-	}
-	.steps li::before {
-		content: counter(s) '  ';
-		font: 600 0.72rem var(--font-mono);
-		white-space: pre;
-	}
-	.steps li[aria-current='step'] {
-		color: var(--strong);
-	}
-	.steps li[aria-current='step']::before {
-		color: var(--sanguine);
-	}
-	.nav {
-		display: flex;
-		align-items: center;
-		gap: 6px;
-	}
-	.nav button {
-		width: 44px;
-		height: 44px;
-		border-radius: 999px;
-		border: 1px solid var(--faint);
-		background: var(--page);
-		color: var(--strong);
-		font-size: 1.3rem;
-		cursor: pointer;
-		transition: background-color 160ms var(--ease);
-	}
-	.nav button:hover {
-		background: var(--card);
-	}
-	.readout {
-		min-width: 3.5em;
-		text-align: center;
-		font: 0.8rem var(--font-mono);
-		font-variant-numeric: tabular-nums;
-		color: var(--text);
-	}
-	figcaption {
-		max-width: 62ch;
-		font-size: 1.05rem;
-		color: var(--text);
-	}
 	@media (max-width: 560px) {
 		.workshop {
 			padding-block: 56px;
-		}
-		.plate {
-			padding: 40px 12px 20px;
 		}
 	}
 </style>

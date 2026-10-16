@@ -1,5 +1,6 @@
 import * as k from '../../lib/anatomy/iso-kit';
-import type { Plan, Plane, Point3, Projection } from '../../lib/anatomy/iso-kit';
+import type { Plan, Plane, Point3 } from '../../lib/anatomy/iso-kit';
+import { moverSvg, stepSvg, transformsFrom, type Machine } from '../../lib/plate';
 
 export const STEP_LABELS = ['parts that already work', 'pick what you need', 'fitted to your business', 'your app, open for customers'] as const;
 
@@ -52,7 +53,7 @@ export function poseAt(step: number): Pose {
 	return pose;
 }
 
-export function buildWorkbench(width: number, height: number): { svg: string; steps: 4; projection: Projection } {
+export function workbench(width = 720, height = 480): Machine {
 	const P = k.fitProjection(
 		[...k.boxCorners(BENCH, -BENCH_H - FOOT_H, 0), [SILL.x, SILL.y, AWNING_Z + 8], [SILL.x + SILL.w, SILL.y + SILL.d, AWNING_Z + 8], [-122, -26, TRAY_Z + LIFT + 8]],
 		width,
@@ -64,7 +65,6 @@ export function buildWorkbench(width: number, height: number): { svg: string; st
 	const L = k.lineSvg;
 	const D = k.dotsSvg;
 	const byDepth = (points: Plane[]) => [...points].sort((a, b) => k.depthOf([a[0], a[1], 0], P) - k.depthOf([b[0], b[1], 0], P));
-	const group = (name: string, body: string, extra = '') => `<g class="wb-${name}"${extra}>${body}</g>`;
 
 	function bench() {
 		const out = [`<path class="iso-halo" d="${k.haloOf(BENCH, -BENCH_H - FOOT_H, BENCH_H, P)}"/>`];
@@ -167,7 +167,7 @@ export function buildWorkbench(width: number, height: number): { svg: string; st
 		const back: Plan = { x: SILL.x + 6, y: SILL.y + 2, w: SILL.w - 12, d: 4, r: 0.6 };
 		out.push(S(k.slabOf(back, SILL_H, POST_TOP - SILL_H, P, 2), { tone: 'lo', crease: 'none' }));
 		const pane: Plan = { x: SILL.x + 12, y: PANE_Y, w: SILL.w - 24, d: 2, r: 0.4 };
-		out.push(group('window', S(k.slabOf(pane, PANE_Z[0], PANE_Z[1] - PANE_Z[0], P, 2), { tone: 'hi', lit: true, className: 'wb-pane' })));
+		out.push(stepSvg('lit-at', 4, S(k.slabOf(pane, PANE_Z[0], PANE_Z[1] - PANE_Z[0], P, 2), { tone: 'hi', lit: true })));
 		const front = pane.y + pane.d;
 		const mid = pane.x + pane.w / 2;
 		out.push(L(k.segment([mid, front, PANE_Z[0]], [mid, front, PANE_Z[1]], P), { tone: 'mid' }));
@@ -197,14 +197,13 @@ export function buildWorkbench(width: number, height: number): { svg: string; st
 		const body: Plan = { x: PHONE_STAND.x + 4, y: PHONE_STAND.y + 6, w: 26, d: 4, r: 1.6 };
 		out.push(S(k.slabOf(body, 3, 50, P, 3, 0.5), { tone: 'mid' }));
 		const screen: Plan = { x: body.x + 2.5, y: body.y + body.d, w: body.w - 5, d: 0.6, r: 0.4 };
-		out.push(group('screen', S(k.slabOf(screen, 8, 40, P, 2), { tone: 'hi', lit: true, className: 'wb-pane' })));
+		out.push(stepSvg('lit-at', 4, S(k.slabOf(screen, 8, 40, P, 2), { tone: 'hi', lit: true })));
 		out.push(D([at([body.x + body.w / 2, body.y + body.d + 0.6, 50.5])], { size: 0.5, tone: 'mid' }));
 		return out.join('');
 	}
 
-	const final = poseAt(4);
-	const mover = (m: Mover, draw: (p: Point3) => string) =>
-		`<g class="wb-mover" data-part="${m.name}" data-step="2" transform="${k.translateAlong(P, final[m.name])}">${draw(m.from)}</g>`;
+	const transforms = transformsFrom(P, Object.fromEntries(MOVERS.map((m) => [m.name, [1, 2, 3, 4].map((step) => poseAt(step)[m.name])])));
+	const mover = (m: Mover, draw: (p: Point3) => string) => moverSvg(m.name, transforms[m.name][3], draw(m.from));
 
 	const svg = k.figureSvg({
 		width,
@@ -214,7 +213,7 @@ export function buildWorkbench(width: number, height: number): { svg: string; st
 		body: [
 			bench(),
 			trayBack(),
-			group('spare', star([-58, -26, TRAY_Z]) + envelope([-62, 22, TRAY_Z]), ' data-step="1"'),
+			stepSvg('dim-from', 3, star([-58, -26, TRAY_Z]) + envelope([-62, 22, TRAY_Z])),
 			shopFront(),
 			counter(),
 			...MOVERS.map((m) => mover(m, m.name === 'key' ? key : m.name === 'coin' ? coin : van)),
@@ -222,5 +221,5 @@ export function buildWorkbench(width: number, height: number): { svg: string; st
 			phone(),
 		],
 	});
-	return { svg, steps: 4, projection: P };
+	return { svg, labels: STEP_LABELS, transforms };
 }
