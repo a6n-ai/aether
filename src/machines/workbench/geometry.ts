@@ -59,7 +59,7 @@ const cellOrigin = ([c, r]: [number, number]): Plane => {
 
 export function workbench(width = 720, height = 480): Machine {
 	const P = k.fitProjection(
-		[...k.boxCorners(BASE, -BASE_H - FOOT_H, 0), [INK[0], INK[1], 44], [CHASE.x, CHASE.y, STONE_H + TYPE_H + HOVER + 4], [CHASE.x + CHASE.w, CHASE.y, STONE_H + TYPE_H + HOVER + 4]],
+		[...k.boxCorners(BASE, -BASE_H - FOOT_H, 0), [INK[0], INK[1], 44], [CHASE.x, CHASE.y, STONE_H + TYPE_H + HOVER + 4], [CHASE.x + CHASE.w, CHASE.y, STONE_H + TYPE_H + HOVER + 4], [2, -84, 56], [108, -84, 56]],
 		width,
 		height,
 		{ pad: 18, azimuth: 38 },
@@ -205,30 +205,74 @@ export function workbench(width = 720, height = 480): Machine {
 		return out.join('');
 	}
 
-	// Wooden furniture and quoins that lock the forme tight: the "fitted to you" part, shown from step 3.
-	function furnitureBack() {
-		const z = STONE_H;
-		const out: string[] = [];
-		out.push(box({ x: CHASE.x + BAR, y: CHASE.y + BAR, w: CHASE.w - BAR * 2, d: 4, r: 0.4 }, z, 5, 'lo', { steps: 2, seam: z + 2.5 }));
-		out.push(box({ x: CHASE.x + BAR, y: CHASE.y + BAR + 4, w: 4, d: CHASE.d - BAR * 2 - 4, r: 0.4 }, z, 5, 'lo', { steps: 2 }));
-		return stepSvg('show-from', 3, out.join(''));
+	// The furniture rack: an upright cabinet of wooden spacers and quoins beside the stone. Each piece is a mover that
+	// rests here at step 1, is lifted clear and carried over its gap at step 2, and is lowered into the chase at step 3.
+	const RACK: Plan = { x: 2, y: -84, w: 106, d: 22, r: 1 };
+	const SHELF = [22, 44];
+	const RACK_TOP = 52;
+	const FZ = STONE_H;
+	const HOVER_F = 9;
+	interface Piece {
+		name: string;
+		plan: Plan;
+		h: number;
+		quoin?: boolean;
+		rack: Point3;
+		front?: boolean;
+	}
+	const CX = CHASE.x;
+	const CY = CHASE.y;
+	const MID = CY + 33;
+	const mk = (name: string, x: number, y: number, w: number, d: number, h: number, rack: Point3, o: { quoin?: boolean; front?: boolean } = {}): Piece => ({ name, plan: { x, y, w, d, r: 0.4 }, h, rack, ...o });
+	const PIECES: Piece[] = [
+		mk('spacerB0', CX + 4, CY + 4, 43.5, 4, 5, [8, -70, SHELF[1]]),
+		mk('spacerB1', CX + 48.5, CY + 4, 43.5, 4, 5, [53, -70, SHELF[1]]),
+		mk('spacerL0', CX + 4, CY + 8, 4, 20, 5, [12, -82, SHELF[0]]),
+		mk('spacerL1', CX + 4, CY + 29, 4, 20, 5, [19, -82, SHELF[0]]),
+		mk('spacerL2', CX + 4, CY + 50, 4, 20, 5, [26, -82, SHELF[0]]),
+		mk('spacerM0', CX + 8, MID, 40, 3, 5, [8, -78, SHELF[1]], { front: true }),
+		mk('spacerM1', CX + 49, MID, 40, 3, 5, [53, -78, SHELF[1]], { front: true }),
+		mk('spacerV0', CX + 10, MID + 5, 8, 20, 5, [36, -82, SHELF[0]], { front: true }),
+		mk('spacerV1', CX + 78, MID + 5, 8, 20, 5, [48, -82, SHELF[0]], { front: true }),
+		mk('quoinF0', CX + 18, CY + CHASE.d - BAR - 5, 20, 5, 6, [62, -81, SHELF[0]], { quoin: true, front: true }),
+		mk('quoinF1', CX + 58, CY + CHASE.d - BAR - 5, 20, 5, 6, [62, -74, SHELF[0]], { quoin: true, front: true }),
+		mk('quoinR', CX + CHASE.w - BAR - 5, CY + 12, 5, 20, 6, [88, -82, SHELF[0]], { quoin: true, front: true }),
+	];
+	// The quoin key: a bar and a knurled knob. It hangs on the upper shelf and is carried to the stone to turn the quoins.
+	const KEY = { x: 98, y: -30, w: 2.4, d: 16, knobY: -11 };
+	const KEY_RACK: Point3 = [KEY.x, -82, SHELF[1]];
+
+	function rack() {
+		const out = [halo(RACK, 0, RACK_TOP)];
+		const R = RACK;
+		out.push(box({ x: R.x, y: R.y, w: R.w, d: R.d, r: 1 }, 0, 4, 'lo', { steps: 3, seam: 2 }));
+		out.push(box({ x: R.x + 4, y: R.y, w: R.w - 8, d: 2.4, r: 0.4 }, 4, RACK_TOP - 8, 'lo', { steps: 2, seam: 30 }));
+		for (const z of [14, 33, 47]) out.push(top([R.x + 6, R.y + 2.4], [R.x + R.w - 6, R.y + 2.4], z, 'faint'));
+		const cheek = (x: number) => box({ x, y: R.y, w: 4, d: R.d, r: 0.6 }, 4, RACK_TOP - 4, 'mid', { steps: 3, seam: 28 }) + cyl(x + 2, R.y + 11, 1.6, RACK_TOP, 1.4, 'hi', 0.3);
+		const shelf = (z: number) => box({ x: R.x + 4, y: R.y + 2.4, w: R.w - 8, d: R.d - 2.4, r: 0.4 }, z - 2, 2, 'mid', { steps: 3, seam: z - 1 }) + top([R.x + 6, R.y + R.d - 1], [R.x + R.w - 6, R.y + R.d - 1], z, 'lo');
+		out.push(cheek(R.x), shelf(SHELF[0]), shelf(SHELF[1]), cheek(R.x + R.w - 4));
+		for (const z of SHELF) out.push(box({ x: R.x + 12, y: R.y + R.d, w: 40, d: 0.6, r: 0.2 }, z - 2, 2, 'hi', { thin: true, steps: 2, bevel: 0 }));
+		return out.join('');
 	}
 
-	function furnitureFront() {
-		const z = STONE_H;
-		const out: string[] = [];
-		const midY = CHASE.y + 34;
-		out.push(box({ x: CHASE.x + 8, y: midY - 1, w: CHASE.w - 16, d: 3, r: 0.3 }, z, 5, 'lo', { steps: 2 }));
-		for (const fx of [CHASE.x + BAR + 6, CHASE.x + 78]) out.push(box({ x: fx, y: midY + 4, w: 8, d: 20, r: 0.4 }, z, 5, 'lo', { steps: 2, seam: z + 2.5 }));
-		const qy = CHASE.y + CHASE.d - BAR - 5;
-		for (const qx of [CHASE.x + 18, CHASE.x + 58]) {
-			out.push(box({ x: qx, y: qy, w: 20, d: 5, r: 0.4 }, z, 6, 'mid', { steps: 2 }), seg([qx + 2, qy + 5, z + 3], [qx + 18, qy + 5, z + 5], 'lo'));
-			out.push(cyl(qx + 10, qy + 2.5, 1.1, z + 6, 0.6, 'lo', 0.1));
-		}
-		const qx = CHASE.x + CHASE.w - BAR - 5;
-		out.push(box({ x: qx, y: CHASE.y + 12, w: 5, d: 20, r: 0.4 }, z, 6, 'mid', { steps: 2 }));
-		return stepSvg('show-from', 3, out.join(''));
+	function pieceBody(pc: Piece) {
+		const { plan, h } = pc;
+		const out = [box(plan, FZ, h, pc.quoin ? 'mid' : 'lo', { steps: 2, bevel: 0.3, seam: FZ + h / 2 })];
+		const long = plan.w >= plan.d;
+		if (pc.quoin) {
+			const a: Point3 = long ? [plan.x + 2, plan.y + plan.d, FZ + 2.5] : [plan.x + plan.w, plan.y + 2, FZ + 2.5];
+			const b: Point3 = long ? [plan.x + plan.w - 2, plan.y + plan.d, FZ + h - 1] : [plan.x + plan.w, plan.y + plan.d - 2, FZ + h - 1];
+			out.push(seg(a, b, 'lo'), cyl(plan.x + plan.w / 2, plan.y + plan.d / 2, 1.1, FZ + h, 0.6, 'lo', 0.1));
+		} else if (long) out.push(top([plan.x + 2, plan.y + plan.d / 2], [plan.x + plan.w - 2, plan.y + plan.d / 2], FZ + h, 'lo'));
+		else out.push(top([plan.x + plan.w / 2, plan.y + 2], [plan.x + plan.w / 2, plan.y + plan.d - 2], FZ + h, 'lo'));
+		return out.join('');
 	}
+
+	const pieceMover = (pc: Piece) => {
+		const body = pieceBody(pc);
+		return pc.quoin ? moverSvg(pc.name, transforms[pc.name][3], body) : `<g class="mover plain" data-part="${pc.name}" transform="${transforms[pc.name][3]}">${body}</g>`;
+	};
+	const piecesOf = (front: boolean) => PIECES.filter((pc) => !!pc.front === front).map(pieceMover).join('');
 
 	function chaseFront() {
 		const z = STONE_H;
@@ -236,11 +280,13 @@ export function workbench(width = 720, height = 480): Machine {
 		out.push(box({ x: CHASE.x + CHASE.w - BAR, y: CHASE.y, w: BAR, d: CHASE.d, r: 0.6 }, z, BAR_H, 'lo', { steps: 2 }));
 		out.push(box({ x: CHASE.x, y: CHASE.y + CHASE.d - BAR, w: CHASE.w, d: BAR, r: 0.6 }, z, BAR_H, 'lo', { steps: 2, seam: z + 3 }));
 		out.push(dots(k.corners(CHASE, BAR / 2).map(([x, y]) => [x, y, z + BAR_H] as Point3), 0.5, 'hi'));
-		// The quoin key, laid on the stone once the forme is locked.
-		const kx = CHASE.x + 30;
-		const ky = CHASE.y + CHASE.d + 8;
-		out.push(stepSvg('show-from', 3, box({ x: kx, y: ky - 1.2, w: 22, d: 2.4, r: 1 }, z, 1.6, 'mid', { steps: 2 }) + cyl(kx + 26, ky, 4, z, 3, 'hi', 0.4) + L(k.knurl(kx + 26, ky, 4, z, z + 3, 18, P, 0.3), { tone: 'lo' })));
 		return out.join('');
+	}
+
+	function quoinKey() {
+		const z = STONE_H;
+		const kx = KEY.x + KEY.w / 2;
+		return box({ x: KEY.x, y: KEY.y, w: KEY.w, d: KEY.d, r: 1 }, z, 1.6, 'mid', { steps: 2 }) + cyl(kx, KEY.knobY, 3.4, z, 3, 'hi', 0.4) + L(k.knurl(kx, KEY.knobY, 3.4, z, z + 3, 16, P, 0.3), { tone: 'lo' });
 	}
 
 	function relief(s: Sort, x: number, y: number, z: number) {
@@ -325,6 +371,12 @@ export function workbench(width = 720, height = 480): Machine {
 			return [s.name, [inCase, [s.drift[0], s.drift[1], HOVER], [0, 0, 0], [0, 0, 0]]];
 		}),
 	);
+	for (const pc of PIECES) {
+		const r: Point3 = [pc.rack[0] - pc.plan.x, pc.rack[1] - pc.plan.y, pc.rack[2] - FZ];
+		offsets[pc.name] = [r, [0, 0, HOVER_F], [0, 0, 0], [0, 0, 0]];
+	}
+	const keyRack: Point3 = [KEY_RACK[0] - KEY.x, KEY_RACK[1] - KEY.y, KEY_RACK[2] - STONE_H];
+	offsets.key = [keyRack, keyRack, [0, 0, 0], [0, 0, 0]];
 	offsets.sheet = [toStack, toStack, lift(toStack, 0), [0, 0, 0]];
 	const transforms = transformsFrom(P, offsets);
 	const blocks = byDepth(SORTS.map((s) => ({ at: [s.slot[0] + BLOCK_W / 2, s.slot[1] + BLOCK_D / 2] as Plane, svg: moverSvg(s.name, transforms[s.name][3], block(s)) }))).map((b) => b.svg);
@@ -333,8 +385,8 @@ export function workbench(width = 720, height = 480): Machine {
 		width,
 		height,
 		label:
-			'A letterpress bench. On the left, a wooden type case holds compartments of ready-cast type. Five type blocks, each carrying a part of an app: a web page, a key for signing in, a coin for payments, a parcel for orders and an envelope for messages, lift out of the case and set into a steel chase on the stone. Wooden furniture and quoins lock them tight, and a sheet from the paper stack comes out on the delivery board printed as one app page.',
-		body: [base(), inkDisc(), typeCase(), caseFront(), stick(), stone(), furnitureBack(), ...blocks, furnitureFront(), chaseFront(), paper(), board(), `<g class="mover plain" data-part="sheet" transform="${transforms.sheet[3]}">${sheet()}</g>`],
+			'A letterpress bench. On the left, a wooden type case holds compartments of ready-cast type. Five type blocks, each carrying a part of an app: a web page, a key for signing in, a coin for payments, a parcel for orders and an envelope for messages, lift out of the case and set into a steel chase on the stone. Wooden spacers and quoins stored in a tall rack behind the stone are lifted out and lowered into the gaps to lock them tight, and a sheet from the paper stack comes out on the delivery board printed as one app page.',
+		body: [base(), inkDisc(), typeCase(), caseFront(), stick(), rack(), stone(), piecesOf(false), ...blocks, piecesOf(true), chaseFront(), `<g class="mover" data-part="key" transform="${transforms.key[3]}">${quoinKey()}</g>`, paper(), board(), `<g class="mover plain" data-part="sheet" transform="${transforms.sheet[3]}">${sheet()}</g>`],
 	});
 	return { svg, labels: STEP_LABELS, transforms };
 }
