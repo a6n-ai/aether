@@ -2,6 +2,10 @@
    Anatomy shades come from tokens, so a pigment is a token override. Set --pigment on the figure. */
 .machine {
 	--pigment: var(--umber);
+}
+/* A .tint group re-derives every tone from its own --pigment, so ingredients can carry their own colour. */
+.machine,
+.machine .tint {
 	--anatomy-face: color-mix(in oklab, var(--pigment) 14%, var(--card));
 	--anatomy-top: color-mix(in oklab, var(--pigment) 24%, var(--card));
 	--anatomy-shade-3: color-mix(in oklab, var(--pigment) 36%, var(--card));
@@ -20,12 +24,14 @@
 }
 
 /* The ingredients that move are the subject: a lighter tint so they read against their base. */
-.machine .mover {
-	--anatomy-top: color-mix(in oklab, var(--pigment) 6%, var(--card));
-	--anatomy-shade-3: color-mix(in oklab, var(--pigment) 14%, var(--card));
-	--anatomy-shade-2: color-mix(in oklab, var(--pigment) 22%, var(--card));
-	--anatomy-shade-1: color-mix(in oklab, var(--pigment) 32%, var(--card));
-	--anatomy-shade-0: color-mix(in oklab, var(--pigment) 44%, var(--card));
+.machine .mover,
+.machine .mover .tint {
+	--anatomy-face: color-mix(in oklab, var(--pigment) 10%, var(--card));
+	--anatomy-top: color-mix(in oklab, var(--pigment) 14%, var(--card));
+	--anatomy-shade-3: color-mix(in oklab, var(--pigment) 26%, var(--card));
+	--anatomy-shade-2: color-mix(in oklab, var(--pigment) 38%, var(--card));
+	--anatomy-shade-1: color-mix(in oklab, var(--pigment) 50%, var(--card));
+	--anatomy-shade-0: color-mix(in oklab, var(--pigment) 64%, var(--card));
 	transition: opacity 500ms var(--ease);
 }
 

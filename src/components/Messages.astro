@@ -1,18 +1,31 @@
 ---
 import Plate from './Plate.astro';
 import { CAPTION } from '../machines/relay/geometry';
+
+const KINDS = [
+	{ term: 'Confirmations and receipts', text: 'Sent the moment an order, booking or payment goes through.', pigment: 'var(--lapis)' },
+	{ term: 'Reminders', text: 'A nudge before a booking or a pickup, so fewer people forget.', pigment: 'var(--ochre)' },
+	{ term: 'Offers', text: 'Only to customers who said yes. Those who opt out still get their receipts.', pigment: 'var(--verdigris)' },
+];
 ---
 
 <section class="messages" data-reveal>
 	<div class="wrap grid">
 		<div class="copy" data-reveal-item>
 			<h2>Every message, delivered.</h2>
-			<p>
-				Order confirmations, reminders, receipts and offers go out on their own. Customers who opt out of offers still
-				get their receipts. You can see every message that went out.
-			</p>
+			<p>Messages to your customers go out on their own, and you can see every one that was sent.</p>
+			<ul class="kinds">
+				{
+					KINDS.map((k) => (
+						<li style={`--key:${k.pigment}`}>
+							<h3>{k.term}</h3>
+							<p>{k.text}</p>
+						</li>
+					))
+				}
+			</ul>
 		</div>
-		<div class="plate-wrap" data-reveal-item><Plate name="relay" fig="Plate VIII" title="The post" caption={CAPTION} compact /></div>
+		<div class="plate-wrap" data-reveal-item><Plate name="relay" fig="Plate VIII" title="The post" caption={CAPTION} /></div>
 	</div>
 </section>
 
@@ -22,27 +35,46 @@ import { CAPTION } from '../machines/relay/geometry';
 	}
 	.grid {
 		display: grid;
-		grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-		gap: 48px;
-		align-items: center;
-	}
-	.grid > .plate-wrap {
-		order: -1;
+		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+		gap: 56px;
+		align-items: start;
 	}
 	.copy {
 		display: grid;
 		gap: 16px;
 		max-width: 44ch;
+		padding-top: 24px;
 	}
 	h2 {
 		font-size: clamp(2rem, 4vw, 3rem);
 	}
+	.kinds {
+		list-style: none;
+		margin: 12px 0 0;
+		padding: 0;
+		display: grid;
+		gap: 18px;
+	}
+	.kinds li {
+		display: grid;
+		gap: 4px;
+		padding-left: 18px;
+		border-left: 3px solid var(--key);
+	}
+	.kinds h3 {
+		font-size: 1.2rem;
+		line-height: 1.2;
+	}
+	.kinds p {
+		font-size: 0.97rem;
+	}
 	@media (max-width: 899px) {
 		.grid {
 			grid-template-columns: 1fr;
+			gap: 32px;
 		}
-		.grid > .plate-wrap {
-			order: 0;
+		.copy {
+			padding-top: 0;
 		}
 	}
 </style>

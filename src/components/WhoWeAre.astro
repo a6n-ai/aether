@@ -5,12 +5,12 @@ import { CAPTION as TEAM_CAPTION } from '../machines/team/geometry';
 
 // Legend keys match the numbered tags on the plate. Every line is a Live catalog feature.
 const PARTS = [
-	{ term: 'Your website', text: 'Where customers find you, see what you offer, and order or book in a few taps.' },
-	{ term: 'Your customer app', text: 'On their phone: their orders or bookings, rewards and messages. They sign in with an email code or Google.' },
-	{ term: 'Payments', text: 'Card, bank transfer, UPI or cash, all in one ledger, with coupons and loyalty points built in.' },
-	{ term: 'Messages', text: 'Confirmations, reminders and offers go out on their own. Customers who opt out of offers still get their receipts.' },
-	{ term: 'Your staff screen', text: 'Orders, bookings, customers and payments in one place. Each person sees only what their role needs.' },
-	{ term: 'Reports', text: "Sales, customers and what's selling, ready whenever you look." },
+	{ term: 'Your website', pigment: 'var(--lapis)', text: 'Where customers find you, see what you offer, and order or book in a few taps.' },
+	{ term: 'Your customer app', pigment: 'var(--verdigris)', text: 'On their phone: their orders or bookings, rewards and messages. They sign in with an email code or Google.' },
+	{ term: 'Payments', pigment: 'var(--ochre)', text: 'Card, bank transfer, UPI or cash, all in one ledger, with coupons and loyalty points built in.' },
+	{ term: 'Messages', pigment: 'var(--violet)', text: 'Confirmations, reminders and offers go out on their own. Customers who opt out of offers still get their receipts.' },
+	{ term: 'Your staff screen', pigment: 'var(--sanguine)', text: 'Orders, bookings, customers and payments in one place. Each person sees only what their role needs.' },
+	{ term: 'Reports', pigment: 'var(--umber)', text: "Sales, customers and what's selling, ready whenever you look." },
 ];
 ---
 
@@ -35,7 +35,7 @@ const PARTS = [
 			<ol class="legend" aria-label="What's inside a6n">
 				{
 					PARTS.map((part, i) => (
-						<li data-key={i + 1} tabindex="0">
+						<li data-key={i + 1} tabindex="0" style={`--key:${part.pigment}`}>
 							<span class="key" aria-hidden="true">
 								{i + 1}
 							</span>
@@ -127,19 +127,19 @@ const PARTS = [
 		gap: 4px 12px;
 		align-content: start;
 		padding-top: 16px;
-		border-top: 1px solid color-mix(in oklab, var(--umber) 30%, var(--faint));
+		border-top: 2px solid color-mix(in oklab, var(--key) 45%, var(--faint));
 		border-radius: 0;
 		cursor: default;
 		transition: border-color 200ms var(--ease);
 	}
 	.legend li:hover,
 	.legend li:focus-visible {
-		border-top-color: var(--sanguine);
+		border-top-color: var(--key);
 	}
 	.legend li:hover .key,
 	.legend li:focus-visible .key {
-		background: var(--sanguine);
-		border-color: var(--sanguine);
+		background: var(--key);
+		border-color: var(--key);
 		color: var(--card);
 	}
 	/* Engraved key, the same mark as the numbered tags on the plate. */
@@ -150,8 +150,9 @@ const PARTS = [
 		width: 26px;
 		height: 26px;
 		border-radius: 50%;
-		border: 1px solid color-mix(in oklab, var(--umber) 70%, var(--card));
-		color: var(--umber);
+		border: 1px solid var(--key);
+		background: color-mix(in oklab, var(--key) 12%, var(--card));
+		color: color-mix(in oklab, var(--key) 80%, var(--strong));
 		font: 500 0.9rem/1 var(--font-display);
 		font-variant-numeric: lining-nums;
 		transition: background-color 200ms var(--ease), color 200ms var(--ease);

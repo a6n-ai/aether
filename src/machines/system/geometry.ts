@@ -16,15 +16,18 @@ interface Mod {
 	dock: [number, number];
 	loose: [number, number];
 	tilt: number;
+	pigment: string;
 }
+// Docks ring the desk with a 6-unit gap, so the joined system reads as one block. Pigments match the legend keys.
 const MODS: Mod[] = [
-	{ name: 'website', dock: [-88, -22], loose: [-134, -70], tilt: -9 },
-	{ name: 'app', dock: [-72, 46], loose: [-128, 86], tilt: 7 },
-	{ name: 'payments', dock: [-4, 66], loose: [-40, 110], tilt: -11 },
-	{ name: 'messages', dock: [78, -54], loose: [130, -84], tilt: 8 },
-	{ name: 'staff', dock: [-14, -72], loose: [40, -100], tilt: 12 },
-	{ name: 'reports', dock: [76, 18], loose: [130, 58], tilt: -7 },
+	{ name: 'website', dock: [-70, -27], loose: [-134, -70], tilt: -9, pigment: 'var(--lapis)' },
+	{ name: 'app', dock: [-70, 27], loose: [-128, 86], tilt: 7, pigment: 'var(--verdigris)' },
+	{ name: 'payments', dock: [0, 60], loose: [-40, 110], tilt: -11, pigment: 'var(--ochre)' },
+	{ name: 'messages', dock: [70, -27], loose: [130, -84], tilt: 8, pigment: 'var(--violet)' },
+	{ name: 'staff', dock: [0, -60], loose: [46, -104], tilt: 12, pigment: 'var(--sanguine)' },
+	{ name: 'reports', dock: [70, 27], loose: [130, 58], tilt: -7, pigment: 'var(--umber)' },
 ];
+const keyOf = (m: Mod) => `<g data-key="${MODS.indexOf(m) + 1}" class="tint" style="--pigment:${m.pigment}">`;
 
 export function system(width = 760, height = 520): Machine {
 	const P = k.fitProjection(
@@ -92,7 +95,7 @@ export function system(width = 760, height = 520): Machine {
 		for (const m of sorted) {
 			const [cx, cy] = m.dock;
 			const pad: Plan = { x: cx - 28, y: cy - 24, w: 56, d: 48, r: 3 };
-			out.push(`<g data-key="${MODS.indexOf(m) + 1}">`, halo(pad, 0, 3));
+			out.push(keyOf(m), halo(pad, 0, 3));
 			out.push(S(k.slabOf(pad, 0, 3, P, 4, 0.7), { tone: 'lo', inner: L(k.sideSeam(pad, 1.6, P, 4), { tone: 'faint' }) }));
 			out.push(L(k.planOutline(k.insetPlan(pad, 3), 3, P), { tone: 'faint' }), L(k.planOutline(k.insetPlan(pad, 5), 3, P), { tone: 'faint' }));
 			out.push(slab(cx - 25, cy - 21, 3, 42, 3, 1.6, 'mid', { thin: true }), slab(cx + 22, cy - 21, 3, 42, 3, 1.6, 'mid', { thin: true }));
@@ -111,9 +114,9 @@ export function system(width = 760, height = 520): Machine {
 	function cables() {
 		const out: string[] = [];
 		for (const m of MODS) {
-			out.push(`<g data-key="${MODS.indexOf(m) + 1}">`);
+			out.push(keyOf(m));
 			const { a, b } = cableOf(m.dock);
-			const mid: [number, number] = [(a[0] + b[0]) / 2 + (m.dock[1] > 0 ? 6 : -6), (a[1] + b[1]) / 2 + (m.dock[0] > 0 ? -6 : 6)];
+			const mid: [number, number] = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
 			out.push(L(k.onTop([a, mid, b], 3.4, P), { tone: 'lo' }) + L(k.onTop([a, mid, b], 0.4, P), { tone: 'faint' }));
 			out.push(dots([[a[0], a[1], 3.4], [b[0], b[1], 2.4]], 1, 'hi'));
 			out.push(slab(mid[0] - 2, mid[1] - 2, 4, 4, 0, 1.4, 'mid', { thin: true, r: 0.8 }), dots([[mid[0], mid[1], 1.4]], 0.4), '</g>');
@@ -355,7 +358,7 @@ export function system(width = 760, height = 520): Machine {
 	};
 	const transforms = Object.fromEntries(MODS.map((m) => [m.name, [1, 2, 3, 4].map((s) => tf(m, s))]));
 
-	const items = [{ depth: k.depthOf([0, 0, 0], P), svg: hub() }, ...MODS.map((m) => ({ depth: k.depthOf([m.dock[0], m.dock[1], 0], P), svg: moverSvg(m.name, transforms[m.name][3], `<g data-key="${MODS.indexOf(m) + 1}">${builders[m.name](m.dock)}</g>`) }))];
+	const items = [{ depth: k.depthOf([0, 0, 0], P), svg: hub() }, ...MODS.map((m) => ({ depth: k.depthOf([m.dock[0], m.dock[1], 0], P), svg: moverSvg(m.name, transforms[m.name][3], `${keyOf(m)}${builders[m.name](m.dock)}</g>`) }))];
 	items.sort((a, b) => a.depth - b.depth);
 
 	const svg = k.figureSvg({
