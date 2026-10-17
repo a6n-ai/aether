@@ -7,7 +7,7 @@ import { CONTACT_EMAIL } from '../lib/cta';
 	<div class="wrap foot-row">
 		<div class="brand"><Mark /><span>a6n</span></div>
 		<a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-		<p class="credit">Paintings: Michelangelo, Sistine Chapel, public domain.</p>
+		<p class="credit">Art: Michelangelo, public domain. Sistine Chapel; The Metropolitan Museum of Art.</p>
 	</div>
 </footer>
 
@@ -30,6 +30,11 @@ import { CONTACT_EMAIL } from '../lib/cta';
 		gap: 10px;
 		color: var(--strong);
 		font: 500 1.2rem/1 var(--font-display);
+	}
+	.foot-row > a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
 	}
 	.credit {
 		margin-left: auto;

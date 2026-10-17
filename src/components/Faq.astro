@@ -47,14 +47,12 @@ const FAQ = [
 
 <section class="faq" id="faq" data-reveal>
 	<div class="wrap">
-		<p class="mono">Questions</p>
 		<h2>Things owners ask us.</h2>
 		<div class="list">
 			{
 				FAQ.map((item, i) => (
 					<details>
 						<summary>
-							<span class="n">{String(i + 1).padStart(2, '0')}</span>
 							<span class="q">{item.q}</span>
 							<span class="plus" aria-hidden="true" />
 						</summary>
@@ -87,7 +85,7 @@ const FAQ = [
 	summary {
 		list-style: none;
 		display: grid;
-		grid-template-columns: 2.6em 1fr 24px;
+		grid-template-columns: 1fr 24px;
 		align-items: baseline;
 		gap: 12px;
 		min-height: 44px;
@@ -98,10 +96,6 @@ const FAQ = [
 	}
 	summary::-webkit-details-marker {
 		display: none;
-	}
-	.n {
-		font: 0.75rem var(--font-mono);
-		color: var(--muted);
 	}
 	.plus {
 		position: relative;
@@ -126,7 +120,7 @@ const FAQ = [
 	}
 	details p {
 		max-width: 64ch;
-		padding: 0 0 22px calc(2.6em + 12px);
+		padding: 0 0 22px;
 	}
 	.more {
 		margin-top: 24px;

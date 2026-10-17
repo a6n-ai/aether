@@ -22,19 +22,20 @@ export function getStaticPaths() {
 
 const { client } = Astro.props as { client: Client };
 const { machine, caption } = MACHINES[client.slug];
+const plateNo = ['IX', 'X', 'XI', 'XII'][CLIENTS.indexOf(client)];
 ---
 
 <Layout title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} ${client.line}`}>
 	<main class="client" style={`--pigment:${client.pigment}`}>
 		<div class="wrap head">
 			<a class="back" href="/#clients">All clients</a>
-			<p class="mono">{client.kind} · {client.where}</p>
 			<h1>{client.name}</h1>
+			<p class="meta">{client.kind}, {client.where}</p>
 			<p class="intro">{client.intro}</p>
 			<p class="line">{client.line}</p>
 		</div>
 		<div class="wrap">
-			<Plate name={client.slug} machine={machine()} fig="Plate" title={client.name} caption={caption} pigment={client.pigment} />
+			<Plate name={client.slug} machine={machine()} fig={`Plate ${plateNo}`} title={client.name} caption={caption} pigment={client.pigment} />
 		</div>
 		<section class="wrap features">
 			<h2>What it does</h2>
@@ -82,6 +83,11 @@ const { machine, caption } = MACHINES[client.slug];
 		border-bottom: 3px solid var(--pigment);
 		justify-self: start;
 		padding-bottom: 6px;
+	}
+	.meta {
+		color: var(--muted);
+		font-size: 1rem;
+		margin-top: -4px;
 	}
 	.intro {
 		max-width: 56ch;
