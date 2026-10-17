@@ -3,7 +3,7 @@ import type { Plan, Plane, Point3 } from '../../lib/anatomy/iso-kit';
 import { moverSvg, stepSvg, transformsFrom, type Machine } from '../../lib/plate';
 
 export const LABELS = ['you send a message', 'kept safe', 'tried again if needed', 'it arrives'] as const;
-export const CAPTION = 'Receipts, reminders and offers reach your customers. If a message fails, we try again until it arrives.';
+export const CAPTION = 'Receipts, reminders and offers reach your customers. If a message fails to send, it is tried again automatically.';
 
 const BASE: Plan = { x: -175, y: -90, w: 350, d: 180, r: 8 };
 const BASE_H = 12;

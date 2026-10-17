@@ -33,11 +33,11 @@ const steps = machine.labels.length;
 	<div class="stage" set:html={machine.svg} />
 	<div class="controls">
 		<ol class="steps">
-			{machine.labels.map((label, i) => <li data-step={i + 1}>{label}</li>)}
+			{machine.labels.map((label, i) => <li data-step={i + 1} aria-current={i + 1 === steps ? 'step' : undefined}>{label}</li>)}
 		</ol>
-		<div class="nav">
+		<div class="nav" hidden>
 			<button type="button" data-prev aria-label="Previous step">‹</button>
-			<span class="readout" data-readout aria-live="polite">{steps} / {steps}</span>
+			<span class="readout" data-readout aria-live="off">{steps} / {steps}</span>
 			<button type="button" data-next aria-label="Next step">›</button>
 		</div>
 	</div>

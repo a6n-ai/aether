@@ -44,7 +44,7 @@ import { runGrow, CAPTION as RUN_GROW } from '../machines/run-grow/geometry';
 	.grid {
 		margin-top: 40px;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
 		gap: 20px;
 	}
 	.track {

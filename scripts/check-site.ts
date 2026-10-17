@@ -33,6 +33,13 @@ for (const page of PAGES) {
 	for (const fig of body.matchAll(/<figure[^>]*data-machine="([^"]+)"[\s\S]*?<\/figure>/g)) {
 		const label = fig[0].match(/<svg[^>]*role="img"[^>]*aria-label="([^"]*)"/)?.[1] ?? '';
 		check(label.length >= 60, `${page}: plate ${fig[1]} needs an svg aria-label of 60+ chars`);
+		check(/<div[^>]*class="nav[^"]*"[^>]*hidden/.test(fig[0]), `${page}: plate ${fig[1]} step buttons must be hidden until JS can run them`);
+		check(!/data-readout[^>]*aria-live="polite"/.test(fig[0]), `${page}: plate ${fig[1]} readout must not announce during the auto tour`);
+		const items = [...fig[0].matchAll(/<li[^>]*data-step="(\d+)"[^>]*>/g)];
+		check(/aria-current="step"/.test(items.at(-1)?.[0] ?? ''), `${page}: plate ${fig[1]} static HTML must mark the last step current`);
+	}
+	for (const phrase of ['until it arrives', 'bookings, delivery and messages are parts']) {
+		check(!text.includes(phrase), `${page}: overpromising copy: "${phrase}"`);
 	}
 }
 check(/We work mainly from Singapore and India/.test(visible), 'FAQ location answer missing');
@@ -65,6 +72,7 @@ check(
 
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
 check(/color-scheme:\s*light/.test(css), 'page must set color-scheme: light');
+check(/minmax\(min\(300px,\s*100%\),\s*1fr\)/.test(css), 'tracks grid must shrink below 300px on narrow phones');
 for (const client of ['TiffinGrab', 'Puchkaman', 'Xplorers', 'Copper + Cloves']) {
 	check(markup.includes(client), `missing client card: ${client}`);
 }
