@@ -1,54 +1,200 @@
 ---
 import Plate from './Plate.astro';
-import { team, CAPTION } from '../machines/team/geometry';
+import { system, CAPTION as SYSTEM_CAPTION } from '../machines/system/geometry';
+import { team, CAPTION as TEAM_CAPTION } from '../machines/team/geometry';
+
+// Legend keys match the numbered tags on the plate. Every line is a Live catalog feature.
+const PARTS = [
+	{ term: 'Your website', text: 'Where customers find you, see what you offer, and order or book in a few taps.' },
+	{ term: 'Your customer app', text: 'On their phone: their orders or bookings, rewards and messages. They sign in with an email code or Google.' },
+	{ term: 'Payments', text: 'Card, bank transfer, UPI or cash, all in one ledger, with coupons and loyalty points built in.' },
+	{ term: 'Messages', text: 'Confirmations, reminders and offers go out on their own. Customers who opt out of offers still get their receipts.' },
+	{ term: 'Your staff screen', text: 'Orders, bookings, customers and payments in one place. Each person sees only what their role needs.' },
+	{ term: 'Reports', text: "Sales, customers and what's selling, ready whenever you look." },
+];
 ---
 
 <section class="who" id="who" data-reveal>
-	<div class="wrap grid">
-		<div class="copy" data-reveal-item>
+	<div class="wrap">
+		<div class="intro" data-reveal-item>
 			<h2>Built for businesses like yours.</h2>
-			<p class="lead">
-				a6n is short for <strong>(Ai)ny Management System</strong>: a small team of engineers in Singapore and India building
-				the software your business runs on, for businesses anywhere in the world.
-			</p>
-			<p>
-				Not a vendor you chase. More like your own tech team: the same people, every week, working inside your
-				business.
-			</p>
-			<p>We use AI where it saves you time, and plain good engineering everywhere else.</p>
+			<div class="copy">
+				<p class="lead">
+					a6n is short for <strong>(Ai)ny Management System</strong>: one system for the everyday work of a business,
+					from the website your customers visit to the screen your staff use.
+				</p>
+				<p>
+					Many businesses we meet run on a patchwork: a website from one place, bookings in another, payments in a
+					third, and the rest on WhatsApp and a spreadsheet. We join it into one, shaped around how you already work.
+				</p>
+			</div>
 		</div>
-		<div data-reveal-item><Plate name="team" machine={team()} fig="Plate II" title="Your own team" caption={CAPTION} compact /></div>
+
+		<div class="anatomy" data-reveal-item>
+			<Plate name="system" machine={system()} fig="Plate II" title="The anatomy of a6n" caption={SYSTEM_CAPTION} />
+			<ol class="legend" aria-label="What's inside a6n">
+				{
+					PARTS.map((part, i) => (
+						<li data-key={i + 1} tabindex="0">
+							<span class="key" aria-hidden="true">
+								{i + 1}
+							</span>
+							<h3>{part.term}</h3>
+							<p>{part.text}</p>
+						</li>
+					))
+				}
+			</ol>
+		</div>
+
+		<div class="team" data-reveal-item>
+			<div class="copy">
+				<h3 class="team-title">A team, not a vendor.</h3>
+				<p>
+					We're a small team of engineers in Singapore and India. You talk to the same people who build your system,
+					every week, the way you would with your own tech team.
+				</p>
+				<p>We use AI where it saves you time, and plain good engineering everywhere else.</p>
+				<p class="where">Working today with businesses in Canada, Singapore and India.</p>
+			</div>
+			<Plate name="team" machine={team()} fig="Plate III" title="Your own team" caption={TEAM_CAPTION} compact />
+		</div>
 	</div>
 </section>
 
+<script>
+	// Hover or focus a legend entry to spotlight the matching part on the plate.
+	const figure = document.querySelector<HTMLElement>('[data-machine="system"]');
+	const parts = (key: string) => figure?.querySelectorAll<SVGElement>(`svg [data-key="${key}"]`) ?? [];
+	document.querySelectorAll<HTMLElement>('.legend li[data-key]').forEach((li) => {
+		const on = () => {
+			figure?.classList.add('keyed');
+			parts(li.dataset.key!).forEach((p) => p.classList.add('hl'));
+		};
+		const off = () => {
+			figure?.classList.remove('keyed');
+			parts(li.dataset.key!).forEach((p) => p.classList.remove('hl'));
+		};
+		li.addEventListener('pointerenter', on);
+		li.addEventListener('pointerleave', off);
+		li.addEventListener('focus', on);
+		li.addEventListener('blur', off);
+	});
+</script>
+
 <style>
 	.who {
-		padding-block: 104px 32px;
+		padding-block: 112px 48px;
 	}
-	.grid {
+	.intro {
+		display: grid;
+		grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+		gap: 24px 64px;
+		align-items: end;
+	}
+	h2 {
+		font-size: clamp(2.4rem, 5vw, 4rem);
+		max-width: 11ch;
+	}
+	.copy {
+		display: grid;
+		gap: 14px;
+		max-width: 52ch;
+	}
+	.lead {
+		color: var(--strong);
+		font-size: 1.18rem;
+	}
+	.lead strong {
+		font-weight: 600;
+	}
+	.anatomy {
+		margin-top: 56px;
+		display: grid;
+		gap: 28px;
+	}
+	.legend {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 28px 40px;
+	}
+	.legend li {
+		display: grid;
+		grid-template-columns: 30px 1fr;
+		gap: 4px 12px;
+		align-content: start;
+		padding-top: 16px;
+		border-top: 1px solid color-mix(in oklab, var(--umber) 30%, var(--faint));
+		border-radius: 0;
+		cursor: default;
+		transition: border-color 200ms var(--ease);
+	}
+	.legend li:hover,
+	.legend li:focus-visible {
+		border-top-color: var(--sanguine);
+	}
+	.legend li:hover .key,
+	.legend li:focus-visible .key {
+		background: var(--sanguine);
+		border-color: var(--sanguine);
+		color: var(--card);
+	}
+	/* Engraved key, the same mark as the numbered tags on the plate. */
+	.key {
+		grid-row: span 2;
+		display: grid;
+		place-items: center;
+		width: 26px;
+		height: 26px;
+		border-radius: 50%;
+		border: 1px solid color-mix(in oklab, var(--umber) 70%, var(--card));
+		color: var(--umber);
+		font: 500 0.9rem/1 var(--font-display);
+		font-variant-numeric: lining-nums;
+		transition: background-color 200ms var(--ease), color 200ms var(--ease);
+	}
+	.legend h3 {
+		font-size: 1.3rem;
+		line-height: 1.2;
+	}
+	.legend p {
+		font-size: 0.97rem;
+	}
+	.team {
+		margin-top: 96px;
 		display: grid;
 		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
 		gap: 48px;
 		align-items: center;
 	}
-	.copy {
-		display: grid;
-		gap: 16px;
-		max-width: 46ch;
+	.team-title {
+		font-size: clamp(1.9rem, 3.4vw, 2.6rem);
 	}
-	h2 {
-		font-size: clamp(2.2rem, 4.4vw, 3.4rem);
-	}
-	.lead {
-		color: var(--strong);
-		font-size: 1.15rem;
+	.where {
+		color: var(--muted);
+		font-size: 0.95rem;
 	}
 	@media (max-width: 899px) {
-		.grid {
+		.intro,
+		.team {
 			grid-template-columns: 1fr;
 		}
+		.legend {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
 		.who {
-			padding-top: 64px;
+			padding-top: 72px;
+		}
+		.team {
+			margin-top: 64px;
+		}
+	}
+	@media (max-width: 560px) {
+		.legend {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

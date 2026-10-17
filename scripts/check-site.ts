@@ -44,6 +44,9 @@ for (const page of PAGES) {
 }
 check(/We work mainly from Singapore and India/.test(visible), 'FAQ location answer missing');
 check(/\(Ai\)ny Management System/.test(visible), 'brand line missing');
+const legend = markup.match(/<ol[^>]*class="legend[^"]*"[\s\S]*?<\/ol>/)?.[0] ?? '';
+check((legend.match(/<li[\s>]/g) ?? []).length === 6, 'anatomy legend must list the six parts of a6n');
+check(markup.includes('data-machine="system"'), 'anatomy of a6n plate missing');
 
 const heroImg = markup.match(/<img[^>]*fetchpriority="high"[^>]*>/)?.[0] ?? '';
 check(/alt="[^"]*Creation of Adam[^"]*"/.test(heroImg), 'hero <img> needs fetchpriority="high" and alt mentioning Creation of Adam');

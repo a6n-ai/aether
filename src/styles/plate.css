@@ -50,3 +50,14 @@
 .machine .dim-from {
 	transition: opacity 500ms var(--ease);
 }
+
+/* Legend spotlight: everything recedes except the parts keyed to the hovered legend entry. */
+.machine.keyed svg [data-key] {
+	transition: opacity 250ms var(--ease), filter 250ms var(--ease);
+}
+.machine.keyed svg [data-key]:not(.hl) {
+	opacity: 0.28;
+}
+.machine.keyed svg [data-key].hl {
+	filter: drop-shadow(0 6px 10px color-mix(in oklab, var(--sanguine) 45%, transparent));
+}

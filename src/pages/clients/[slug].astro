@@ -22,7 +22,7 @@ export function getStaticPaths() {
 
 const { client } = Astro.props as { client: Client };
 const { machine, caption } = MACHINES[client.slug];
-const plateNo = ['IX', 'X', 'XI', 'XII'][CLIENTS.indexOf(client)];
+const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 ---
 
 <Layout title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} ${client.line}`}>
