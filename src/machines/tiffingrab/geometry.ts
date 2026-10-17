@@ -37,6 +37,8 @@ export function tiffingrab(width = 720, height = 480): Machine {
 	const halo = (plan: Plan, z: number, h: number, blur = 0) => `<path class="iso-halo" d="${k.haloOf(plan, z, h, P)}"${blur ? ` style="filter:blur(${blur}px)"` : ''}/>`;
 	const box = (plan: Plan, z: number, h: number, tone: 'hi' | 'mid' | 'lo' = 'mid', steps = 3, bevel = 0.5) => S(k.slabOf(plan, z, h, P, steps, bevel), { tone });
 
+	const frameX = (x: number, y0: number, y1: number, z0: number, z1: number) => L(k.segment([x, y0, z0], [x, y1, z0], P) + k.segment([x, y1, z0], [x, y1, z1], P) + k.segment([x, y1, z1], [x, y0, z1], P) + k.segment([x, y0, z1], [x, y0, z0], P), { tone: 'mid', free: true });
+
 	function base() {
 		const out = [halo(BASE, -BASE_H - FOOT_H, BASE_H)];
 		for (const [x, y] of [...k.corners(BASE, 24)].sort((a, b) => k.depthOf([a[0], a[1], 0], P) - k.depthOf([b[0], b[1], 0], P))) {
@@ -52,6 +54,19 @@ export function tiffingrab(width = 720, height = 480): Machine {
 		out.push(S(k.slabOf(strip, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
 		const ticks = k.topTicks(strip.x + 4, strip.x + strip.w - 4, 4, 5, strip.y + 0.8, 0.6, [2, 3.6], P);
 		out.push(L(ticks.minor, { tone: 'lo' }), L(ticks.major, { tone: 'mid' }));
+		out.push(D([at([strip.x + 2, strip.y + 3.5, 0.6]), at([strip.x + strip.w - 2, strip.y + 3.5, 0.6])], { size: 0.45 }));
+		const lab: Plan = { x: -190, y: BASE.y + BASE.d - 14, w: 44, d: 9, r: 1.5 };
+		out.push(S(k.slabOf(lab, 0, 0.8, P, 3), { tone: 'lo' }));
+		for (const dy of [2.6, 5.4]) out.push(L(k.lineOnTop([lab.x + 5, lab.y + dy], [lab.x + lab.w - (dy > 5 ? 16 : 5), lab.y + dy], 0.8, P), { tone: 'faint', free: true }));
+		out.push(D([at([lab.x + 2, lab.y + 2, 0.8]), at([lab.x + lab.w - 2, lab.y + lab.d - 2, 0.8])], { size: 0.4 }));
+		const rail: Plan = { x: -201, y: -60, w: 7, d: 80, r: 1 };
+		out.push(S(k.slabOf(rail, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
+		const rt = k.topTicks(rail.y + 4, rail.y + rail.d - 4, 4, 5, rail.x + 0.8, 0.6, [2, 3.2], P, 'y');
+		out.push(L(rt.minor, { tone: 'lo' }), L(rt.major, { tone: 'mid' }));
+		const sr: Plan = { x: 193, y: -50, w: 7, d: 70, r: 1 };
+		out.push(S(k.slabOf(sr, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
+		const st = k.topTicks(sr.y + 4, sr.y + sr.d - 4, 4, 5, sr.x + 0.8, 0.6, [2, 3.2], P, 'y');
+		out.push(L(st.minor, { tone: 'lo' }), L(st.major, { tone: 'mid' }));
 		return out.join('');
 	}
 
@@ -59,6 +74,15 @@ export function tiffingrab(width = 720, height = 480): Machine {
 		const out = [box(ROAD, 0, 1.2, 'lo', 3, 0.3)];
 		out.push(L(k.lineOnTop([ROAD.x + 8, VAN_Y + 12], [ROAD.x + ROAD.w - 8, VAN_Y + 12], 1.2, P), { tone: 'faint' }));
 		for (let x = ROAD.x + 14; x < ROAD.x + ROAD.w - 20; x += 22) out.push(L(k.lineOnTop([x, VAN_Y - 14], [x + 10, VAN_Y - 14], 1.2, P), { tone: 'mid' }));
+		for (const y of [ROAD.y, ROAD.y + ROAD.d - 3]) {
+			out.push(box({ x: ROAD.x, y, w: ROAD.w, d: 3, r: 1 }, 1.2, 1.6, 'mid', 2, 0.3));
+			for (let x = ROAD.x + 28; x < ROAD.x + ROAD.w - 10; x += 56) out.push(L(k.rise([x, y + 3], 1.4, 2.8, P), { tone: 'faint' }));
+		}
+		for (let i = 0; i < 6; i++) out.push(box({ x: 150 + i * 6, y: 36, w: 3.2, d: 34, r: 0.6 }, 1.2, 0.3, 'hi', 2, 0));
+		out.push(S(k.cylinder(-120, 73, 5, 1.2, 0.8, P, 24, 0.3), { tone: 'lo' }));
+		out.push(L(k.ring(-120, 73, 3, 2, P, 18), { tone: 'faint' }));
+		out.push(L(k.lineOnTop([-123, 73], [-117, 73], 2, P) + k.lineOnTop([-120, 70], [-120, 76], 2, P), { tone: 'faint' }));
+		out.push(D([at([ROAD.x + 6, ROAD.y + 6, 1.2]), at([ROAD.x + ROAD.w - 6, ROAD.y + 6, 1.2]), at([ROAD.x + 6, ROAD.y + ROAD.d - 6, 1.2]), at([ROAD.x + ROAD.w - 6, ROAD.y + ROAD.d - 6, 1.2])], { size: 0.4 }));
 		return out.join('');
 	}
 
@@ -71,6 +95,19 @@ export function tiffingrab(width = 720, height = 480): Machine {
 			out.push(box({ x: x - 7, y: front, w: 14, d: 2, r: 0.8 }, 9, 2.4, 'lo', 2, 0.2));
 		}
 		out.push(L(k.planOutline(k.insetPlan(COUNTER, 4), COUNTER_H, P), { tone: 'faint' }));
+		for (const x of [-170, -110, -50]) {
+			out.push(L(k.segment([x - 13, front, 5], [x + 13, front, 5], P) + k.segment([x + 13, front, 5], [x + 13, front, 15], P) + k.segment([x + 13, front, 15], [x - 13, front, 15], P) + k.segment([x - 13, front, 15], [x - 13, front, 5], P), { tone: 'faint', free: true }));
+			out.push(D([at([x - 10, front, 12]), at([x + 10, front, 12])], { size: 0.4 }));
+		}
+		out.push(S(k.slabOf({ x: COUNTER.x + 2, y: front - 2, w: COUNTER.w - 4, d: 2.6, r: 0.8 }, 0, 2.2, P, 2), { tone: 'lo', crease: 'none' }));
+		for (const x of [-110, -96]) {
+			out.push(S(k.cylinder(x, -20, 4.2, COUNTER_H, 3, P, 18, 0.3), { tone: 'hi' }));
+			out.push(L(k.ring(x, -20, 2.8, COUNTER_H + 3, P, 14), { tone: 'faint' }));
+		}
+		out.push(S(k.slabOf({ x: 6, y: -72, w: 18, d: 14, r: 1 }, COUNTER_H, 1.2, P, 2), { tone: 'hi' }));
+		for (const dy of [3, 6, 9]) out.push(L(k.lineOnTop([8, -72 + dy], [22 - (dy === 9 ? 6 : 0), -72 + dy], COUNTER_H + 1.2, P), { tone: 'mid', free: true }));
+		out.push(S(k.cylinder(-30, -70, 3, COUNTER_H, 8, P, 14, 0.3), { tone: 'hi' }) + L(k.ring(-30, -70, 3, COUNTER_H + 8, P, 12), { tone: 'mid' }));
+		out.push(D(k.corners(COUNTER, 3).map(([x, y]) => at([x, y, COUNTER_H])), { size: 0.4 }));
 		return out.join('');
 	}
 
@@ -79,6 +116,22 @@ export function tiffingrab(width = 720, height = 480): Machine {
 		out.push(S(k.slabOf(PREP, COUNTER_H, PREP_TOP - COUNTER_H, P, 3, 0.6), { tone: 'mid', inner: L(k.sideSeam(PREP, 32, P, 3), { tone: 'faint' }) }));
 		out.push(L(k.ring(-154, -45, TIN_R + 3, PREP_TOP, P, 40), { tone: 'faint' }));
 		for (const z of [26, 38]) out.push(L(k.lineOnTop([PREP.x + 4, PREP.y + PREP.d], [PREP.x + PREP.w - 4, PREP.y + PREP.d], z, P), { tone: 'faint', free: true }));
+		const pf = PREP.y + PREP.d;
+		for (const x of [-174, -162, -150, -138]) {
+			out.push(L(k.rise([x, pf], 38, 43, P), { tone: 'mid', free: true }));
+			out.push(S(k.slabOf({ x: x - 1.6, y: pf, w: 3.2, d: 1, r: 0.4 }, 29, 8, P, 2, 0.2), { tone: 'lo', crease: 'none' }));
+		}
+		for (const [x, y] of [[-176, -62], [-132, -62], [-132, -28]]) {
+			out.push(S(k.cylinder(x, y, 3.4, PREP_TOP, 6, P, 16, 0.3), { tone: 'hi' }));
+			out.push(S(k.cylinder(x, y, 2.4, PREP_TOP + 6, 1.2, P, 12), { tone: 'mid' }));
+		}
+		out.push(D(k.corners(PREP, 2.4).map(([x, y]) => at([x, y, 18])), { size: 0.4 }));
+		out.push(L(k.planOutline(k.insetPlan(PREP, 3), PREP_TOP, P), { tone: 'faint' }));
+		const rx = PREP.x + PREP.w;
+		out.push(frameX(rx, PREP.y + 5, PREP.y + 37, 22, 42) + frameX(rx, PREP.y + 8, PREP.y + 34, 25, 39));
+		out.push(S(k.slabOf({ x: rx, y: PREP.y + 29, w: 1.4, d: 2.2, r: 0.4 }, 27, 8, P, 2), { tone: 'hi' }));
+		out.push(D([at([rx, PREP.y + 4, 24]), at([rx, PREP.y + 38, 24]), at([rx, PREP.y + 4, 40]), at([rx, PREP.y + 38, 40])], { size: 0.4 }));
+		for (const dz of [29, 33, 37]) out.push(L(k.segment([rx, PREP.y + 11, dz], [rx, PREP.y + 22, dz], P), { tone: 'faint', free: true }));
 		return out.join('');
 	}
 
@@ -127,6 +180,12 @@ export function tiffingrab(width = 720, height = 480): Machine {
 		out.push(S(k.cylinder(PRINTER.x + 36, PRINTER.y + 10, 7, PRINTER_TOP, 6, P, 26, 0.3), { tone: 'hi' }));
 		out.push(L(k.ring(PRINTER.x + 36, PRINTER.y + 10, 2.4, PRINTER_TOP + 6, P, 14), { tone: 'mid' }));
 		out.push(L(k.planOutline(k.insetPlan(PRINTER, 4), PRINTER_TOP, P), { tone: 'faint' }));
+		const px = PRINTER.x + PRINTER.w;
+		for (const dy of [8, 13, 18, 23]) out.push(L(k.segment([px, PRINTER.y + dy, 32], [px, PRINTER.y + dy, 52], P), { tone: 'faint', free: true }));
+		out.push(S(k.slabOf({ x: PRINTER.x + 10, y: front, w: 22, d: 7, r: 0.6 }, 29, 0.5, P, 2), { tone: 'hi', crease: 'none' }));
+		for (const dx of [14, 20, 26]) out.push(L(k.lineOnTop([PRINTER.x + dx, front + 1.4], [PRINTER.x + dx + 3, front + 1.4], 29.5, P), { tone: 'mid', free: true }));
+		out.push(D(k.corners(PRINTER, 2.4).map(([x, y]) => at([x, y, PRINTER_TOP])), { size: 0.4 }));
+		for (const x of [PRINTER.x + 6, PRINTER.x + PRINTER.w - 6]) out.push(S(k.slabOf({ x: x - 3, y: front - 0.4, w: 6, d: 0.8, r: 0.3 }, COUNTER_H + 1, 3, P, 2), { tone: 'lo', crease: 'none' }));
 		out.push(stepSvg('lit-at', 3, S(k.slabOf({ x: PRINTER.x + 4, y: front - 8, w: 6, d: 4, r: 1 }, PRINTER_TOP, 1.2, P, 2), { tone: 'hi', lit: true })));
 		return out.join('');
 	}
@@ -149,9 +208,55 @@ export function tiffingrab(width = 720, height = 480): Machine {
 		out.push(S(k.slabOf({ x: HOUSE.x + 8, y: front - 1, w: 14, d: 2, r: 0.5 }, 0.6, 24, P, 2), { tone: 'lo' }));
 		out.push(D([at([HOUSE.x + 19, front + 1.2, 12])], { size: 0.8, tone: 'hi' }));
 		out.push(L(k.sideRing([HOUSE.x + 40, front + 0.2, 20], 5, 'y', P, 20) + k.segment([HOUSE.x + 40, front + 0.2, 15], [HOUSE.x + 40, front + 0.2, 25], P) + k.segment([HOUSE.x + 35, front + 0.2, 20], [HOUSE.x + 45, front + 0.2, 20], P), { tone: 'mid' }));
+		out.push(box({ x: HOUSE.x + 6, y: front, w: 18, d: 4, r: 0.8 }, 0, 1.4, 'lo', 2, 0.2));
+		out.push(box({ x: HOUSE.x + 4, y: front, w: 22, d: 7, r: 0.8 }, 25.4, 1.2, 'hi', 2, 0.3));
+		for (const dx of [4, 8, 12, 16]) out.push(L(k.rise([HOUSE.x + 5 + dx, front + 7], 25.4, 26.6, P), { tone: 'mid', free: true }));
+		out.push(box({ x: HOUSE.x + 33, y: front, w: 14, d: 1.6, r: 0.5 }, 12, 2.4, 'lo', 2, 0.2));
+		for (const sx of [-1, 1]) out.push(box({ x: HOUSE.x + 40 + sx * 10 - (sx < 0 ? 4 : 0), y: front, w: 4, d: 1, r: 0.3 }, 14, 12, 'lo', 2, 0.2));
+		for (const x of [HOUSE.x + 6, HOUSE.x + 18, HOUSE.x + 30, HOUSE.x + 42]) out.push(L(k.lineOnTop([x, HOUSE.y - 3], [x, front + 3], 38, P), { tone: 'mid', free: true }));
+		out.push(box({ x: HOUSE.x + HOUSE.w - 15, y: HOUSE.y + 5, w: 10, d: 10, r: 1.4 }, 50, 1.4, 'hi', 2, 0.3));
+		out.push(L(k.ring(HOUSE.x + HOUSE.w - 10, HOUSE.y + 10, 2, 51.4, P, 10), { tone: 'lo' }));
+		out.push(S(k.cylinder(HOUSE.x + 3, front + 6, 3.6, 0, 5, P, 16, 0.3), { tone: 'mid' }));
+		out.push(S(k.cylinder(HOUSE.x + 3, front + 6, 2.8, 5, 4, P, 12, 0.6), { tone: 'hi' }));
+		out.push(D(k.corners(HOUSE, 3).map(([x, y]) => at([x, y, 38])), { size: 0.4 }));
+		const hx = HOUSE.x + HOUSE.w;
+		out.push(frameX(hx, HOUSE.y + 8, HOUSE.y + 22, 14, 28) + frameX(hx, HOUSE.y + 10, HOUSE.y + 20, 16, 26));
+		out.push(L(k.segment([hx, HOUSE.y + 15, 16], [hx, HOUSE.y + 15, 26], P) + k.segment([hx, HOUSE.y + 10, 21], [hx, HOUSE.y + 20, 21], P), { tone: 'faint', free: true }));
+		out.push(S(k.slabOf({ x: hx, y: HOUSE.y + 6, w: 1.4, d: 18, r: 0.4 }, 12.4, 1.6, P, 2), { tone: 'hi' }));
+		for (const dy of [28, 33, 38]) out.push(L(k.segment([hx, HOUSE.y + dy, 6], [hx, HOUSE.y + dy, 26], P), { tone: 'faint', free: true }));
+		out.push(S(k.cylinder(hx + 2, HOUSE.y + 40, 1.2, 0, 32, P, 10), { tone: 'lo' }));
+		out.push(D([at([hx, HOUSE.y + 3, 30]), at([hx, HOUSE.y + 41, 30])], { size: 0.4 }));
 		const mail: Plan = { x: HOUSE.x - 18, y: front - 6, w: 10, d: 7, r: 2 };
 		out.push(box({ x: mail.x + 3, y: mail.y + 2, w: 3, d: 3, r: 0.6 }, 0, 12, 'lo', 2, 0));
 		out.push(box(mail, 12, 8, 'hi', 3, 0.4));
+		return out.join('');
+	}
+
+	function crates() {
+		const out: string[] = [];
+		for (const [x, y, z] of [[58, -62, 0], [58, -40, 0], [60, -60, 9]] as const) {
+			const plan: Plan = { x, y, w: 30, d: 20, r: 1.4 };
+			out.push(halo(plan, z, 9));
+			out.push(S(k.slabOf(plan, z, 9, P, 3, 0.5), { tone: 'mid', inner: L(k.sideSeam(plan, z + 4.5, P, 3), { tone: 'faint' }) }));
+			out.push(L(k.planOutline(k.insetPlan(plan, 2.6), z + 9, P), { tone: 'faint' }));
+			for (const dx of [8, 15, 22]) out.push(L(k.segment([x + dx, y + plan.d, z + 1.6], [x + dx, y + plan.d, z + 7.4], P), { tone: 'faint', free: true }));
+			out.push(S(k.slabOf({ x: x + 10, y: y + plan.d, w: 10, d: 0.6, r: 0.3 }, z + 5.6, 2.4, P, 2), { tone: 'hi', crease: 'none' }));
+		}
+		out.push(S(k.cylinder(108, -50, 7, 0, 10, P, 24, 0.5), { tone: 'mid' }));
+		out.push(L(k.sideArc(108, -50, 7, 5, P, 18), { tone: 'faint' }) + L(k.ring(108, -50, 4.5, 10, P, 16), { tone: 'lo' }));
+		out.push(S(k.cylinder(108, -50, 2.6, 10, 2.2, P, 12), { tone: 'hi' }));
+		out.push(D([at([108, -50, 12.2])], { size: 0.45 }));
+		return out.join('');
+	}
+
+	function props() {
+		const out: string[] = [];
+		const cone = ([x, y]: [number, number]) => [S(k.cylinder(x, y, 5, 1.2, 1, P, 4, 0.2), { tone: 'lo' }), S(k.cylinder(x, y, 3.4, 2.2, 5, P, 14, 0.3), { tone: 'hi' }), S(k.cylinder(x, y, 1.6, 7.2, 3, P, 12, 0.3), { tone: 'hi' }), L(k.sideArc(x, y, 2.6, 5.2, P, 12), { tone: 'mid' })].join('');
+		out.push(cone([112, 76]), cone([138, 76]));
+		out.push(S(k.cylinder(186, 84, 1.4, 0, 24, P, 10), { tone: 'lo' }));
+		out.push(S(k.cylinder(186, 84, 6, 0, 1.2, P, 16), { tone: 'lo' }));
+		out.push(S(k.slabOf({ x: 180, y: 83, w: 12, d: 1.8, r: 0.6 }, 24, 11, P, 3, 0.4), { tone: 'hi' }));
+		out.push(L(k.sideRing([186, 84.9, 29.5], 3.8, 'y', P, 18) + k.segment([183.5, 84.9, 29.5], [188.5, 84.9, 29.5], P), { tone: 'mid', free: true }));
 		return out.join('');
 	}
 
@@ -169,6 +274,12 @@ export function tiffingrab(width = 720, height = 480): Machine {
 			out.push(L(k.ring(scr.x + 3.5, f, 1.2, z, P, 10), { tone: 'mid', free: true }));
 		}
 		out.push(D([at([body.x + body.w / 2, f, 5.5])], { size: 0.5, tone: 'mid' }));
+		out.push(L(k.planOutline(k.insetPlan(stand, 2.6), 3, P), { tone: 'faint' }));
+		out.push(D(k.corners(stand, 3).map(([x, y]) => at([x, y, 3])), { size: 0.4 }));
+		out.push(S(k.slabOf({ x: body.x + 8, y: stand.y + stand.d, w: 14, d: 0.6, r: 0.3 }, 0.8, 1.4, P, 2), { tone: 'lo', crease: 'none' }));
+		for (const [dz, h] of [[40, 5], [32, 5]]) out.push(S(k.slabOf({ x: body.x + body.w, y: body.y + 1, w: 0.9, d: 2, r: 0.3 }, dz, h, P, 2), { tone: 'lo', crease: 'none' }));
+		out.push(L(k.segment([scr.x + 8, f, 57], [scr.x + scr.w - 8, f, 57], P), { tone: 'faint', free: true }));
+		out.push(D([at([body.x + body.w / 2 - 4, f, 55.4]), at([body.x + body.w / 2 + 4, f, 55.4])], { size: 0.4 }));
 		return out.join('');
 	}
 
@@ -187,6 +298,16 @@ export function tiffingrab(width = 720, height = 480): Machine {
 		}
 		out.push(D([at([cx + 22, cy + 6, z + 7])], { size: 0.8, tone: 'hi' }));
 		for (const dx of [-12, -2]) out.push(S(k.cylinder(cx + dx, cy, 5, z + 21, 4, P, 20, 0.3), { tone: 'hi' }));
+		out.push(L(k.planOutline(k.insetPlan(body, 2), z + 21, P), { tone: 'faint' }));
+		for (const dy of [-8, 8]) out.push(S(k.slabOf({ x: cx - 18, y: cy + dy - 1, w: 24, d: 2, r: 0.5 }, z + 21, 1, P, 2), { tone: 'lo', crease: 'none' }));
+		out.push(box({ x: cx + 22, y: cy - 9, w: 2, d: 18, r: 0.6 }, z, 3, 'lo', 2, 0.2));
+		out.push(box({ x: cx - 22, y: cy - 9, w: 2, d: 18, r: 0.6 }, z, 3, 'lo', 2, 0.2));
+		out.push(S(k.slabOf({ x: cx + 12, y: cy + 11, w: 2.4, d: 1.4, r: 0.4 }, z + 14, 3, P, 2), { tone: 'lo' }));
+		out.push(L(k.segment([cx - 18, cy + 11, z + 12], [cx + 6, cy + 11, z + 12], P) + k.segment([cx - 18, cy + 11, z + 14], [cx + 6, cy + 11, z + 14], P), { tone: 'mid', free: true }));
+		out.push(L(k.segment([cx - 18, cy + 11, z + 16], [cx - 6, cy + 11, z + 16], P), { tone: 'mid', free: true }));
+		out.push(L(k.sideRing([cx - 11, cy + 11, z + 4.5], 6.4, 'y', P, 22), { tone: 'faint', free: true }));
+		out.push(L(k.sideRing([cx + 14, cy + 11, z + 4.5], 6.4, 'y', P, 22), { tone: 'faint', free: true }));
+		out.push(D([at([cx - 22, cy + 6, z + 7]), at([cx - 22, cy - 6, z + 7])], { size: 0.5, tone: 'mid' }));
 		return out.join('');
 	}
 
@@ -203,7 +324,7 @@ export function tiffingrab(width = 720, height = 480): Machine {
 		height,
 		label:
 			'A kitchen counter with a stack of round tiffin tins, a label printer and a phone showing a meal menu. A tin is packed onto the stack, a printed label is fixed to it, and a small delivery van drives off along the road toward a customer’s door.',
-		body: [base(), road(), house(), counter(), prep(), stackBase(), mover('tin3'), clips(), pot(), printer(), mover('label'), phone(), mover('van')],
+		body: [base(), road(), house(), crates(), counter(), prep(), stackBase(), mover('tin3'), clips(), pot(), printer(), mover('label'), phone(), mover('van'), props()],
 	});
 	return { svg, labels: LABELS, transforms };
 }
