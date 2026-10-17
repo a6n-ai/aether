@@ -3,26 +3,45 @@ import gsap from 'gsap';
 const DWELL_MS = 2600;
 // One eased glide per step; movers leave a beat apart so the eye can follow each ingredient.
 const GLIDE = { duration: 0.95, ease: 'power3.inOut', stagger: 0.09, overwrite: 'auto' } as const;
+// Start fetching a plate's live SVG this far before it scrolls into view.
+const PREFETCH = '600px 0px';
+
+/** Swap the finished-plate <img> for the live inline SVG so its parts can move. */
+async function inline(img: HTMLImageElement): Promise<SVGSVGElement | null> {
+	try {
+		const text = await (await fetch(img.currentSrc || img.src)).text();
+		const svg = new DOMParser().parseFromString(text, 'image/svg+xml').documentElement as unknown as SVGSVGElement;
+		if (svg.nodeName !== 'svg') return null;
+		svg.querySelector('style')?.remove(); // the page's own styles already cover it; the embedded copy is for <img>
+		img.replaceWith(svg);
+		return svg;
+	} catch {
+		return null; // the image stays: the plate still shows its finished story
+	}
+}
 
 export function mountPlate(root: HTMLElement): () => void {
 	const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
 	const transforms: Record<string, string[]> = JSON.parse(root.dataset.transforms ?? '{}');
 	const steps = Number(root.dataset.steps);
-	const movers = [...root.querySelectorAll<SVGGElement>('.mover[data-part]')];
-	const staged = [...root.querySelectorAll<SVGGElement>('[data-at]')].filter((g) => g.closest('svg'));
 	const labels = [...root.querySelectorAll<HTMLLIElement>('li[data-step]')];
 	const readout = root.querySelector<HTMLElement>('[data-readout]')!;
 	const nav = root.querySelector<HTMLElement>('.nav')!;
-	// The page renders the final step; the tour rewinds to step 1 only once the plate is seen, so nothing jumps on load.
+	const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
+	const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+	let movers: SVGGElement[] = [];
+	let staged: SVGGElement[] = [];
+	// The plate shows its final step; the tour rewinds to step 1 only once it is seen, so nothing jumps on load.
 	let step = steps;
+	let live = false;
 	let started = false;
 	let timer = 0;
 	let touring = !still;
 	let visible = false;
 	let paused = false;
 
-	const show = (next: number, instant = false) => {
-		step = ((next - 1 + steps) % steps) + 1;
+	const show = (n: number, instant = false) => {
+		step = ((n - 1 + steps) % steps) + 1;
 		const moving = movers.filter((g) => transforms[g.dataset.part!]?.[step - 1] !== g.getAttribute('transform'));
 		if (instant) moving.forEach((g) => g.setAttribute('transform', transforms[g.dataset.part!][step - 1]));
 		else if (moving.length) gsap.to(moving, { ...GLIDE, attr: { transform: (_: number, g: SVGGElement) => transforms[g.dataset.part!][step - 1] } });
@@ -32,7 +51,7 @@ export function mountPlate(root: HTMLElement): () => void {
 	};
 	const schedule = () => {
 		clearTimeout(timer);
-		if (touring && visible && !paused) timer = window.setTimeout(() => (show(step + 1), schedule()), DWELL_MS);
+		if (live && touring && visible && !paused) timer = window.setTimeout(() => (show(step + 1), schedule()), DWELL_MS);
 	};
 	// Manual steps stop the tour for good and are announced; the auto tour stays silent.
 	const manual = (delta: number) => {
@@ -41,36 +60,54 @@ export function mountPlate(root: HTMLElement): () => void {
 		readout.setAttribute('aria-live', 'polite');
 		show(step + delta, still);
 	};
-
-	const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
-	const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
 	const onPrev = () => manual(-1);
 	const onNext = () => manual(1);
 	const pause = () => ((paused = true), clearTimeout(timer));
 	const resume = () => ((paused = false), schedule());
-	nav.hidden = false;
+
+	const begin = () => {
+		if (!touring || started) return schedule();
+		started = true;
+		timer = window.setTimeout(() => (show(1), schedule()), DWELL_MS / 2);
+	};
+	const goLive = async () => {
+		const img = root.querySelector<HTMLImageElement>('img[data-plate-img]');
+		const svg = img ? await inline(img) : root.querySelector('svg');
+		if (!svg) return;
+		movers = [...svg.querySelectorAll<SVGGElement>('.mover[data-part]')];
+		staged = [...svg.querySelectorAll<SVGGElement>('[data-at]')];
+		live = true;
+		nav.hidden = false;
+		if (visible) begin();
+	};
+
 	prev.addEventListener('click', onPrev);
 	next.addEventListener('click', onNext);
 	root.addEventListener('pointerenter', pause);
 	root.addEventListener('pointerleave', resume);
 	root.addEventListener('focusin', pause);
 	root.addEventListener('focusout', resume);
-	const io = new IntersectionObserver(([entry]) => {
+	const near = new IntersectionObserver(
+		([entry]) => {
+			if (!entry.isIntersecting) return;
+			near.disconnect();
+			goLive();
+		},
+		{ rootMargin: PREFETCH },
+	);
+	const seen = new IntersectionObserver(([entry]) => {
 		visible = entry.isIntersecting;
 		if (!visible) return clearTimeout(timer);
-		if (touring && !started) {
-			started = true;
-			timer = window.setTimeout(() => (show(1), schedule()), DWELL_MS / 2);
-			return;
-		}
-		schedule();
+		if (live) begin();
 	});
-	io.observe(root);
+	near.observe(root);
+	seen.observe(root);
 
 	return () => {
 		clearTimeout(timer);
 		gsap.killTweensOf(movers);
-		io.disconnect();
+		near.disconnect();
+		seen.disconnect();
 		prev.removeEventListener('click', onPrev);
 		next.removeEventListener('click', onNext);
 		root.removeEventListener('pointerenter', pause);

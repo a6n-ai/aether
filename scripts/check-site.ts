@@ -31,8 +31,12 @@ for (const page of PAGES) {
 	check((body.match(/<h1[\s>]/g) ?? []).length === 1, `${page}: expected exactly one <h1>`);
 	check(/<html[^>]*lang="en"/.test(raw), `${page}: missing <html lang="en">`);
 	for (const fig of body.matchAll(/<figure[^>]*data-machine="([^"]+)"[\s\S]*?<\/figure>/g)) {
-		const label = fig[0].match(/<svg[^>]*role="img"[^>]*aria-label="([^"]*)"/)?.[1] ?? '';
-		check(label.length >= 60, `${page}: plate ${fig[1]} needs an svg aria-label of 60+ chars`);
+		const img = fig[0].match(/<img[^>]*data-plate-img[^>]*>/)?.[0] ?? '';
+		const alt = img.match(/alt="([^"]*)"/)?.[1] ?? '';
+		check(alt.length >= 60, `${page}: plate ${fig[1]} needs a finished-plate image with a 60+ char alt`);
+		check(/loading="lazy"/.test(img), `${page}: plate ${fig[1]} image must load lazily`);
+		const file = `dist/plates/${fig[1]}.svg`;
+		check(existsSync(file) && /<style>svg\.machine\{/.test(readFileSync(file, 'utf8')), `${page}: ${file} missing or without embedded styles`);
 		check(/<div[^>]*class="nav[^"]*"[^>]*hidden/.test(fig[0]), `${page}: plate ${fig[1]} step buttons must be hidden until JS can run them`);
 		check(!/data-readout[^>]*aria-live="polite"/.test(fig[0]), `${page}: plate ${fig[1]} readout must not announce during the auto tour`);
 		const items = [...fig[0].matchAll(/<li[^>]*data-step="(\d+)"[^>]*>/g)];
@@ -62,8 +66,8 @@ if (at800) {
 
 const plate = markup.match(/<figure[^>]*data-machine="workbench"[\s\S]*?<\/figure>/)?.[0] ?? '';
 check(plate !== '', 'missing workbench figure');
-const svgLabel = plate.match(/<svg[^>]*role="img"[^>]*aria-label="([^"]*)"/)?.[1] ?? '';
-check(svgLabel.length >= 60, 'workbench svg needs role="img" and a 60+ char aria-label');
+const svgLabel = plate.match(/<img[^>]*data-plate-img[^>]*alt="([^"]*)"/)?.[1] ?? plate.match(/<img[^>]*alt="([^"]*)"[^>]*data-plate-img/)?.[1] ?? '';
+check(svgLabel.length >= 60, 'workbench plate image needs a 60+ char alt');
 const STEP_LABELS = ['parts that already work', 'pick what you need', 'fitted to your business', 'your app, open for customers'];
 const stepTexts = [...plate.matchAll(/<li[^>]*data-step="\d"[^>]*>([\s\S]*?)<\/li>/g)].map((m) => m[1].replace(/<[^>]+>/g, '').trim());
 check(JSON.stringify(stepTexts) === JSON.stringify(STEP_LABELS), `workbench step labels wrong: ${JSON.stringify(stepTexts)}`);

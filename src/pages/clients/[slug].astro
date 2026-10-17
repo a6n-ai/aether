@@ -3,17 +3,16 @@ import Layout from '../../layouts/Layout.astro';
 import Plate from '../../components/Plate.astro';
 import { CLIENTS, type Client } from '../../data/clients';
 import { BOOK_CALL_HREF } from '../../lib/cta';
-import type { Machine } from '../../lib/plate';
 import * as tiffingrab from '../../machines/tiffingrab/geometry';
 import * as puchkaman from '../../machines/puchkaman/geometry';
 import * as xplorers from '../../machines/xplorers/geometry';
 import * as copperCloves from '../../machines/copper-cloves/geometry';
 
-const MACHINES: Record<Client['slug'], { machine: () => Machine; caption: string }> = {
-	tiffingrab: { machine: tiffingrab.tiffingrab, caption: tiffingrab.CAPTION },
-	puchkaman: { machine: puchkaman.puchkaman, caption: puchkaman.CAPTION },
-	xplorers: { machine: xplorers.xplorers, caption: xplorers.CAPTION },
-	'copper-cloves': { machine: copperCloves.copperCloves, caption: copperCloves.CAPTION },
+const CAPTIONS: Record<Client['slug'], string> = {
+	tiffingrab: tiffingrab.CAPTION,
+	puchkaman: puchkaman.CAPTION,
+	xplorers: xplorers.CAPTION,
+	'copper-cloves': copperCloves.CAPTION,
 };
 
 export function getStaticPaths() {
@@ -21,7 +20,7 @@ export function getStaticPaths() {
 }
 
 const { client } = Astro.props as { client: Client };
-const { machine, caption } = MACHINES[client.slug];
+const caption = CAPTIONS[client.slug];
 const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 ---
 
@@ -35,7 +34,7 @@ const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 			<p class="line">{client.line}</p>
 		</div>
 		<div class="wrap">
-			<Plate name={client.slug} machine={machine()} fig={`Plate ${plateNo}`} title={client.name} caption={caption} pigment={client.pigment} />
+			<Plate name={client.slug} fig={`Plate ${plateNo}`} title={client.name} caption={caption} />
 		</div>
 		<section class="wrap features">
 			<h2>What it does</h2>

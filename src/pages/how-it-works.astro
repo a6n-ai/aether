@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Plate from '../components/Plate.astro';
-import { buildProcess, CAPTION } from '../machines/build-process/geometry';
+import { CAPTION } from '../machines/build-process/geometry';
 import { BOOK_CALL_HREF } from '../lib/cta';
 
 const STEPS = [
@@ -22,7 +22,7 @@ const STEPS = [
 			<h1>From first call to <em>open for customers.</em></h1>
 		</div>
 		<div class="wrap">
-			<Plate name="build-process" machine={buildProcess()} fig="Plate IX" title="The build" caption={CAPTION} />
+			<Plate name="build-process" fig="Plate IX" title="The build" caption={CAPTION} />
 		</div>
 		<ol class="wrap steps">
 			{

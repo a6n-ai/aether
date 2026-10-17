@@ -1,6 +1,6 @@
 ---
 import Plate from './Plate.astro';
-import { relay, CAPTION } from '../machines/relay/geometry';
+import { CAPTION } from '../machines/relay/geometry';
 ---
 
 <section class="messages" data-reveal>
@@ -12,7 +12,7 @@ import { relay, CAPTION } from '../machines/relay/geometry';
 				get their receipts. You can see every message that went out.
 			</p>
 		</div>
-		<div class="plate-wrap" data-reveal-item><Plate name="relay" machine={relay()} fig="Plate VIII" title="The post" caption={CAPTION} pigment="var(--violet)" compact /></div>
+		<div class="plate-wrap" data-reveal-item><Plate name="relay" fig="Plate VIII" title="The post" caption={CAPTION} compact /></div>
 	</div>
 </section>
 

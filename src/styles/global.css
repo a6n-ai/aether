@@ -134,3 +134,9 @@ a {
 		transition: none !important;
 	}
 }
+
+/* Below-the-fold sections hold dense plates; skip their layout and paint until they near the viewport. */
+section[data-reveal] {
+	content-visibility: auto;
+	contain-intrinsic-size: auto 1100px;
+}

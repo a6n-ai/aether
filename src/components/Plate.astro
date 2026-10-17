@@ -1,22 +1,25 @@
 ---
 import '../styles/anatomy.css';
 import '../styles/plate.css';
-import type { Machine } from '../lib/plate';
+import { PLATES, machineOf, type PlateName } from '../machines/registry';
 
 interface Props {
-	/** data-machine id, used by tests and styles. */
-	name: string;
-	machine: Machine;
+	/** Plate id from the registry; also data-machine, used by tests and styles. */
+	name: PlateName;
 	fig: string;
 	title: string;
 	caption: string;
-	/** CSS color for the machine body, e.g. 'var(--ochre)'. Defaults to raw umber. */
-	pigment?: string;
 	compact?: boolean;
 }
 
-const { name, machine, fig, title, caption, pigment = 'var(--umber)', compact = false } = Astro.props;
+const { name, fig, title, caption, compact = false } = Astro.props;
+const machine = machineOf(name);
+const { pigment } = PLATES[name];
 const steps = machine.labels.length;
+// The page ships the finished plate as a lazy image (no-JS and reduced-motion readers see the whole story);
+// plate.ts swaps in the live SVG as it nears the viewport.
+const label = machine.svg.match(/aria-label="([^"]*)"/)?.[1] ?? caption;
+const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0 720 480').split(' ').map(Number);
 ---
 
 <figure
@@ -30,7 +33,9 @@ const steps = machine.labels.length;
 		<span data-corner="fig">{fig}</span>
 		<span data-corner="title">{title}</span>
 	</div>
-	<div class="stage" set:html={machine.svg} />
+	<div class="stage">
+		<img src={`/plates/${name}.svg`} alt={label} width={width} height={height} loading="lazy" decoding="async" data-plate-img />
+	</div>
 	<div class="controls">
 		<ol class="steps">
 			{machine.labels.map((label, i) => <li data-step={i + 1} aria-current={i + 1 === steps ? 'step' : undefined}>{label}</li>)}
@@ -82,6 +87,12 @@ const steps = machine.labels.length;
 		max-width: 880px;
 		width: 100%;
 		margin-inline: auto;
+	}
+	.stage > :global(img),
+	.stage > :global(svg) {
+		display: block;
+		width: 100%;
+		height: auto;
 	}
 	.controls {
 		display: flex;
