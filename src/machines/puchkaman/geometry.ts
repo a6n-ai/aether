@@ -52,6 +52,37 @@ export function puchkaman(width = 720, height = 480): Machine {
 		out.push(S(k.slabOf(strip, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
 		const ticks = k.topTicks(strip.x + 4, strip.x + strip.w - 4, 4, 5, strip.y + 0.8, 0.6, [2, 3.6], P);
 		out.push(L(ticks.minor, { tone: 'lo' }), L(ticks.major, { tone: 'mid' }));
+		out.push(D([at([strip.x + 2, strip.y + 3.5, 0.6]), at([strip.x + strip.w - 2, strip.y + 3.5, 0.6])], { size: 0.45 }));
+		const lab: Plan = { x: -190, y: BASE.y + BASE.d - 14, w: 44, d: 9, r: 1.5 };
+		out.push(S(k.slabOf(lab, 0, 0.8, P, 3), { tone: 'lo' }));
+		for (const dy of [2.6, 5.4]) out.push(L(k.lineOnTop([lab.x + 5, lab.y + dy], [lab.x + lab.w - (dy > 5 ? 16 : 5), lab.y + dy], 0.8, P), { tone: 'faint', free: true }));
+		out.push(D([at([lab.x + 2, lab.y + 2, 0.8]), at([lab.x + lab.w - 2, lab.y + lab.d - 2, 0.8])], { size: 0.4 }));
+		const rail: Plan = { x: 146, y: -60, w: 7, d: 100, r: 1 };
+		out.push(S(k.slabOf(rail, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
+		const rt = k.topTicks(rail.y + 4, rail.y + rail.d - 4, 4, 5, rail.x + 0.8, 0.6, [2, 3.2], P, 'y');
+		out.push(L(rt.minor, { tone: 'lo' }), L(rt.major, { tone: 'mid' }));
+		const lr: Plan = { x: -203, y: -40, w: 7, d: 80, r: 1 };
+		out.push(S(k.slabOf(lr, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
+		const lt = k.topTicks(lr.y + 4, lr.y + lr.d - 4, 4, 5, lr.x + 0.8, 0.6, [2, 3.2], P, 'y');
+		out.push(L(lt.minor, { tone: 'lo' }), L(lt.major, { tone: 'mid' }));
+		return out.join('');
+	}
+
+	const wire = (pts: [number, number][], z = 0.4) => L(k.onTop(pts, z, P), { tone: 'lo' });
+	function backStuff() {
+		const out: string[] = [];
+		const box: Plan = { x: -86, y: -76, w: 30, d: 14, r: 2 };
+		out.push(halo(box, 0, 10));
+		out.push(S(k.slabOf(box, 0, 10, P, 3, 0.6), { tone: 'mid', inner: L(k.sideSeam(box, 6, P, 3), { tone: 'faint' }) }));
+		const f = box.y + box.d;
+		out.push(L(k.planOutline(k.insetPlan(box, 2), 10, P), { tone: 'faint' }));
+		for (const dx of [6, 12, 18]) out.push(S(k.cylinder(box.x + dx, box.y + 7, 2.2, 10, 1.2, P, 12, 0.2), { tone: 'hi' }));
+		out.push(S(k.cylinder(box.x + 25, box.y + 7, 2.8, 10, 2, P, 14, 0.3), { tone: 'hi' }));
+		out.push(L(k.knurl(box.x + 25, box.y + 7, 2.8, 10, 12, 12, P, 0.2), { tone: 'lo' }));
+		for (const dx of [5, 10, 15, 20]) out.push(L(k.segment([box.x + dx, f, 3], [box.x + dx, f, 7], P), { tone: 'faint', free: true }));
+		out.push(D(k.corners(box, 2.6).map(([x, y]) => at([x, y, 10])), { size: 0.4 }));
+		out.push(wire([[box.x + box.w, -68], [147, -68], [147, -30], [142, -30]]));
+		out.push(D([at([box.x + box.w + 0.4, -68, 3]), at([142, -30, 2])], { size: 0.8, tone: 'hi' }));
 		return out.join('');
 	}
 
@@ -63,6 +94,10 @@ export function puchkaman(width = 720, height = 480): Machine {
 		for (let x = lane.x + 8; x < lane.x + lane.w - 4; x += 8) out.push(L(k.lineOnTop([x, lane.y + 3], [x, lane.y + lane.d - 3], BELT_Z, P), { tone: 'faint' }));
 		for (const x of [lane.x + 4, lane.x + lane.w - 6]) out.push(box({ x: x - 1, y: lane.y + 3, w: 4, d: lane.d - 6, r: 2 }, BELT_Z, 1.6, 'hi', 3, 0));
 		out.push(D([at([lane.x + 3, lane.y + 1.5, BELT_Z + 3]), at([lane.x + lane.w - 4, lane.y + 1.5, BELT_Z + 3])], { size: 0.5, tone: 'hi' }));
+		const dir = cy === LANE_A ? 1 : -1;
+		for (let x = lane.x + 30; x < lane.x + lane.w - 14; x += 32) out.push(L(k.onTop([[x - 2 * dir, cy - 3], [x + 1.6 * dir, cy], [x - 2 * dir, cy + 3]], BELT_Z, P), { tone: 'lo' }));
+		out.push(D(k.corners(lane, 1.6).map(([x, y]) => at([x, y, BELT_Z + 3])), { size: 0.4 }));
+		for (const x of [lane.x + 12, lane.x + lane.w / 2, lane.x + lane.w - 14]) out.push(S(k.slabOf({ x: x - 3, y: lane.y + lane.d, w: 6, d: 1.4, r: 0.4 }, 0, 3.4, P, 2), { tone: 'lo', crease: 'none' }));
 		return out.join('');
 	}
 
@@ -73,6 +108,12 @@ export function puchkaman(width = 720, height = 480): Machine {
 		out.push(box({ x: TILL.x + 8, y: front, w: 66, d: 1.6, r: 0.6 }, 9, 12, 'lo', 2, 0.2));
 		out.push(box({ x: TILL.x + 30, y: front + 1.6, w: 22, d: 2, r: 0.8 }, 12, 3, 'hi', 2, 0.2));
 		out.push(L(k.rise([TILL.x + 41, front + 3.6], 1, 7, P), { tone: 'faint', free: true }));
+		out.push(L(k.planOutline(k.insetPlan(TILL, 3), TILL_H, P), { tone: 'faint' }));
+		for (let i = 0; i < 6; i++) for (const z of [18, 21, 24]) out.push(D([at([TILL.x + 8 + i * 3.4, front, z])], { size: 0.3, tone: 'mid' }));
+		out.push(S(k.slabOf({ x: TILL.x + 60, y: front, w: 14, d: 0.8, r: 0.3 }, 14, 6, P, 2), { tone: 'lo', crease: 'none' }));
+		out.push(L(k.segment([TILL.x + 62, front + 0.8, 17], [TILL.x + 72, front + 0.8, 17], P), { tone: 'mid', free: true }));
+		for (const x of [TILL.x + 6, TILL.x + TILL.w - 6]) out.push(S(k.slabOf({ x: x - 3, y: front - 0.4, w: 6, d: 0.8, r: 0.3 }, 0, 2.4, P, 2), { tone: 'lo', crease: 'none' }));
+		out.push(D(k.corners(TILL, 3).map(([x, y]) => at([x, y, TILL_H])), { size: 0.4 }));
 		const keys: Plan = { x: TILL.x + 8, y: TILL.y + 26, w: 50, d: 38, r: 2 };
 		out.push(S(k.slabOf(keys, TILL_H, 1, P, 3), { tone: 'lo', crease: 'none' }));
 		for (let i = 0; i < 4; i++) for (let j = 0; j < 3; j++) out.push(box({ x: keys.x + 4 + i * 11.5, y: keys.y + 4 + j * 11, w: 8.5, d: 8, r: 1.4 }, TILL_H + 1, 2, 'hi', 2, 0.3));
@@ -132,6 +173,13 @@ export function puchkaman(width = 720, height = 480): Machine {
 			out.push(D([at([scr.x + scr.w - 5, f + 0.6, z])], { size: 0.9 - i * 0.05, tone: 'mid' }));
 		}
 		out.push(D([at([tab.x + tab.w / 2, f, 19])], { size: 0.8, tone: 'mid' }));
+		out.push(D([at([tab.x + tab.w / 2, f, 67])], { size: 0.5, tone: 'mid' }));
+		out.push(S(k.slabOf({ x: STAND.x + STAND.w - 12, y: STAND.y + 14, w: 8, d: 12, r: 1.4 }, 4, 6, P, 2, 0.3), { tone: 'hi' }));
+		out.push(L(k.lineOnTop([STAND.x + STAND.w - 10, STAND.y + 17], [STAND.x + STAND.w - 6, STAND.y + 17], 10, P) + k.lineOnTop([STAND.x + STAND.w - 10, STAND.y + 21], [STAND.x + STAND.w - 6, STAND.y + 21], 10, P), { tone: 'mid', free: true }));
+		out.push(S(k.slabOf({ x: STAND.x + 6, y: STAND.y + STAND.d - 8, w: 16, d: 3, r: 1 }, 4, 0.8, P, 2), { tone: 'lo', crease: 'none' }));
+		out.push(L(k.sideSeam(STAND, 3, P, 3), { tone: 'faint' }));
+		out.push(wire([[106, 12], [106, TERM.y]]));
+		out.push(D([at([106, 12, 0.4]), at([106, TERM.y, 0.4])], { size: 0.8, tone: 'hi' }));
 		return out.join('');
 	}
 
@@ -143,6 +191,10 @@ export function puchkaman(width = 720, height = 480): Machine {
 		out.push(L(k.planOutline(k.insetPlan(TERM, 3), TERM_H, P), { tone: 'faint' }));
 		out.push(S(k.slabOf({ x: TERM.x + 6, y: TERM.y + 7, w: 16, d: 3, r: 1.2 }, TERM_H, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
 		out.push(D([at([TERM.x + 6, f - 3, TERM_H]), at([TERM.x + 22, f - 3, TERM_H])], { size: 0.5 }));
+		for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) out.push(S(k.slabOf({ x: TERM.x + 4 + i * 6, y: TERM.y + 12 + j * 3, w: 4.4, d: 2.2, r: 0.5 }, TERM_H, 0.8, P, 2), { tone: 'hi', crease: 'none' }));
+		out.push(S(k.slabOf({ x: TERM.x + TERM.w, y: TERM.y + 6, w: 0.8, d: 8, r: 0.3 }, 10, 2, P, 2), { tone: 'lo', crease: 'none' }));
+		for (const z of [4, 7]) out.push(L(k.segment([TERM.x + 5, f, z], [TERM.x + 23, f, z], P), { tone: 'faint', free: true }));
+		for (const x of [TERM.x + 4, TERM.x + TERM.w - 4]) out.push(S(k.slabOf({ x: x - 3, y: f - 0.4, w: 6, d: 0.8, r: 0.3 }, 0, 2, P, 2), { tone: 'lo', crease: 'none' }));
 		return out.join('');
 	}
 
@@ -162,7 +214,43 @@ export function puchkaman(width = 720, height = 480): Machine {
 		const out = [`<path class="iso-halo" d="${k.haloOf({ x: cx - 18, y: cy - 18, w: 36, d: 36, r: 18 }, 0, 2, P)}"/>`];
 		out.push(S(k.cylinder(cx, cy, 18, 0, 2, P, 40, 0.5), { tone: 'mid' }));
 		out.push(L(k.ring(cx, cy, 14, 2, P, 32), { tone: 'faint' }));
+		out.push(L(k.ring(cx, cy, 17, 2, P, 36), { tone: 'faint' }));
+		out.push(L(k.knurl(cx, cy, 18, 0, 2, 36, P, 0.3), { tone: 'faint' }));
+		out.push(S(k.cylinder(-122, 66, 6, 0, 4, P, 20, 0.4), { tone: 'mid' }) + L(k.ring(-122, 66, 4.4, 4, P, 16), { tone: 'lo' }) + S(k.cylinder(-122, 66, 3.6, 3.6, 0.6, P, 14), { tone: 'hi' }));
+		out.push(S(k.slabOf({ x: -186, y: 56, w: 1.8, d: 14, r: 0.5 }, 0, 0.8, P, 2), { tone: 'hi' }));
+		out.push(S(k.slabOf({ x: -183, y: 56, w: 1.8, d: 14, r: 0.5 }, 0, 0.8, P, 2), { tone: 'hi' }));
 		for (const [dx, dy] of [[-7, -5], [5, -7], [0, 0], [-8, 5], [7, 4], [0, 9]] as const) out.push(S(k.cylinder(cx + dx, cy + dy, 4.6, 2, 5.4, P, 16, 0.9), { tone: 'hi' }));
+		return out.join('');
+	}
+
+	function stool([cx, cy]: [number, number]) {
+		const out = [`<path class="iso-halo" d="${k.haloOf({ x: cx - 9, y: cy - 9, w: 18, d: 18, r: 9 }, 0, 14, P)}"/>`];
+		out.push(S(k.cylinder(cx, cy, 8, 0, 1.6, P, 28, 0.3), { tone: 'lo' }));
+		out.push(S(k.cylinder(cx, cy, 1.8, 1.6, 9, P, 12), { tone: 'mid' }));
+		out.push(L(k.ring(cx, cy, 5, 1.6, P, 20), { tone: 'faint' }));
+		out.push(S(k.cylinder(cx, cy, 8.4, 10.6, 3.4, P, 32, 0.8), { tone: 'hi' }));
+		out.push(L(k.ring(cx, cy, 6.4, 14, P, 28), { tone: 'faint' }));
+		out.push(L(k.sideArc(cx, cy, 8.4, 12.4, P, 20), { tone: 'faint' }));
+		out.push(D([at([cx, cy, 14])], { size: 0.4 }));
+		return out.join('');
+	}
+	function props() {
+		const out: string[] = [];
+		out.push(stool([-44, 46]), stool([-8, 46]));
+		out.push(S(k.cylinder(-186, 38, 6, 0, 9, P, 20, 0.4), { tone: 'mid' }));
+		out.push(L(k.sideArc(-186, 38, 6, 5, P, 14), { tone: 'faint' }) + L(k.ring(-186, 38, 4.4, 9, P, 14), { tone: 'lo' }));
+		for (const [dz, r] of [[9, 5], [12, 4], [15, 2.8]] as const) out.push(S(k.cylinder(-186, 38, r, dz, 3, P, 14, 0.4), { tone: 'hi' }));
+
+		const jar = [-96, 42] as const;
+		out.push(S(k.cylinder(jar[0], jar[1], 6, 0, 12, P, 24, 0.5), { tone: 'mid' }) + L(k.sideArc(jar[0], jar[1], 6, 6, P, 16), { tone: 'faint' }) + L(k.ring(jar[0], jar[1], 4.4, 12, P, 16), { tone: 'lo' }) + S(k.cylinder(jar[0], jar[1], 6.4, 12, 1.4, P, 24, 0.3), { tone: 'hi' }));
+		out.push(S(k.slabOf({ x: jar[0] - 2.5, y: jar[1] - 0.6, w: 5, d: 1.2, r: 0.4 }, 12.6, 0.8, P, 2), { tone: 'lo', crease: 'none' }));
+		const bell = [-76, 36] as const;
+		out.push(S(k.cylinder(bell[0], bell[1], 5, 0, 1.4, P, 20, 0.3), { tone: 'lo' }) + S(k.cylinder(bell[0], bell[1], 3.8, 1.4, 3, P, 18, 0.6), { tone: 'hi' }) + S(k.cylinder(bell[0], bell[1], 1, 4.4, 1.6, P, 10), { tone: 'mid' }) + L(k.sideArc(bell[0], bell[1], 3.8, 3, P, 14), { tone: 'faint' }));
+		const tent = [-60, 30] as const;
+		out.push(S(k.slabOf({ x: tent[0], y: tent[1], w: 14, d: 1.2, r: 0.4 }, 0, 12, P, 2, 0.3), { tone: 'hi' }));
+		out.push(L(k.lineOnTop([tent[0] + 3, tent[1] + 0.6], [tent[0] + 11, tent[1] + 0.6], 12, P), { tone: 'mid', free: true }));
+		for (const z of [4, 6.6, 9.2]) out.push(L(k.segment([tent[0] + 3, tent[1] + 1.2, z], [tent[0] + 11 - (z === 4 ? 4 : 0), tent[1] + 1.2, z], P), { tone: 'mid', free: true }));
+		out.push(S(k.slabOf({ x: tent[0] + 3, y: tent[1] - 3, w: 8, d: 3, r: 0.6 }, 0, 1.6, P, 2), { tone: 'lo' }));
 		return out.join('');
 	}
 
@@ -183,12 +271,14 @@ export function puchkaman(width = 720, height = 480): Machine {
 			'A shop till with a screen and receipt printer joined by two belts to a tablet on a stand. A menu card rides one belt from the till to the tablet, a coin drops into the payment reader, and an order ticket rides the other belt back to the till, whose screen lights up.',
 		body: [
 			base(),
+			backStuff(),
 			belt(LANE_A),
 			belt(LANE_B),
 			till(),
 			moverSvg('card', transforms.card[3], card(A)),
 			stand(),
 			stepSvg('show-from', 3, moverSvg('ticket', transforms.ticket[3], ticket(T))),
+			props(),
 			terminal(),
 			stepSvg('show-from', 3, moverSvg('coin', transforms.coin[3], coin(C))),
 			plate(),
