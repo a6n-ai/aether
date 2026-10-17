@@ -4,8 +4,8 @@ import light from '../assets/art/light.jpg';
 import { BOOK_CALL_HREF } from '../lib/cta';
 ---
 
-<section class="closing">
-	<figure>
+<section class="closing" data-reveal>
+	<figure data-reveal-item>
 		<Picture
 			src={light}
 			formats={['avif', 'webp']}
@@ -16,7 +16,7 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		/>
 		<figcaption class="wrap">Michelangelo, <i>The Separation of Light from Darkness</i>, Sistine Chapel ceiling, c. 1512.</figcaption>
 	</figure>
-	<div class="wrap call">
+	<div class="wrap call" data-reveal-item>
 		<p class="mono">The call</p>
 		<h2>Tell us about your business.</h2>
 		<p class="line">One short call. No jargon, no pressure. We'll tell you honestly if we can help.</p>

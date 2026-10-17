@@ -3,9 +3,9 @@ import Plate from './Plate.astro';
 import { team, CAPTION } from '../machines/team/geometry';
 ---
 
-<section class="who" id="who">
+<section class="who" id="who" data-reveal>
 	<div class="wrap grid">
-		<div class="copy">
+		<div class="copy" data-reveal-item>
 			<p class="mono">(Ai)ny Management System</p>
 			<h2>Built for businesses like yours.</h2>
 			<p class="lead">
@@ -18,7 +18,7 @@ import { team, CAPTION } from '../machines/team/geometry';
 			</p>
 			<p>We use AI where it saves you time, and plain good engineering everywhere else.</p>
 		</div>
-		<Plate name="team" machine={team()} fig="Plate II" title="Your own team" caption={CAPTION} compact />
+		<div data-reveal-item><Plate name="team" machine={team()} fig="Plate II" title="Your own team" caption={CAPTION} compact /></div>
 	</div>
 </section>
 

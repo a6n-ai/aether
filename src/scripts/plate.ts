@@ -1,4 +1,8 @@
-const DWELL_MS = 2400;
+import gsap from 'gsap';
+
+const DWELL_MS = 2600;
+// One eased glide per step; movers leave a beat apart so the eye can follow each ingredient.
+const GLIDE = { duration: 0.95, ease: 'power3.inOut', stagger: 0.09, overwrite: 'auto' } as const;
 
 export function mountPlate(root: HTMLElement): () => void {
 	const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -17,12 +21,11 @@ export function mountPlate(root: HTMLElement): () => void {
 	let visible = false;
 	let paused = false;
 
-	const show = (next: number) => {
+	const show = (next: number, instant = false) => {
 		step = ((next - 1 + steps) % steps) + 1;
-		for (const g of movers) {
-			const t = transforms[g.dataset.part!]?.[step - 1];
-			if (t) g.setAttribute('transform', t);
-		}
+		const moving = movers.filter((g) => transforms[g.dataset.part!]?.[step - 1] !== g.getAttribute('transform'));
+		if (instant) moving.forEach((g) => g.setAttribute('transform', transforms[g.dataset.part!][step - 1]));
+		else if (moving.length) gsap.to(moving, { ...GLIDE, attr: { transform: (_: number, g: SVGGElement) => transforms[g.dataset.part!][step - 1] } });
 		for (const g of staged) g.classList.toggle('on', step >= Number(g.dataset.at));
 		labels.forEach((li, i) => (i + 1 === step ? li.setAttribute('aria-current', 'step') : li.removeAttribute('aria-current')));
 		readout.textContent = `${step} / ${steps}`;
@@ -36,7 +39,7 @@ export function mountPlate(root: HTMLElement): () => void {
 		touring = false;
 		clearTimeout(timer);
 		readout.setAttribute('aria-live', 'polite');
-		show(step + delta);
+		show(step + delta, still);
 	};
 
 	const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
@@ -66,6 +69,7 @@ export function mountPlate(root: HTMLElement): () => void {
 
 	return () => {
 		clearTimeout(timer);
+		gsap.killTweensOf(movers);
 		io.disconnect();
 		prev.removeEventListener('click', onPrev);
 		next.removeEventListener('click', onNext);

@@ -2,14 +2,14 @@
 import { CLIENTS } from '../data/clients';
 ---
 
-<section class="clients" id="clients" data-section="clients">
+<section class="clients" id="clients" data-section="clients" data-reveal>
 	<div class="wrap">
 		<p class="mono">Already running</p>
 		<h2>Businesses we've already built for.</h2>
 		<ul>
 			{
 				CLIENTS.map((c) => (
-					<li style={`--pigment:${c.pigment}`}>
+					<li style={`--pigment:${c.pigment}`} data-reveal-item>
 						<a href={`/clients/${c.slug}/`}>
 							<span class="swatch" aria-hidden="true" />
 							<h3>{c.name}</h3>

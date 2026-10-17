@@ -3,9 +3,9 @@ import Plate from './Plate.astro';
 import { relay, CAPTION } from '../machines/relay/geometry';
 ---
 
-<section class="messages">
+<section class="messages" data-reveal>
 	<div class="wrap grid">
-		<div class="copy">
+		<div class="copy" data-reveal-item>
 			<p class="mono">Messages</p>
 			<h2>Every message, delivered.</h2>
 			<p>
@@ -13,7 +13,7 @@ import { relay, CAPTION } from '../machines/relay/geometry';
 				get their receipts. You can see every message that went out.
 			</p>
 		</div>
-		<Plate name="relay" machine={relay()} fig="Plate VII" title="The post" caption={CAPTION} pigment="var(--violet)" compact />
+		<div class="plate-wrap" data-reveal-item><Plate name="relay" machine={relay()} fig="Plate VII" title="The post" caption={CAPTION} pigment="var(--violet)" compact /></div>
 	</div>
 </section>
 
@@ -27,7 +27,7 @@ import { relay, CAPTION } from '../machines/relay/geometry';
 		gap: 48px;
 		align-items: center;
 	}
-	.grid > :global(figure) {
+	.grid > .plate-wrap {
 		order: -1;
 	}
 	.copy {
@@ -42,7 +42,7 @@ import { relay, CAPTION } from '../machines/relay/geometry';
 		.grid {
 			grid-template-columns: 1fr;
 		}
-		.grid > :global(figure) {
+		.grid > .plate-wrap {
 			order: 0;
 		}
 	}

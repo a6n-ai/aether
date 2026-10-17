@@ -26,7 +26,7 @@
 	--anatomy-shade-2: color-mix(in oklab, var(--pigment) 22%, var(--card));
 	--anatomy-shade-1: color-mix(in oklab, var(--pigment) 32%, var(--card));
 	--anatomy-shade-0: color-mix(in oklab, var(--pigment) 44%, var(--card));
-	transition: transform 700ms var(--ease), opacity 500ms var(--ease);
+	transition: opacity 500ms var(--ease);
 }
 
 /* .lit-at-N parts stay in body tones until step N, then take the sanguine lit tones. */
