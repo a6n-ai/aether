@@ -5,7 +5,7 @@ import { moverSvg, stepSvg, type Machine } from '../../lib/plate';
 export const LABELS = ['your tools today', 'joined into one', 'shaped around you', 'running every day'] as const;
 export const CAPTION = 'a6n joins your website, customer app, payments, messages, staff screen and reports into one system, then shapes it around how your business works.';
 
-const BASE: Plan = { x: -200, y: -145, w: 400, d: 290, r: 10 };
+const BASE: Plan = { x: -170, y: -132, w: 340, d: 264, r: 10 };
 const BASE_H = 10;
 const FOOT_H = 5;
 const PLINTH: Plan = { x: -36, y: -30, w: 72, d: 60, r: 3 };
@@ -18,12 +18,12 @@ interface Mod {
 	tilt: number;
 }
 const MODS: Mod[] = [
-	{ name: 'website', dock: [-105, -28], loose: [-160, -72], tilt: -9 },
-	{ name: 'app', dock: [-82, 52], loose: [-155, 100], tilt: 7 },
-	{ name: 'payments', dock: [-5, 80], loose: [-30, 120], tilt: -11 },
-	{ name: 'messages', dock: [95, -65], loose: [160, -100], tilt: 8 },
-	{ name: 'staff', dock: [-18, -88], loose: [28, -108], tilt: 12 },
-	{ name: 'reports', dock: [92, 22], loose: [155, 60], tilt: -7 },
+	{ name: 'website', dock: [-88, -22], loose: [-134, -70], tilt: -9 },
+	{ name: 'app', dock: [-72, 46], loose: [-128, 86], tilt: 7 },
+	{ name: 'payments', dock: [-4, 66], loose: [-40, 110], tilt: -11 },
+	{ name: 'messages', dock: [78, -54], loose: [130, -84], tilt: 8 },
+	{ name: 'staff', dock: [-14, -72], loose: [40, -100], tilt: 12 },
+	{ name: 'reports', dock: [76, 18], loose: [130, 58], tilt: -7 },
 ];
 
 export function system(width = 760, height = 520): Machine {
@@ -59,19 +59,19 @@ export function system(width = 760, height = 520): Machine {
 		const screws = k.corners(BASE, 11);
 		out.push(L(screws.map(([x, y]) => k.ring(x, y, 2.4, 0, P, 16)).join(''), { tone: 'lo' }), dots(screws.map(([x, y]) => [x, y, 0] as Point3), 0.55));
 		for (const [x, y] of screws) out.push(L(k.lineOnTop([x - 1.4, y], [x + 1.4, y], 0, P), { tone: 'faint', free: true }));
-		const back: Plan = { x: -140, y: BASE.y + 11, w: 280, d: 6, r: 1 };
+		const back: Plan = { x: -130, y: BASE.y + 11, w: 130, d: 6, r: 1 };
 		out.push(slab(back.x, back.y, back.w, back.d, 0, 0.6, 'lo', { thin: true, steps: 3 }));
 		const bt = k.topTicks(back.x + 4, back.x + back.w - 4, 5, 5, back.y + 0.8, 0.6, [2, 3.4], P);
 		out.push(L(bt.minor, { tone: 'lo' }), L(bt.major, { tone: 'mid' }), dots([[back.x + 2, back.y + 3, 0.6], [back.x + back.w - 2, back.y + 3, 0.6]]));
-		const front: Plan = { x: 0, y: BASE.y + BASE.d - 17, w: 110, d: 6, r: 1 };
+		const front: Plan = { x: 20, y: BASE.y + BASE.d - 17, w: 100, d: 6, r: 1 };
 		out.push(slab(front.x, front.y, front.w, front.d, 0, 0.6, 'lo', { thin: true, steps: 3 }));
 		const ft = k.topTicks(front.x + 4, front.x + front.w - 4, 5, 5, front.y + 0.8, 0.6, [2, 3.4], P);
 		out.push(L(ft.minor, { tone: 'lo' }), L(ft.major, { tone: 'mid' }), dots([[front.x + 2, front.y + 3, 0.6], [front.x + front.w - 2, front.y + 3, 0.6]]));
-		const side: Plan = { x: BASE.x + BASE.w - 17, y: -70, w: 6, d: 110, r: 1 };
+		const side: Plan = { x: BASE.x + BASE.w - 17, y: -50, w: 6, d: 70, r: 1 };
 		out.push(slab(side.x, side.y, side.w, side.d, 0, 0.6, 'lo', { thin: true, steps: 3 }));
 		const st = k.topTicks(side.y + 4, side.y + side.d - 4, 5, 5, side.x + 0.8, 0.6, [2, 3.4], P, 'y');
 		out.push(L(st.minor, { tone: 'lo' }), L(st.major, { tone: 'mid' }));
-		const lab: Plan = { x: -185, y: BASE.y + BASE.d - 19, w: 54, d: 11, r: 1.5 };
+		const lab: Plan = { x: -156, y: BASE.y + BASE.d - 19, w: 54, d: 11, r: 1.5 };
 		out.push(slab(lab.x, lab.y, lab.w, lab.d, 0, 0.8, 'lo', { steps: 3 }));
 		for (const [dy, w] of [[2.6, 44], [5.4, 30], [8.2, 38]] as const) out.push(L(k.lineOnTop([lab.x + 5, lab.y + dy], [lab.x + w, lab.y + dy], 0.8, P), { tone: 'faint', free: true }));
 		out.push(dots([[lab.x + 2, lab.y + 2, 0.8], [lab.x + lab.w - 2, lab.y + 2, 0.8], [lab.x + 2, lab.y + lab.d - 2, 0.8], [lab.x + lab.w - 2, lab.y + lab.d - 2, 0.8]], 0.4));
@@ -92,7 +92,7 @@ export function system(width = 760, height = 520): Machine {
 		for (const m of sorted) {
 			const [cx, cy] = m.dock;
 			const pad: Plan = { x: cx - 28, y: cy - 24, w: 56, d: 48, r: 3 };
-			out.push(halo(pad, 0, 3));
+			out.push(`<g data-key="${MODS.indexOf(m) + 1}">`, halo(pad, 0, 3));
 			out.push(S(k.slabOf(pad, 0, 3, P, 4, 0.7), { tone: 'lo', inner: L(k.sideSeam(pad, 1.6, P, 4), { tone: 'faint' }) }));
 			out.push(L(k.planOutline(k.insetPlan(pad, 3), 3, P), { tone: 'faint' }), L(k.planOutline(k.insetPlan(pad, 5), 3, P), { tone: 'faint' }));
 			out.push(slab(cx - 25, cy - 21, 3, 42, 3, 1.6, 'mid', { thin: true }), slab(cx + 22, cy - 21, 3, 42, 3, 1.6, 'mid', { thin: true }));
@@ -103,7 +103,7 @@ export function system(width = 760, height = 520): Machine {
 			out.push(slab(a[0] - 2.4, a[1] - 2.4, 4.8, 4.8, 3, 2, 'hi', { r: 0.8, thin: true }));
 			out.push(cyl(cx + 18, cy + 17, 1.9, 3, 1.2, 'lo', 0.2));
 			out.push(stepSvg('show-from', 3, L(k.ring(cx + 18, cy + 17, 3.1, 3, P, 14), { tone: 'mid' }) + cyl(cx + 18, cy + 17, 1.3, 4.2, 0.9, 'hi', 0.15) + dots([[cx + 18, cy + 17, 5.1]], 0.4, 'hi')));
-			out.push(stepSvg('lit-at', 4, cyl(cx + 18, cy + 17, 1.1, 5.1, 0.7, 'hi', 0.1, true)));
+			out.push(stepSvg('lit-at', 4, cyl(cx + 18, cy + 17, 1.1, 5.1, 0.7, 'hi', 0.1, true)), '</g>');
 		}
 		return out.join('');
 	}
@@ -111,11 +111,12 @@ export function system(width = 760, height = 520): Machine {
 	function cables() {
 		const out: string[] = [];
 		for (const m of MODS) {
+			out.push(`<g data-key="${MODS.indexOf(m) + 1}">`);
 			const { a, b } = cableOf(m.dock);
 			const mid: [number, number] = [(a[0] + b[0]) / 2 + (m.dock[1] > 0 ? 6 : -6), (a[1] + b[1]) / 2 + (m.dock[0] > 0 ? -6 : 6)];
 			out.push(L(k.onTop([a, mid, b], 3.4, P), { tone: 'lo' }) + L(k.onTop([a, mid, b], 0.4, P), { tone: 'faint' }));
 			out.push(dots([[a[0], a[1], 3.4], [b[0], b[1], 2.4]], 1, 'hi'));
-			out.push(slab(mid[0] - 2, mid[1] - 2, 4, 4, 0, 1.4, 'mid', { thin: true, r: 0.8 }), dots([[mid[0], mid[1], 1.4]], 0.4));
+			out.push(slab(mid[0] - 2, mid[1] - 2, 4, 4, 0, 1.4, 'mid', { thin: true, r: 0.8 }), dots([[mid[0], mid[1], 1.4]], 0.4), '</g>');
 		}
 		return stepSvg('show-from', 2, out.join(''));
 	}
@@ -186,9 +187,9 @@ export function system(width = 760, height = 520): Machine {
 		out.push(S(k.slabOf(plan, 0, T, P, 4, 0.6), { tone: 'mid', inner: L(k.sideSeam(plan, T / 2, P, 4), { tone: 'faint' }) }));
 		out.push(L(k.planOutline(k.insetPlan(plan, 2.6), T, P), { tone: 'faint' }));
 		out.push(dots(k.corners(plan, 2.6).map(([x, y]) => [x, y, T] as Point3), 0.45));
-		out.push(slab(cx + 11, cy + 8.5, 10, 7, T, 0.8, 'lo', { r: 1, thin: true }));
-		out.push(k.faceTextSvg(k.topMatrix([cx + 16, cy + 14.2], T + 0.8, P, 'x'), String(n), { size: 4, tone: 'hi', anchor: 'middle' }));
-		out.push(dots([[cx + 12.2, cy + 9.7, T + 0.8], [cx + 19.8, cy + 9.7, T + 0.8]], 0.3, 'faint'));
+		out.push(slab(cx + 6, cy + 6, 14, 10, T, 0.8, 'lo', { r: 1.2, thin: true }));
+		out.push(k.faceTextSvg(k.topMatrix([cx + 13, cy + 14], T + 0.8, P, 'x'), String(n), { size: 6.5, tone: 'hi', anchor: 'middle' }));
+		out.push(dots([[cx + 7.6, cy + 7.6, T + 0.8], [cx + 18.4, cy + 7.6, T + 0.8]], 0.3, 'faint'));
 		return out.join('');
 	}
 
@@ -261,11 +262,10 @@ export function system(width = 760, height = 520): Machine {
 		const tray2: Plan = { x: cx - 15, y: cy + 10, w: 30, d: 7, r: 1.5 };
 		out.push(halo(tray2, T, 2.6));
 		out.push(S(k.slabOf(tray2, T, 2.6, P, 3, 0.4), { tone: 'lo' }), L(k.planOutline(k.insetPlan(tray2, 1.2), T + 2.6, P), { tone: 'faint' }));
-		for (const [dx, n] of [[-8, 2], [-1, 4], [6, 3]] as const) {
+		for (const [dx, n] of [[-8, 2], [-1, 4], [5, 3]] as const) {
 			for (let i = 0; i < n; i++) out.push(cyl(cx + dx, cy + 13.4, 2.8, T + 2.6 + i * 0.9, 0.9, 'hi', 0.2));
 			out.push(L(k.ring(cx + dx, cy + 13.4, 1.6, T + 2.6 + n * 0.9, P, 10), { tone: 'faint' }));
 		}
-		out.push(cyl(cx + 12, cy + 13.4, 2.8, T + 2.6, 0.9, 'hi', 0.2));
 		out.push(lamp(cx + 13, cy - 10.4, T + 19));
 		return out.join('');
 	}
@@ -289,7 +289,7 @@ export function system(width = 760, height = 520): Machine {
 		out.push(cyl(tx, ty, 2, T + 30, 5, 'hi', 0.5), L(k.sideArc(tx, ty, 2, T + 33, P, 10), { tone: 'faint' }), cyl(tx, ty, 1.2, T + 35, 0.8, 'mid', 0.2));
 		out.push(flat([[tx, ty + 3.8], [tx - 2, cy + 12], [bx + 8, cy + 14]], T, 'lo'), dots([[bx + 8, cy + 14, T]], 0.8, 'hi'));
 		out.push(slab(cx - 21, cy - 14, 3, 3, T, 1.6, 'lo', { r: 0.8, thin: true }));
-		out.push(lamp(cx + 13, cy + 12.4, T));
+		out.push(lamp(cx - 2, cy + 13, T));
 		return out.join('');
 	}
 
@@ -341,7 +341,7 @@ export function system(width = 760, height = 520): Machine {
 		const rt = k.radialTicks(gx, gy, 5.4, 36, 6, gz + 3.2, [0.9, 1.8], P, -2.4, 4.8);
 		out.push(L(rt.minor, { tone: 'lo' }), L(rt.major, { tone: 'mid' }));
 		out.push(L(k.lineOnTop([gx, gy], [gx + 3.8, gy - 3.2], gz + 3.4, P), { tone: 'mid', free: true }), dots([[gx, gy, gz + 3.4]], 0.9, 'hi'));
-		out.push(lamp(cx + 13, cy + 13, T));
+		out.push(lamp(cx - 14, cy + 13, T));
 		return out.join('');
 	}
 
@@ -355,7 +355,7 @@ export function system(width = 760, height = 520): Machine {
 	};
 	const transforms = Object.fromEntries(MODS.map((m) => [m.name, [1, 2, 3, 4].map((s) => tf(m, s))]));
 
-	const items = [{ depth: k.depthOf([0, 0, 0], P), svg: hub() }, ...MODS.map((m) => ({ depth: k.depthOf([m.dock[0], m.dock[1], 0], P), svg: moverSvg(m.name, transforms[m.name][3], builders[m.name](m.dock)) }))];
+	const items = [{ depth: k.depthOf([0, 0, 0], P), svg: hub() }, ...MODS.map((m) => ({ depth: k.depthOf([m.dock[0], m.dock[1], 0], P), svg: moverSvg(m.name, transforms[m.name][3], `<g data-key="${MODS.indexOf(m) + 1}">${builders[m.name](m.dock)}</g>`) }))];
 	items.sort((a, b) => a.depth - b.depth);
 
 	const svg = k.figureSvg({
@@ -369,21 +369,27 @@ export function system(width = 760, height = 520): Machine {
 
 	function props() {
 		const out: string[] = [];
-		const mug = [182, 124] as const;
+		const mug = [140, 108] as const;
 		out.push(halo({ x: mug[0] - 6, y: mug[1] - 6, w: 12, d: 12, r: 6 }, 0, 10));
 		out.push(S(k.cylinder(mug[0], mug[1], 5.4, 0, 9, P, 20, 0.5), { tone: 'mid' }), L(k.sideArc(mug[0], mug[1], 5.4, 4.5, P, 14), { tone: 'faint' }), L(k.ring(mug[0], mug[1], 4, 9, P, 14), { tone: 'lo' }));
 		out.push(S(k.cylinder(mug[0] + 6.8, mug[1], 1.6, 3, 3.4, P, 10, 0.2), { tone: 'hi' }));
-		const pot = [-185, -130] as const;
+		const pot = [-150, -112] as const;
 		out.push(halo({ x: pot[0] - 7, y: pot[1] - 7, w: 14, d: 14, r: 7 }, 0, 9));
 		out.push(S(k.cylinder(pot[0], pot[1], 6.2, 0, 8, P, 20, 0.5), { tone: 'mid' }), L(k.ring(pot[0], pot[1], 5, 8, P, 14), { tone: 'lo' }), L(k.sideArc(pot[0], pot[1], 6.2, 3, P, 14), { tone: 'faint' }));
 		for (const [dx, dy, h] of [[0, 0, 12], [-3, 2, 8], [3, 1.4, 9], [1.6, -2.6, 7]] as const) out.push(S(k.cylinder(pot[0] + dx, pot[1] + dy, 1.8, 8, h, P, 10, 0.4), { tone: 'hi' }));
-		const cup = [100, -132] as const;
+		const cup = [90, -116] as const;
 		out.push(S(k.cylinder(cup[0], cup[1], 5, 0, 10, P, 18, 0.4), { tone: 'lo' }), L(k.ring(cup[0], cup[1], 3.8, 10, P, 14), { tone: 'lo' }));
 		for (const [dx, dy, h] of [[-1.5, 0, 6], [0.8, 1, 8], [1.6, -1.2, 5]] as const) out.push(seg([cup[0] + dx, cup[1] + dy, 10], [cup[0] + dx * 1.6, cup[1] + dy, 10 + h], 'mid'));
-		const pad: Plan = { x: 50, y: 100, w: 24, d: 18, r: 1 };
+		const pad: Plan = { x: 48, y: 94, w: 24, d: 18, r: 1 };
 		out.push(halo(pad, 0, 1.6), S(k.slabOf(pad, 0, 1.6, P, 3, 0.3), { tone: 'hi' }), L(k.planOutline(k.insetPlan(pad, 2), 1.6, P), { tone: 'faint' }));
 		for (const dy of [4, 7.4, 10.8, 14]) out.push(L(k.lineOnTop([pad.x + 4, pad.y + dy], [pad.x + pad.w - (dy > 12 ? 10 : 4), pad.y + dy], 1.6, P), { tone: 'faint', free: true }));
 		out.push(dots([[pad.x + 3, pad.y + 2, 1.6], [pad.x + 9, pad.y + 2, 1.6], [pad.x + 15, pad.y + 2, 1.6]], 0.5, 'lo'));
+		const spool = [-148, 10] as const;
+		out.push(halo({ x: spool[0] - 6, y: spool[1] - 6, w: 12, d: 12, r: 6 }, 0, 9));
+		out.push(cyl(spool[0], spool[1], 5.4, 0, 1.4, 'hi', 0.4), S(k.cylinder(spool[0], spool[1], 3, 1.4, 6, P, 14, 0.2), { tone: 'mid' }), L(k.sideArc(spool[0], spool[1], 3, 3, P, 10) + k.sideArc(spool[0], spool[1], 3, 5, P, 10), { tone: 'faint' }), cyl(spool[0], spool[1], 5.4, 7.4, 1.4, 'hi', 0.4), L(k.ring(spool[0], spool[1], 3.4, 8.8, P, 14), { tone: 'lo' }), D([at([spool[0], spool[1], 8.8])], { size: 0.6, tone: 'lo' }));
+		const tape = [142, 8] as const;
+		out.push(halo({ x: tape[0] - 6, y: tape[1] - 6, w: 12, d: 12, r: 6 }, 0, 4));
+		out.push(cyl(tape[0], tape[1], 6, 0, 4, 'mid', 0.5), L(k.knurl(tape[0], tape[1], 6, 0, 4, 20, P, 0.4), { tone: 'faint' }), L(k.ring(tape[0], tape[1], 3.4, 4, P, 16), { tone: 'lo' }), L(k.ring(tape[0], tape[1], 4.8, 4, P, 16), { tone: 'faint' }), slab(tape[0] + 5, tape[1] + 2, 8, 3, 0, 0.4, 'hi', { thin: true, r: 0.3, bevel: 0 }));
 		return out.join('');
 	}
 }
