@@ -290,7 +290,7 @@ export function team(width = 720, height = 480): Machine {
 	const spanAt = (c: Point3): Point3 => [c[0] - SPAN_FIX[0], c[1] - SPAN_FIX[1], c[2] - SPAN_FIX[2]];
 	const transforms = transformsFrom(P, {
 		drawer: [[0, 0, 0], drawerOut, drawerOut, [0, 0, 0]],
-		spanner: [spanAt(SPAN_IN), spanAt(SPAN_OUT), [0, 0, 0], [0, 0, 0]],
+		spanner: [spanAt(SPAN_IN), spanAt(SPAN_OUT), [0, 0, 0], spanAt(SPAN_IN)],
 	});
 	const [px, py] = at(PIVOT);
 	const spin = (a: number) => `translate(0 0) rotate(${a} ${r1(px)} ${r1(py)})`;

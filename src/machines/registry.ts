@@ -25,12 +25,18 @@ export const PLATES = {
 	tiffingrab: { build: tiffingrab, pigment: 'var(--ochre)' },
 	puchkaman: { build: puchkaman, pigment: 'var(--verdigris)' },
 	xplorers: { build: xplorers, pigment: 'var(--lapis)' },
-	'copper-cloves': { build: copperCloves, pigment: 'var(--sanguine)' },
-} satisfies Record<string, { build: () => Machine; pigment: string; tinted?: boolean }>;
+	'copper-cloves': { build: copperCloves, pigment: 'var(--sanguine)', lit: 'var(--ochre)' },
+} satisfies Record<string, { build: () => Machine; pigment: string; tinted?: boolean; lit?: string }>;
 
 export type PlateName = keyof typeof PLATES;
 
 const PALETTE = ['var(--lapis)', 'var(--ochre)', 'var(--verdigris)', 'var(--violet)', 'var(--sanguine)', 'var(--umber)'];
+
+/** Inline style for a plate: its pigment, and a lit colour when the default sanguine would vanish into the pigment. */
+export function plateStyle(name: PlateName) {
+	const plate: { pigment: string; lit?: string } = PLATES[name];
+	return `--pigment:${plate.pigment}` + (plate.lit ? `;--lit:${plate.lit}` : '');
+}
 
 /** Each moving ingredient takes its own fresco pigment, so the parts of a story read apart. Plates that colour their own parts opt out. */
 function tint(name: PlateName, svg: string) {

@@ -18,9 +18,9 @@
 	--anatomy-faint: color-mix(in oklab, var(--pigment) 26%, var(--card));
 	--anatomy-halo: var(--pigment);
 	--anatomy-dot: color-mix(in oklab, var(--pigment) 50%, var(--strong));
-	--anatomy-lit: var(--sanguine);
-	--anatomy-lit-top: color-mix(in oklab, var(--sanguine) 62%, var(--card));
-	--anatomy-lit-shade: color-mix(in oklab, var(--sanguine) 88%, var(--card));
+	--anatomy-lit: var(--lit, var(--sanguine));
+	--anatomy-lit-top: color-mix(in oklab, var(--lit, var(--sanguine)) 62%, var(--card));
+	--anatomy-lit-shade: color-mix(in oklab, var(--lit, var(--sanguine)) 88%, var(--card));
 }
 
 /* The ingredients that move are the subject: a lighter tint so they read against their base. */

@@ -1,7 +1,7 @@
 ---
 import '../styles/anatomy.css';
 import '../styles/plate.css';
-import { PLATES, machineOf, type PlateName } from '../machines/registry';
+import { machineOf, plateStyle, type PlateName } from '../machines/registry';
 
 interface Props {
 	/** Plate id from the registry; also data-machine, used by tests and styles. */
@@ -14,7 +14,6 @@ interface Props {
 
 const { name, fig, title, caption, compact = false } = Astro.props;
 const machine = machineOf(name);
-const { pigment } = PLATES[name];
 const steps = machine.labels.length;
 // The page ships the finished plate as a lazy image (no-JS and reduced-motion readers see the whole story);
 // plate.ts swaps in the live SVG as it nears the viewport.
@@ -24,7 +23,7 @@ const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0
 
 <figure
 	class:list={['iso machine plate', { compact }]}
-	style={`--pigment:${pigment}`}
+	style={plateStyle(name)}
 	data-machine={name}
 	data-steps={steps}
 	data-transforms={JSON.stringify(machine.transforms)}
