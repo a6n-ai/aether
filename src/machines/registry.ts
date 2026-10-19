@@ -11,6 +11,7 @@ import { tiffingrab } from './tiffingrab/geometry';
 import { puchkaman } from './puchkaman/geometry';
 import { xplorers } from './xplorers/geometry';
 import { copperCloves } from './copper-cloves/geometry';
+import { automaton } from './automaton/geometry';
 
 /** Every plate on the site: how to draw it and its pigment. The page and /plates/<name>.svg both read this. */
 export const PLATES = {
@@ -26,6 +27,7 @@ export const PLATES = {
 	puchkaman: { build: puchkaman, pigment: 'var(--verdigris)' },
 	xplorers: { build: xplorers, pigment: 'var(--lapis)' },
 	'copper-cloves': { build: copperCloves, pigment: 'var(--sanguine)', lit: 'var(--ochre)' },
+	automaton: { build: automaton, pigment: 'var(--umber)', lit: 'var(--ochre)' },
 } satisfies Record<string, { build: () => Machine; pigment: string; tinted?: boolean; lit?: string }>;
 
 export type PlateName = keyof typeof PLATES;
