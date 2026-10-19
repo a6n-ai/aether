@@ -10,9 +10,11 @@ interface Props {
 	title: string;
 	caption: string;
 	compact?: boolean;
+	/** Driven by scroll from the page (a 'plate:step' event) instead of touring on its own. */
+	scrub?: boolean;
 }
 
-const { name, fig, title, caption, compact = false } = Astro.props;
+const { name, fig, title, caption, compact = false, scrub = false } = Astro.props;
 const machine = machineOf(name);
 const steps = machine.labels.length;
 // The page ships the finished plate as a lazy image (no-JS and reduced-motion readers see the whole story);
@@ -26,6 +28,7 @@ const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0
 	style={plateStyle(name)}
 	data-machine={name}
 	data-steps={steps}
+	data-scrub={scrub ? '' : undefined}
 	data-transforms={JSON.stringify(machine.transforms)}
 >
 	<div class="corners" aria-hidden="true">
@@ -33,7 +36,7 @@ const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0
 		<span data-corner="title">{title}</span>
 	</div>
 	<div class="stage">
-		<img src={`/plates/${name}.svg`} alt={label} width={width} height={height} loading="lazy" decoding="async" data-plate-img />
+		<img src={`/plates/${name}.svg`} alt={label} width={width} height={height} loading="lazy" decoding="async" data-plate-img onload="this.dataset.loaded=''" />
 	</div>
 	<div class="controls">
 		<ol class="steps">
@@ -86,6 +89,10 @@ const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0
 		max-width: 880px;
 		width: 100%;
 		margin-inline: auto;
+	}
+	/* Before the drawing arrives: bare plaster with the cartoon's pounce dots. */
+	.stage > :global(img:not([data-loaded])) {
+		background: radial-gradient(circle, color-mix(in oklab, var(--strong) 22%, transparent) 1.1px, transparent 1.6px) 0 0 / 9px 9px;
 	}
 	.stage > :global(img),
 	.stage > :global(svg) {

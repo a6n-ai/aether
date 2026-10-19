@@ -31,7 +31,7 @@ const caption = CAPTIONS[client.slug];
 const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 ---
 
-<Layout title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} ${client.line}`}>
+<Layout title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} Built by a6n.`}>
 	<main class="client" style={`--pigment:${client.pigment}`}>
 		<div class="wrap head">
 			<a class="back" href="/#clients">All clients</a>
@@ -83,6 +83,17 @@ const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 	.back::before {
 		content: '‹ ';
 		white-space: pre;
+		display: inline-block;
+		transition: translate 400ms var(--ease);
+	}
+	/* The arrow reaches back toward where you came from. */
+	@media (hover: hover) {
+		.back:hover::before {
+			translate: -6px 0;
+		}
+	}
+	.back:focus-visible::before {
+		translate: -6px 0;
 	}
 	h1 {
 		font-size: clamp(2.8rem, 7vw, 5rem);

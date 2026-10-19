@@ -45,9 +45,9 @@ const FAQ = [
 ];
 ---
 
-<section class="faq" id="faq" data-reveal>
+<section class="faq" id="faq">
 	<div class="wrap">
-		<h2>Things owners ask us.</h2>
+		<h2 data-split="lines">Things owners ask us.</h2>
 		<div class="list">
 			{
 				FAQ.map((item, i) => (
@@ -73,7 +73,9 @@ const FAQ = [
 	}
 	h2 {
 		margin-top: 12px;
-		font-size: clamp(2rem, 4vw, 3rem);
+		font-size: var(--t-xl);
+		line-height: 0.92;
+		letter-spacing: -0.03em;
 	}
 	.list {
 		margin-top: 36px;
@@ -96,6 +98,23 @@ const FAQ = [
 	}
 	summary::-webkit-details-marker {
 		display: none;
+	}
+	.q {
+		transition: translate 500ms var(--ease);
+	}
+	@media (hover: hover) {
+		summary:hover .q {
+			translate: 10px 0;
+		}
+		summary:hover .plus {
+			rotate: 90deg;
+		}
+	}
+	summary:focus-visible .q {
+		translate: 10px 0;
+	}
+	.plus {
+		transition: rotate 500ms var(--ease);
 	}
 	.plus {
 		position: relative;

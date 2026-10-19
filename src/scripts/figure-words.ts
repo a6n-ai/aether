@@ -11,8 +11,8 @@ const RULES: Record<FigureName, Rule[]> = {
 		[/^Message queue$/, 'Messages in line'],
 		[/^Drag to set rate · tap a drum$/, 'Drag to send faster · tap a drum'],
 		[/(\d+) queued/, '$1 waiting'],
-		[/\bin ([\d.]+)\/s/, '$1 arriving a second'],
-		[/\bout ([\d.]+)\/s/, '$1 sent a second'],
+		[/\bin ([\d.]+)\/s/, '$1 in a sec'],
+		[/\bout ([\d.]+)\/s/, '$1 out a sec'],
 		[/^msg\/s$/, 'per second'],
 	],
 	'git-merge': [

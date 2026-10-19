@@ -63,6 +63,7 @@ export function mountFigure(stage: HTMLElement) {
 			const { render } = await load();
 			const name = stage.dataset.figure as FigureName;
 			render(stage, { fig: stage.dataset.fig, theme: 'light', tokens: tokensOf(stage) });
+			stage.classList.add('is-live');
 			const root = stage.shadowRoot;
 			if (!root) return;
 			plain(name, root);

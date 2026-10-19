@@ -1,47 +1,128 @@
 ---
 import Mark from './Mark.astro';
-import { CONTACT_EMAIL } from '../lib/cta';
+import { BOOK_CALL_HREF, CONTACT_EMAIL } from '../lib/cta';
+const year = new Date().getFullYear();
 ---
 
 <footer class="foot">
-	<div class="wrap foot-row">
-		<div class="brand"><Mark /><span>a6n</span></div>
-		<a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
-		<p class="credit">Art: Michelangelo, public domain. Sistine Chapel; The Metropolitan Museum of Art.</p>
+	<div class="inner">
+		<div class="top">
+			<p class="big" aria-hidden="true">a6n</p>
+			<div class="ask">
+				<p>Ready when you are. One short call, no jargon.</p>
+				<a class="btn-call light" href={BOOK_CALL_HREF}>Book a call</a>
+			</div>
+		</div>
+		<div class="cols">
+			<div class="brand">
+				<Mark />
+				<span>(Ai)ny Management System</span>
+			</div>
+			<nav aria-label="Footer">
+				<a href="/how-it-works/">How it works</a>
+				<a href="/#clients">Clients</a>
+				<a href="/#faq">Questions</a>
+				<a href={BOOK_CALL_HREF}>Book a call</a>
+			</nav>
+			<p class="contact"><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a><br />Singapore and India</p>
+		</div>
+		<p class="credit">
+			© {year} a6n. Art: Michelangelo, public domain (Sistine Chapel; The Metropolitan Museum of Art). Figures built with Anatomy.
+		</p>
 	</div>
 </footer>
 
 <style>
 	.foot {
-		border-top: 1px solid var(--faint);
-		padding-block: 40px 56px;
-		font-size: 0.9rem;
-		color: var(--muted);
+		background: var(--arriccio);
+		color: #d9cfc2;
+		font-size: 0.95rem;
 	}
-	.foot-row {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 12px 32px;
+	.inner {
+		max-width: var(--max);
+		margin-inline: auto;
+		padding: clamp(48px, 8vh, 96px) var(--gutter) 40px;
+		container-type: inline-size;
+	}
+	.top {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+		align-items: end;
+		gap: 32px;
+	}
+	.ask {
+		display: grid;
+		justify-items: start;
+		gap: 20px;
+		padding-bottom: 1.2em;
+		color: #efe6da;
+		font-size: 1.15rem;
+	}
+	.ask a.btn-call {
+		background: #efe6da;
+		color: var(--arriccio);
+		min-height: 52px;
+		padding: 0 26px;
+	}
+	.ask a.btn-call.is-filled,
+	.ask a.btn-call:active {
+		color: #fff;
+	}
+	.big {
+		font: 400 clamp(6rem, 30cqi, 26rem) / 0.78 var(--font-display);
+		letter-spacing: -0.06em;
+		margin-left: -0.06em;
+		color: #efe6da;
+	}
+	.cols {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 24px 32px;
+		margin-top: clamp(32px, 6vh, 64px);
+		padding-top: 24px;
+		border-top: 1px solid color-mix(in oklab, #efe6da 22%, transparent);
 	}
 	.brand {
-		display: inline-flex;
+		display: flex;
 		align-items: center;
-		gap: 10px;
-		color: var(--strong);
-		font: 500 1.2rem/1 var(--font-display);
+		gap: 12px;
+		color: #efe6da;
+		font: italic 400 1.15rem/1.2 var(--font-display);
 	}
-	.foot-row > a {
+	nav {
+		display: grid;
+		justify-items: start;
+	}
+	a {
 		display: inline-flex;
 		align-items: center;
-		min-height: 44px;
+		min-height: 36px;
+		color: #efe6da;
+		text-decoration: none;
+		background: linear-gradient(currentColor 0 0) left calc(100% - 6px) / 0 1px no-repeat;
+		transition: background-size 400ms var(--ease);
+	}
+	@media (hover: hover) {
+		a:hover {
+			background-size: 100% 1px;
+		}
+	}
+	a:focus-visible {
+		background-size: 100% 1px;
+		outline-color: #efe6da;
+	}
+	.contact {
+		line-height: 1.6;
 	}
 	.credit {
-		margin-left: auto;
+		margin-top: 40px;
+		font-size: var(--t-xs);
+		color: #bfb3a5;
 	}
-	@media (max-width: 560px) {
-		.credit {
-			margin-left: 0;
+	@media (max-width: 767px) {
+		.top,
+		.cols {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>

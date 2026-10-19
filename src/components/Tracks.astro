@@ -5,21 +5,21 @@ import { CAPTION as MOVE_OVER } from '../machines/move-over/geometry';
 import { CAPTION as RUN_GROW } from '../machines/run-grow/geometry';
 ---
 
-<section class="tracks" id="ways" data-reveal>
+<section class="tracks" id="ways">
 	<div class="wrap">
-		<div data-reveal-item>
-		<h2>Start where you are.</h2>
+		<div>
+		<h2 data-split="lines">Start where you are.</h2>
 		<p class="lead">Starting fresh, moving off spreadsheets, or keeping what you have running well: pick the one that fits.</p></div>
 		<div class="grid">
-			<div class="track" data-reveal-item>
+			<div class="track">
 				<h3>Build something new</h3>
 				<Plate name="build-new" fig="Plate V" title="The kiosk" caption={BUILD_NEW} compact />
 			</div>
-			<div class="track" data-reveal-item>
+			<div class="track">
 				<h3>Move you over</h3>
 				<Plate name="move-over" fig="Plate VI" title="The weigh-over" caption={MOVE_OVER} compact />
 			</div>
-			<div class="track" data-reveal-item>
+			<div class="track">
 				<h3>Run and grow</h3>
 				<Plate name="run-grow" fig="Plate VII" title="A year on" caption={RUN_GROW} compact />
 			</div>
@@ -34,7 +34,9 @@ import { CAPTION as RUN_GROW } from '../machines/run-grow/geometry';
 	}
 	h2 {
 		margin-top: 12px;
-		font-size: clamp(2rem, 4vw, 3rem);
+		font-size: var(--t-xl);
+		line-height: 0.92;
+		letter-spacing: -0.03em;
 	}
 	.lead {
 		margin-top: 12px;

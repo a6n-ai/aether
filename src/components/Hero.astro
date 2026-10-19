@@ -4,142 +4,253 @@ import hands from '../assets/art/hands.jpg';
 import { BOOK_CALL_HREF } from '../lib/cta';
 ---
 
-<section class="hero" data-hero>
-	<div class="wrap hero-copy">
-		<h1>Your business, <em>working on its own.</em></h1>
-		<p class="sub">
-			We build the website and app your business runs on: orders, bookings, payments and messages, all in one
-			place. You keep doing the work you love.
-		</p>
-	</div>
+<section class="hero" data-hero aria-labelledby="hero-title">
+	<div class="stage" data-stage>
+		<Picture
+			src={hands}
+			formats={['avif', 'webp']}
+			widths={[480, 800, 1280, 1533]}
+			sizes="100vw"
+			alt="Michelangelo's Creation of Adam: two hands reaching toward each other, almost touching."
+			loading="eager"
+			fetchpriority="high"
+			class="wall-img"
+			data-wall
+		/>
+		<div class="veil" aria-hidden="true"></div>
 
-	<figure class="hero-figure">
-		<div class="hero-art" data-hero-art>
-			<Picture
-				src={hands}
-				formats={['avif', 'webp']}
-				widths={[480, 800, 1280, 1533]}
-				sizes="100vw"
-				alt="Michelangelo's Creation of Adam: two hands reaching toward each other, almost touching."
-				loading="eager"
-				fetchpriority="high"
-			/>
-			<a class="btn-call in-gap" href={BOOK_CALL_HREF}>Book a call</a>
+		<div class="copy" data-hero-copy>
+			<h1 id="hero-title" data-split="lines" data-intro>Your business, <em>working on its own.</em></h1>
+			<p class="sub">We build the website and app your business runs on: orders, bookings, payments and messages, all in one place.</p>
+			<p class="actions" data-reveal="up" data-intro data-delay="0.5">
+				<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
+				<a class="how" href="#who">How we work</a>
+			</p>
 		</div>
-		<figcaption class="wrap">Michelangelo, <i>The Creation of Adam</i>, c. 1512.</figcaption>
-	</figure>
-	<div class="wrap below-gap">
-		<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
+
+		<p class="touch" data-touch>Every part of your business,<br /><em>finally in reach.</em></p>
+
+		<div class="cue" data-cue aria-hidden="true">
+			<span>Scroll to bring them together</span>
+			<span class="line"><span data-bar></span></span>
+		</div>
 	</div>
 </section>
 
 <script>
-	const start = () => {
-		if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-		const art = document.querySelector<HTMLElement>('[data-hero-art]');
-		if (!art) return;
-		import('../scripts/hero-light').then(({ mountHeroLight }) => mountHeroLight(art));
-	};
-	const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(start) : setTimeout(start, 1200));
-	document.readyState === 'complete' ? idle() : addEventListener('load', idle, { once: true });
+	import { gsap } from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { mountHands } from '../scripts/hands';
+
+	gsap.registerPlugin(ScrollTrigger);
+	const hero = document.querySelector<HTMLElement>('[data-hero]');
+	const stage = hero?.querySelector<HTMLElement>('[data-stage]');
+	const img = stage?.querySelector<HTMLImageElement>('img[data-wall]');
+
+	if (hero && stage && img && document.documentElement.classList.contains('motion')) {
+		const start = () => {
+			const small = matchMedia('(max-width: 767px)').matches;
+			const open = small ? 0.08 : 0.23;
+			const scene = mountHands(stage, img, [0.925, 0.902, 0.855]);
+			if (!scene) stage.classList.add('no-gl');
+			// First frame: hands drawn apart, then they ease in a little as the page arrives.
+			scene?.set({ spread: open * 1.15 });
+			gsap.delayedCall(0.2, () => scene?.set({ spread: open }));
+
+			const touch = hero.querySelector<HTMLElement>('[data-touch]');
+			const bar = hero.querySelector<HTMLElement>('[data-bar]');
+			const range = (p: number, a: number, b: number) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+
+			gsap.to('[data-hero-copy]', {
+				autoAlpha: 0,
+				y: -60,
+				ease: 'none',
+				scrollTrigger: { trigger: hero, start: 'top top', end: '22% top', scrub: true },
+			});
+			gsap.to('[data-cue]', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: hero, start: '2% top', end: '10% top', scrub: true } });
+
+			ScrollTrigger.create({
+				trigger: hero,
+				start: 'top top',
+				end: 'bottom bottom',
+				onUpdate: (self) => {
+					const p = self.progress;
+					const close = gsap.parseEase('power2.inOut')(range(p, 0, 0.55));
+					const light = range(p, 0.42, 0.62);
+					const push = gsap.parseEase('power2.inOut')(range(p, 0.7, 1));
+					scene?.set({ spread: open * (1 - close), light: light + push * 0.8, zoom: 1 + push * 0.9, fade: 0 });
+					if (touch) {
+						const t = range(p, 0.5, 0.6) * (1 - range(p, 0.74, 0.84));
+						touch.style.opacity = String(t);
+						touch.style.translate = `0 ${(1 - range(p, 0.5, 0.6)) * 24}px`;
+					}
+					if (bar) bar.style.transform = `scaleX(${p})`;
+				},
+			});
+		};
+		img.complete ? start() : img.addEventListener('load', start, { once: true });
+	}
 </script>
 
 <style>
-	.hero-art :global(.hero-light) {
+	.hero {
+		position: relative;
+		margin-top: calc(-1 * var(--nav-h));
+	}
+	.stage {
+		position: relative;
+		height: 100svh;
+		min-height: 560px;
+		overflow: clip;
+		display: grid;
+		place-items: center;
+		background: var(--page);
+	}
+	.stage :global(.hands-canvas),
+	.wall-img,
+	.stage :global(picture) {
 		position: absolute;
 		inset: 0;
-		z-index: 1;
 		width: 100%;
 		height: 100%;
-		pointer-events: none;
 	}
-	.hero {
-		padding-top: 56px;
-	}
-	.hero-copy {
-		display: grid;
-		gap: 18px;
-		justify-items: center;
-		text-align: center;
-		animation: rise 600ms var(--ease) both;
-	}
-	h1 {
-		font-size: clamp(2.4rem, 5.6vw, 4.4rem);
-		max-width: 20ch;
-	}
-	h1 em {
-		color: var(--sanguine);
-	}
-	.sub {
-		max-width: 52ch;
-		font-size: clamp(1.05rem, 1.6vw, 1.22rem);
-	}
-	.hero-figure {
-		margin: 28px 0 0;
-	}
-	.hero-art {
-		position: relative;
-		aspect-ratio: 1533 / 863;
-		max-height: 68vh;
-		margin-inline: auto;
-		overflow: hidden;
-	}
-	.hero-art :global(img) {
+	.stage :global(img) {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		object-position: 49.6% 50%;
-		filter: saturate(0.86) contrast(0.97);
 	}
-	.hero-art::after {
-		content: '';
+	/* Behind the type only: a soft wash of the painting's own sky, so every word reads. */
+	.veil {
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
-		background: linear-gradient(var(--page), transparent 14%, transparent 86%, var(--page));
+		background: radial-gradient(60% 46% at 50% 40%, color-mix(in oklab, var(--page) 70%, transparent), transparent 70%);
 	}
-	.in-gap {
-		position: absolute;
-		left: 49.6%;
-		top: 61%;
+	.copy {
+		position: relative;
 		z-index: 2;
+		display: grid;
+		justify-items: center;
+		width: 100%;
+		max-width: 980px;
+		padding: var(--nav-h) var(--gutter) 0;
+		text-align: center;
+		translate: 0 -6vh;
+		pointer-events: none;
+	}
+	.copy a {
+		pointer-events: auto;
+	}
+	h1 {
+		font-size: clamp(3rem, 1.4rem + 6.4vw, 8.4rem);
+		line-height: 0.9;
+		letter-spacing: -0.035em;
+		max-width: 11ch;
+	}
+	h1 em {
+		color: var(--sanguine-ink);
+	}
+	.sub {
+		margin-top: clamp(18px, 2.6vh, 28px);
+		max-width: 36ch;
+		font-size: var(--t-m);
+		line-height: 1.4;
+		color: var(--strong);
+	}
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		gap: 12px 28px;
+		margin-top: 28px;
+	}
+	.how {
+		color: var(--strong);
+	}
+
+	.touch {
+		position: absolute;
+		z-index: 2;
+		inset: calc(var(--nav-h) + 8vh) 0 auto;
+		width: min(24ch, calc(100% - 2 * var(--gutter)));
+		translate: 0 24px;
+		margin: 0 auto;
+		text-align: center;
+		font: 400 var(--t-l) / 1.05 var(--font-display);
+		letter-spacing: -0.02em;
+		color: var(--strong);
+		opacity: 0;
+		pointer-events: none;
+	}
+	.touch em {
+		color: var(--sanguine-ink);
+	}
+
+	.cue {
+		position: absolute;
+		z-index: 2;
+		left: 50%;
+		bottom: clamp(20px, 4vh, 40px);
 		translate: -50% 0;
-		box-shadow: 0 8px 28px -10px color-mix(in oklab, var(--sanguine) 70%, transparent);
+		display: grid;
+		justify-items: center;
+		gap: 10px;
+		font-size: var(--t-xs);
+		letter-spacing: 0.02em;
+		color: var(--strong);
+		white-space: nowrap;
 	}
-	figcaption {
-		margin-top: 10px;
-		font-size: 0.82rem;
-		color: var(--muted);
-		text-align: right;
+	.cue .line {
+		display: block;
+		width: 96px;
+		height: 2px;
+		background: color-mix(in oklab, var(--strong) 18%, transparent);
 	}
-	.below-gap {
+	.cue .line span {
+		display: block;
+		height: 100%;
+		background: var(--sanguine);
+		transform: scaleX(0);
+		transform-origin: left;
+	}
+
+	/* Motion: 160svh of scroll belongs to the hands. The canvas replaces the picture once it draws. */
+	:global(html.motion) .hero {
+		height: 240svh;
+	}
+	:global(html.motion) .stage {
+		position: sticky;
+		top: 0;
+	}
+	.stage:global(.is-live) :global(picture) {
+		visibility: hidden;
+	}
+	/* Without the canvas the painting sits whole; a wider wash keeps the type on sky. */
+	:global(html:not(.motion)) .veil,
+	.stage.no-gl .veil {
+		background: linear-gradient(color-mix(in oklab, var(--page) 86%, transparent) 30%, color-mix(in oklab, var(--page) 40%, transparent) 70%, transparent);
+	}
+	:global(html:not(.motion)) .cue,
+	:global(html:not(.motion)) .touch {
 		display: none;
 	}
 
-	@media (max-width: 899px) {
-		.hero {
-			padding-top: 48px;
+	@media (max-width: 767px) {
+		.copy {
+			translate: 0 -4vh;
 		}
-		.hero-art {
-			aspect-ratio: 16 / 10;
+		h1 {
+			font-size: clamp(2.9rem, 13vw, 4.2rem);
+			max-width: 9ch;
 		}
-		.in-gap {
-			display: none;
+		.sub {
+			font-size: 1.05rem;
+			max-width: 30ch;
 		}
-		.below-gap {
-			display: flex;
-			justify-content: center;
-			margin-top: 24px;
-		}
-		figcaption {
-			text-align: center;
-		}
-	}
-
-	@keyframes rise {
-		from {
-			opacity: 0;
-			transform: translateY(12px);
+		.touch {
+			top: calc(var(--nav-h) + 6vh);
 		}
 	}
 </style>

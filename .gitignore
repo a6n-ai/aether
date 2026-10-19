@@ -24,3 +24,7 @@ pnpm-debug.log*
 .idea/
 .superpowers/
 .claude/worktrees/
+
+# design QA evidence
+.jury/
+.shots/

@@ -14,12 +14,12 @@ const PARTS = [
 ];
 ---
 
-<section class="who" id="who" data-reveal>
+<section class="who" id="who">
 	<div class="wrap">
-		<div class="intro" data-reveal-item>
-			<h2>Built for businesses like yours.</h2>
+		<div class="intro">
+			<h2 data-split="lines">Built for businesses like yours.</h2>
 			<div class="copy">
-				<p class="lead">
+				<p class="lead" data-split="lines" data-delay="0.1">
 					a6n is short for <strong>(Ai)ny Management System</strong>: one system for the everyday work of a business,
 					from the website your customers visit to the screen your staff use.
 				</p>
@@ -30,7 +30,7 @@ const PARTS = [
 			</div>
 		</div>
 
-		<div class="anatomy" data-reveal-item>
+		<div class="anatomy" data-reveal="soak">
 			<Plate name="system" fig="Plate II" title="The anatomy of a6n" caption={SYSTEM_CAPTION} />
 			<ol class="legend" aria-label="What's inside a6n">
 				{
@@ -47,7 +47,7 @@ const PARTS = [
 			</ol>
 		</div>
 
-		<div class="team" data-reveal-item>
+		<div class="team">
 			<div class="copy">
 				<h3 class="team-title">A team, not a vendor.</h3>
 				<p>
@@ -84,17 +84,20 @@ const PARTS = [
 
 <style>
 	.who {
-		padding-block: 112px 48px;
+		padding-block: clamp(72px, 11vh, 128px) 48px;
 	}
 	.intro {
 		display: grid;
-		grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-		gap: 24px 64px;
+		grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+		gap: 32px 64px;
 		align-items: end;
 	}
 	h2 {
-		font-size: clamp(2.4rem, 5vw, 4rem);
-		max-width: 11ch;
+		font-size: var(--t-xl);
+		line-height: 0.92;
+		letter-spacing: -0.03em;
+		margin-left: -0.04em;
+		max-width: 10ch;
 	}
 	.copy {
 		display: grid;
@@ -103,7 +106,8 @@ const PARTS = [
 	}
 	.lead {
 		color: var(--strong);
-		font-size: 1.18rem;
+		font-size: var(--t-m);
+		line-height: 1.4;
 	}
 	.lead strong {
 		font-weight: 600;

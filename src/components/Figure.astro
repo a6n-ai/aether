@@ -17,7 +17,7 @@ const [slope, px] = SIZES[figure];
 ---
 
 <figure class="figure" style={`--pigment:${pigment};--lit:${lit};--slope:${slope};--px:${px}px`}>
-	<div class="stage" data-figure={figure} data-fig={fig} role="img" aria-label={like}></div>
+	<div class="stage" data-figure={figure} data-fig={fig} role="group" aria-label={like}></div>
 	<figcaption>
 		<span class="like">{like}</span>
 		{caption}
@@ -41,6 +41,15 @@ const [slope, px] = SIZES[figure];
 		min-height: calc(var(--slope) * 100cqw + var(--px));
 		background: var(--card);
 		box-shadow: 0 0 0 1px color-mix(in oklab, var(--pigment) 30%, var(--card));
+	}
+	.stage:focus-visible,
+	.stage:has(:focus-visible),
+	.stage:focus-within:not(:hover) {
+		outline: 2px solid var(--sanguine);
+		outline-offset: 4px;
+	}
+	.stage:not(.is-live) {
+		background: radial-gradient(circle, color-mix(in oklab, var(--strong) 22%, transparent) 1.1px, transparent 1.6px) 0 0 / 9px 9px, var(--card);
 	}
 	figcaption {
 		font-size: 0.95rem;

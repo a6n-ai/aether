@@ -8,10 +8,10 @@ const KINDS = [
 ];
 ---
 
-<section class="messages" data-reveal>
+<section class="messages">
 	<div class="wrap grid">
-		<div class="copy" data-reveal-item>
-			<h2>Every message, delivered.</h2>
+		<div class="copy">
+			<h2 data-split="lines">Every message, delivered.</h2>
 			<p>Messages to your customers go out on their own, and you can see every one that was sent.</p>
 			<ul class="kinds">
 				{
@@ -24,7 +24,7 @@ const KINDS = [
 				}
 			</ul>
 		</div>
-		<div data-reveal-item>
+		<div>
 			<Figure
 				figure="message-queue"
 				fig="Plate VIII"
@@ -54,7 +54,9 @@ const KINDS = [
 		padding-top: 24px;
 	}
 	h2 {
-		font-size: clamp(2rem, 4vw, 3rem);
+		font-size: var(--t-xl);
+		line-height: 0.92;
+		letter-spacing: -0.03em;
 	}
 	.kinds {
 		list-style: none;

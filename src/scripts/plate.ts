@@ -36,7 +36,9 @@ export function mountPlate(root: HTMLElement): () => void {
 	let live = false;
 	let started = false;
 	let timer = 0;
-	let touring = !still;
+	// A scrubbed plate is driven from outside (scroll) through a 'plate:step' event and never tours on its own.
+	const scrubbed = root.hasAttribute('data-scrub');
+	let touring = !still && !scrubbed;
 	let visible = false;
 	let paused = false;
 
@@ -78,9 +80,16 @@ export function mountPlate(root: HTMLElement): () => void {
 		staged = [...svg.querySelectorAll<SVGGElement>('[data-at]')];
 		live = true;
 		nav.hidden = false;
+		if (scrubbed && wanted) show(wanted, true);
 		if (visible) begin();
 	};
 
+	let wanted = 0;
+	const onStep = (e: Event) => {
+		wanted = (e as CustomEvent<number>).detail;
+		if (live && wanted !== step) show(wanted, still);
+	};
+	root.addEventListener('plate:step', onStep);
 	prev.addEventListener('click', onPrev);
 	next.addEventListener('click', onNext);
 	root.addEventListener('pointerenter', pause);
@@ -108,6 +117,7 @@ export function mountPlate(root: HTMLElement): () => void {
 		gsap.killTweensOf(movers);
 		near.disconnect();
 		seen.disconnect();
+		root.removeEventListener('plate:step', onStep);
 		prev.removeEventListener('click', onPrev);
 		next.removeEventListener('click', onNext);
 		root.removeEventListener('pointerenter', pause);

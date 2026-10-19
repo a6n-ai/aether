@@ -1,17 +1,28 @@
 ---
 import Mark from './Mark.astro';
 import { BOOK_CALL_HREF } from '../lib/cta';
+
+const path = Astro.url.pathname;
+const LINKS = [
+	{ href: '/how-it-works/', label: 'How it works', current: path.startsWith('/how-it-works') },
+	{ href: '/#clients', label: 'Clients', current: path.startsWith('/clients'), hide: true },
+];
 ---
 
 <header class="nav">
-	<div class="wrap nav-row">
-		<a class="mark" href="/" aria-label="a6n home">
+	<div class="nav-row">
+		<a class="mark" href="/" aria-label="a6n home" aria-current={path === '/' ? 'page' : undefined}>
 			<Mark animated />
 			<span>a6n</span>
 		</a>
 		<nav aria-label="Main">
-			<a class="link" href="/how-it-works/">How it works</a>
-			<a class="link hide-sm" href="/#clients">Clients</a>
+			{
+				LINKS.map((l) => (
+					<a class:list={['link', { 'hide-sm': l.hide }]} href={l.href} aria-current={l.current ? 'page' : undefined}>
+						{l.label}
+					</a>
+				))
+			}
 			<a class="btn-call small" href={BOOK_CALL_HREF}>Book a call</a>
 		</nav>
 	</div>
@@ -19,19 +30,31 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 
 <style>
 	.nav {
-		position: sticky;
-		top: 0;
+		position: fixed;
+		inset: 0 0 auto;
 		z-index: 20;
-		background: color-mix(in oklab, var(--page) 82%, transparent);
-		-webkit-backdrop-filter: saturate(160%) blur(16px);
-		backdrop-filter: saturate(160%) blur(16px);
-		border-bottom: 1px solid color-mix(in oklab, var(--faint) 60%, transparent);
+		transition:
+			translate 600ms var(--ease),
+			background-color 400ms var(--ease),
+			box-shadow 400ms var(--ease);
+	}
+	:global(html.nav-solid) .nav {
+		background: color-mix(in oklab, var(--page) 88%, transparent);
+		-webkit-backdrop-filter: blur(14px);
+		backdrop-filter: blur(14px);
+		box-shadow: 0 1px 0 color-mix(in oklab, var(--strong) 8%, transparent);
+	}
+	:global(html.nav-away) .nav:not(:focus-within) {
+		translate: 0 -110%;
 	}
 	.nav-row {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		min-height: 64px;
+		max-width: var(--max);
+		min-height: var(--nav-h);
+		margin-inline: auto;
+		padding-inline: var(--gutter);
 	}
 	.mark {
 		display: inline-flex;
@@ -40,38 +63,46 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		min-height: 44px;
 		color: var(--strong);
 		text-decoration: none;
-		font: 500 1.35rem/1 var(--font-display);
+		font: 500 1.4rem/1 var(--font-display);
 	}
 	nav {
 		display: flex;
 		align-items: center;
-		gap: 4px;
+		gap: 8px;
 	}
+	/* A brush stroke draws under the link; the current page keeps its stroke. */
 	.link {
 		display: inline-flex;
 		align-items: center;
 		min-height: 44px;
-		padding: 0 10px;
+		padding: 0 12px;
 		color: var(--strong);
-		font-size: 0.92rem;
+		font-size: 0.95rem;
 		text-decoration: none;
-		border-radius: 8px;
-		transition: background-color 160ms var(--ease);
+		background: linear-gradient(var(--sanguine) 0 0) 12px calc(100% - 10px) / 0 2px no-repeat;
+		transition: background-size 450ms var(--ease);
 	}
-	.link:hover {
-		background: color-mix(in oklab, var(--faint) 50%, transparent);
+	@media (hover: hover) {
+		.link:hover {
+			background-size: calc(100% - 24px) 2px;
+		}
+	}
+	.link:focus-visible,
+	.link[aria-current='page'] {
+		background-size: calc(100% - 24px) 2px;
 	}
 	@media (max-width: 480px) {
 		.hide-sm {
 			display: none;
 		}
 		.link {
-			padding: 0 6px;
-			font-size: 0.85rem;
+			padding: 0 8px;
+			font-size: 0.88rem;
+			background-position: 8px calc(100% - 10px);
 		}
 	}
 	@media (prefers-reduced-transparency: reduce) {
-		.nav {
+		:global(html.nav-solid) .nav {
 			background: var(--page);
 			backdrop-filter: none;
 		}

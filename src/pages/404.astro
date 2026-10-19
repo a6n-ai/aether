@@ -1,0 +1,63 @@
+---
+import { Picture } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import hands from '../assets/art/hands.jpg';
+---
+
+<Layout title="Out of reach · a6n" description="This page doesn't exist. Head back to the a6n home page, or book a short call about your business.">
+	<section class="lost" aria-labelledby="lost-title">
+		<p class="term">Page not found</p>
+		<h1 id="lost-title" data-split="lines" data-intro>This page is <em>just out of reach.</em></h1>
+		<p class="line" data-reveal="up" data-intro data-delay="0.3">The link you followed doesn't lead anywhere. Everything else is one step back.</p>
+		<p data-reveal="up" data-intro data-delay="0.45"><a class="btn-call" href="/">Back to the front</a></p>
+		<figure class="apart" aria-hidden="true">
+			<Picture src={hands} formats={['avif', 'webp']} widths={[480, 800, 1280]} sizes="(min-width: 900px) 1100px, 100vw" alt="" loading="lazy" />
+		</figure>
+	</section>
+</Layout>
+
+<style>
+	.lost {
+		max-width: var(--max);
+		margin-inline: auto;
+		padding: clamp(48px, 12vh, 140px) var(--gutter) 64px;
+		display: grid;
+		align-content: start;
+		gap: 24px;
+	}
+	.term {
+		font: italic 400 1.2rem/1 var(--font-display);
+		color: var(--sanguine-ink);
+	}
+	h1 {
+		font-size: var(--t-xl);
+		line-height: 0.92;
+		max-width: 12ch;
+		margin-left: -0.04em;
+	}
+	h1 em {
+		color: var(--sanguine-ink);
+	}
+	.line {
+		max-width: 44ch;
+		font-size: var(--t-m);
+		color: var(--strong);
+	}
+	/* The two hands, pulled further apart than the painting has them. */
+	.apart {
+		margin: 32px 0 0;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		height: clamp(200px, 32vw, 420px);
+		overflow: clip;
+		mask-image: linear-gradient(90deg, #000 30%, transparent 46%, transparent 54%, #000 70%);
+	}
+	.apart :global(picture),
+	.apart :global(img) {
+		grid-area: 1 / 1 / 2 / 3;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: 49.6% 50%;
+	}
+</style>

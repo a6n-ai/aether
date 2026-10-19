@@ -2,22 +2,27 @@
 import { CLIENTS } from '../data/clients';
 ---
 
-<section class="clients" id="clients" data-section="clients" data-reveal>
+<section class="clients" id="clients" data-section="clients">
 	<div class="wrap">
-		<h2>Businesses we've already built for.</h2>
+		<div class="head">
+			<h2 data-split="lines">Businesses we've already built for.</h2>
+			<p class="note">Each has its own colour here. Open one to see how its system runs.</p>
+		</div>
 		<ul>
 			{
 				CLIENTS.map((c) => (
-					<li style={`--pigment:${c.pigment}`} data-reveal-item>
+					<li style={`--pigment:${c.pigment}`}>
 						<a href={`/clients/${c.slug}/`}>
 							<span class="swatch" aria-hidden="true" />
 							<h3>{c.name}</h3>
-							<p class="kind">
+							<span class="kind">
 								{c.kind}
-								<span class="mono">{c.where}</span>
-							</p>
+								<span class="where">{c.where}</span>
+							</span>
 							<p>{c.line}</p>
-							<span class="open">See how it works</span>
+							<span class="open" aria-hidden="true">
+								<svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+							</span>
 						</a>
 					</li>
 				))
@@ -28,72 +33,124 @@ import { CLIENTS } from '../data/clients';
 
 <style>
 	.clients {
-		padding-block: 24px 96px;
+		padding-block: clamp(64px, 10vh, 120px);
+	}
+	.head {
+		display: grid;
+		grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+		gap: 20px 48px;
+		align-items: end;
 	}
 	h2 {
-		margin-top: 12px;
-		font-size: clamp(2rem, 4vw, 3rem);
-		max-width: 20ch;
+		font-size: var(--t-xl);
+		line-height: 0.92;
+		letter-spacing: -0.03em;
+		margin-left: -0.04em;
+		max-width: 12ch;
+	}
+	.note {
+		max-width: 34ch;
 	}
 	ul {
 		list-style: none;
-		margin: 40px 0 0;
+		margin: 48px 0 0;
 		padding: 0;
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-		gap: 16px;
+		border-top: 1px solid var(--strong);
 	}
+	li {
+		border-bottom: 1px solid color-mix(in oklab, var(--strong) 22%, transparent);
+	}
+	/* A row: the client's pigment soaks in from the left and the name steps toward it. */
 	a {
-		height: 100%;
+		position: relative;
+		isolation: isolate;
 		display: grid;
-		align-content: start;
-		gap: 10px;
-		padding: 24px 22px 26px;
-		background: var(--card);
-		border-top: 3px solid var(--pigment);
-		box-shadow: 0 0 0 1px color-mix(in oklab, var(--pigment) 18%, var(--faint));
+		grid-template-columns: 36px minmax(0, 4fr) minmax(0, 3fr) minmax(0, 5fr) 40px;
+		align-items: center;
+		gap: 12px 24px;
+		padding: 26px 8px;
 		color: var(--text);
 		text-decoration: none;
-		transition: box-shadow 200ms var(--ease), transform 200ms var(--ease);
 	}
-	a:hover {
-		box-shadow: 0 0 0 1px color-mix(in oklab, var(--pigment) 50%, var(--faint)), 0 14px 30px -18px var(--pigment);
-		transform: translateY(-2px);
-	}
-	a:active {
-		transform: translateY(0) scale(0.99);
+	a::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: color-mix(in oklab, var(--pigment) 16%, var(--card));
+		clip-path: inset(0 100% 0 0);
+		transition: clip-path 700ms var(--ease);
 	}
 	.swatch {
-		width: 28px;
-		height: 18px;
-		background: linear-gradient(135deg, color-mix(in oklab, var(--pigment) 40%, var(--card)), var(--pigment));
-		clip-path: polygon(0 30%, 50% 0, 100% 30%, 100% 70%, 50% 100%, 0 70%);
+		width: 22px;
+		height: 22px;
+		border-radius: 50%;
+		background: var(--pigment);
+		transition: scale 600ms var(--ease);
 	}
 	h3 {
-		font-size: 1.6rem;
-		line-height: 1.1;
+		font-size: var(--t-l);
+		line-height: 1;
+		transition: translate 600ms var(--ease);
 	}
 	.kind {
 		display: grid;
-		gap: 4px;
+		gap: 2px;
 		color: var(--strong);
 		font-weight: 500;
 	}
-	p {
+	.where {
+		color: var(--muted);
+		font-weight: 400;
+		font-size: 0.9rem;
+	}
+	a p {
 		font-size: 0.98rem;
 	}
-	.open {
-		margin-top: 6px;
-		color: var(--sanguine-ink);
-		font-weight: 500;
-		font-size: 0.95rem;
+	.open svg {
+		width: 24px;
+		height: 24px;
+		fill: none;
+		stroke: var(--strong);
+		stroke-width: 1.6;
+		transition: translate 500ms var(--ease);
 	}
-	.open::after {
-		content: ' ›';
+	@media (hover: hover) {
+		a:hover::before {
+			clip-path: inset(0 0 0 0);
+		}
+		a:hover .swatch {
+			scale: 1.5;
+		}
+		a:hover h3 {
+			translate: 10px 0;
+		}
+		a:hover .open svg {
+			translate: 6px 0;
+		}
 	}
-	@media (max-width: 560px) {
-		.clients {
-			padding-bottom: 64px;
+	a:focus-visible::before {
+		clip-path: inset(0 0 0 0);
+	}
+	a:active::before {
+		clip-path: inset(0 0 0 0);
+	}
+	@media (max-width: 899px) {
+		.head {
+			grid-template-columns: 1fr;
+		}
+		a {
+			grid-template-columns: 22px minmax(0, 1fr) 28px;
+			gap: 8px 14px;
+			padding: 22px 4px;
+		}
+		.kind,
+		a p {
+			grid-column: 2 / 3;
+		}
+		.open {
+			grid-row: 1;
+			grid-column: 3;
 		}
 	}
 </style>
