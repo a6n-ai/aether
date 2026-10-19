@@ -1,59 +1,67 @@
 ---
-import { Picture } from 'astro:assets';
-import sibyl from '../assets/art/sibyl.jpg';
+import Plate from './Plate.astro';
 import { BOOK_CALL_HREF } from '../lib/cta';
+import { CAPTION } from '../machines/automaton/geometry';
 ---
 
-<section class="closing" data-reveal>
-	<div class="wrap grid">
-		<figure data-reveal-item>
-			<Picture
-				src={sibyl}
-				formats={['avif', 'webp']}
-				widths={[400, 640, 960]}
-				sizes="(min-width: 900px) 480px, 80vw"
-				alt="Michelangelo's red chalk studies for the Libyan Sibyl: a figure turning, arms raised, with studies of a head and hands."
-				loading="lazy"
-			/>
-			<figcaption>Michelangelo, <i>Studies for the Libyan Sibyl</i>, red chalk, c. 1511. The Met.</figcaption>
-		</figure>
-		<div class="call" data-reveal-item>
-			<h2>Tell us about your business.</h2>
-			<p class="line">
-				Every great piece starts as a study. One short call: no jargon, no pressure, and an honest answer about whether
-				we can help.
-			</p>
-			<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
+<section class="closing" data-closing aria-labelledby="closing-title">
+	<div class="stage">
+		<div class="call">
+			<p class="term">Your turn</p>
+			<h2 id="closing-title" data-split="lines">Tell us about your business.</h2>
+			<p class="line">One short call: no jargon, no pressure, and an honest answer about whether we can help.</p>
+			<a class="btn-call" href={BOOK_CALL_HREF} data-reach>Book a call</a>
+		</div>
+		<div class="figure">
+			<Plate name="automaton" fig="Plate XIV" title="The automaton" caption={CAPTION} scrub />
 		</div>
 	</div>
 </section>
 
+<script>
+	import { gsap } from 'gsap';
+	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+	gsap.registerPlugin(ScrollTrigger);
+	const section = document.querySelector<HTMLElement>('[data-closing]');
+	const plate = section?.querySelector<HTMLElement>('figure.machine');
+	const cta = section?.querySelector<HTMLElement>('[data-reach]');
+	if (section && plate && document.documentElement.classList.contains('motion')) {
+		let last = 0;
+		ScrollTrigger.create({
+			trigger: section,
+			start: 'top top',
+			end: 'bottom bottom',
+			onUpdate: ({ progress: p }) => {
+				// Bench, assembled, wound, reaching: the last quarter of the scroll holds the reach.
+				const step = p < 0.12 ? 1 : p < 0.36 ? 2 : p < 0.58 ? 3 : 4;
+				if (step !== last) {
+					last = step;
+					plate.dispatchEvent(new CustomEvent('plate:step', { detail: step }));
+					cta?.classList.toggle('is-reached', step === 4);
+				}
+			},
+		});
+	}
+</script>
+
 <style>
 	.closing {
-		padding-block: 72px 120px;
+		position: relative;
+		overflow-x: clip; /* the enlarged figure may spill sideways; clip keeps sticky working */
 	}
-	.grid {
+	.stage {
 		display: grid;
-		grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
-		gap: clamp(32px, 6vw, 88px);
+		grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
 		align-items: center;
+		gap: clamp(24px, 4vw, 64px);
+		max-width: var(--max);
+		margin-inline: auto;
+		padding: clamp(64px, 10vh, 120px) var(--gutter);
 	}
-	figure {
-		margin: 0;
-		display: grid;
-		gap: 10px;
-	}
-	/* The study's own paper multiplies into ours, so the sheet sits on the page rather than in a box. */
-	figure :global(img) {
-		width: 100%;
-		height: auto;
-		mix-blend-mode: multiply;
-		mask-image: linear-gradient(transparent, #000 5%, #000 95%, transparent), linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
-		mask-composite: intersect;
-	}
-	figcaption {
-		font-size: 0.82rem;
-		color: var(--muted);
+	.term {
+		font: italic 400 1.15rem/1 var(--font-display);
+		color: var(--sanguine-ink);
 	}
 	.call {
 		display: grid;
@@ -61,23 +69,81 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		gap: 20px;
 	}
 	h2 {
-		font-size: clamp(2.4rem, 5vw, 4rem);
-		max-width: 12ch;
+		font-size: var(--t-xl);
+		line-height: 0.92;
+		letter-spacing: -0.03em;
+		margin-left: -0.04em;
+		max-width: 10ch;
 	}
 	.line {
-		max-width: 40ch;
+		max-width: 34ch;
 		font-size: 1.15rem;
+		color: var(--strong);
 	}
+	/* When the automaton's hand is up, the call answers it: the pigment soaks in and the dot reaches. */
+	.btn-call:global(.is-reached) {
+		box-shadow: 0 0 0 6px color-mix(in oklab, var(--ochre) 30%, transparent);
+	}
+	.btn-call {
+		transition:
+			color 300ms var(--ease),
+			scale 200ms var(--ease),
+			box-shadow 700ms var(--ease);
+	}
+
+	/* Motion: 150svh of scroll belongs to the automaton. */
+	:global(html.motion) .closing {
+		height: 250svh;
+	}
+	:global(html.motion) .stage {
+		position: sticky;
+		top: 0;
+		min-height: 100svh;
+		padding-top: calc(var(--nav-h) + 24px);
+	}
+
+	/* Out of its card: the automaton stands on the page itself, at the scale of the hero's hands.
+	   Scroll drives the steps, so the step list and caption stay for no-JS and reduced motion only. */
+	.figure :global(.plate) {
+		padding: 0;
+		background: none;
+		box-shadow: none;
+	}
+	.figure :global(.corners) {
+		display: none;
+	}
+	.figure :global(.stage) {
+		max-width: none;
+		scale: 1.32;
+		transform-origin: 50% 46%;
+	}
+	:global(html.motion) .figure :global(.controls),
+	:global(html.motion) .figure :global(figcaption) {
+		display: none;
+	}
+
 	@media (max-width: 899px) {
-		.grid {
+		.figure :global(.stage) {
+			scale: 1.5;
+			transform-origin: 50% 40%;
+		}
+		.stage {
 			grid-template-columns: 1fr;
+			align-content: center;
+			gap: 56px;
 		}
-		figure {
-			max-width: 420px;
-			margin-inline: auto;
+		.figure {
+			order: -1;
 		}
-		.closing {
-			padding-bottom: 80px;
+		.figure :global(figcaption),
+		.figure :global(.controls) {
+			display: none;
+		}
+		h2 {
+			font-size: clamp(2.2rem, 10vw, 3rem);
+		}
+		.line {
+			font-size: 1rem;
 		}
 	}
 </style>
