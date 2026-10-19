@@ -1,7 +1,7 @@
 ---
-import Plate from './Plate.astro';
+import { Picture } from 'astro:assets';
 import { BOOK_CALL_HREF } from '../lib/cta';
-import { CAPTION } from '../machines/vitruvian/geometry';
+import vitruvian from '../assets/art/vitruvian.jpg';
 ---
 
 <section class="closing" data-closing aria-labelledby="closing-title">
@@ -12,43 +12,59 @@ import { CAPTION } from '../machines/vitruvian/geometry';
 			<p class="line">One short call: no jargon, no pressure, and an honest answer about whether we can help.</p>
 			<a class="btn-call" href={BOOK_CALL_HREF} data-reach>Book a call</a>
 		</div>
-		<div class="figure">
-			<Plate name="vitruvian" fig="Plate XIV" title="The Vitruvian" caption={CAPTION} scrub />
-		</div>
+		<figure class="figure">
+			<div class="drawing" data-drawing>
+				<Picture
+					src={vitruvian}
+					formats={['avif', 'webp']}
+					quality={55}
+					widths={[480, 800, 1200]}
+					sizes="(max-width: 899px) 100vw, 52vw"
+					alt="Leonardo da Vinci's Vitruvian Man: a man drawn inside a circle and a square, arms and legs in two positions."
+					loading="lazy"
+					decoding="async"
+					data-drawing-img
+				/>
+			</div>
+			<figcaption>Leonardo da Vinci, Vitruvian Man, c. 1490. Built to the measure of one person.</figcaption>
+		</figure>
 	</div>
 </section>
 
 <script>
 	import { gsap } from 'gsap';
 	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { mountVitruvian } from '../scripts/vitruvian';
 
 	gsap.registerPlugin(ScrollTrigger);
 	const section = document.querySelector<HTMLElement>('[data-closing]');
-	const plate = section?.querySelector<HTMLElement>('figure.machine');
+	const stage = section?.querySelector<HTMLElement>('[data-drawing]');
+	const img = stage?.querySelector<HTMLImageElement>('img[data-drawing-img]');
 	const cta = section?.querySelector<HTMLElement>('[data-reach]');
-	if (section && plate && document.documentElement.classList.contains('motion')) {
-		let last = 0;
-		ScrollTrigger.create({
-			trigger: section,
-			start: 'top top',
-			end: 'bottom bottom',
-			onUpdate: ({ progress: p }) => {
-				// Bench, assembled, wound, reaching: the last quarter of the scroll holds the reach.
-				const step = p < 0.12 ? 1 : p < 0.36 ? 2 : p < 0.58 ? 3 : 4;
-				if (step !== last) {
-					last = step;
-					plate.dispatchEvent(new CustomEvent('plate:step', { detail: step }));
-					cta?.classList.toggle('is-reached', step === 4);
-				}
-			},
-		});
+	if (section && stage && img && document.documentElement.classList.contains('motion')) {
+		const scene = mountVitruvian(stage, img);
+		if (scene) {
+			// Linear here: the scene follows each value with an exponential ease, and expo.inOut held the man blank until 55%.
+			const range = (p: number, a: number, b: number) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+			ScrollTrigger.create({
+				trigger: section,
+				start: 'top top',
+				end: 'bottom bottom',
+				invalidateOnRefresh: true,
+				onUpdate: ({ progress: p }) => {
+					// Square, circle, the man from his darkest lines, then the light at his fingertip.
+					const light = range(p, 0.8, 0.95);
+					scene.set({ square: range(p, 0, 0.2), circle: range(p, 0.15, 0.4), man: range(p, 0.35, 0.75), light });
+					cta?.classList.toggle('is-reached', light > 0.5);
+				},
+			});
+		}
 	}
 </script>
 
 <style>
 	.closing {
 		position: relative;
-		overflow-x: clip; /* the enlarged figure may spill sideways; clip keeps sticky working */
 	}
 	.stage {
 		display: grid;
@@ -80,9 +96,9 @@ import { CAPTION } from '../machines/vitruvian/geometry';
 		font-size: 1.15rem;
 		color: var(--strong);
 	}
-	/* When the automaton's hand is up, the call answers it: the pigment soaks in and the dot reaches. */
+	/* When the light opens at Leonardo's fingertip, the call answers it. */
 	.btn-call:global(.is-reached) {
-		box-shadow: 0 0 0 6px color-mix(in oklab, var(--ochre) 30%, transparent);
+		box-shadow: 0 0 28px 2px color-mix(in oklab, var(--ochre) 55%, transparent);
 	}
 	.btn-call {
 		transition:
@@ -91,7 +107,7 @@ import { CAPTION } from '../machines/vitruvian/geometry';
 			box-shadow 700ms var(--ease);
 	}
 
-	/* Motion: 150svh of scroll belongs to the automaton. */
+	/* Motion: 150svh of scroll draws the Vitruvian Man. */
 	:global(html.motion) .closing {
 		height: 250svh;
 	}
@@ -102,45 +118,70 @@ import { CAPTION } from '../machines/vitruvian/geometry';
 		padding-top: calc(var(--nav-h) + 24px);
 	}
 
-	/* Out of its card: the automaton stands on the page itself, at the scale of the hero's hands.
-	   Scroll drives the steps, so the step list and caption stay for no-JS and reduced motion only. */
-	.figure :global(.plate) {
-		padding: 0;
-		background: none;
-		box-shadow: none;
+	.figure {
+		margin: 0;
+		display: grid;
+		justify-items: center;
+		gap: 12px;
 	}
-	.figure :global(.corners) {
-		display: none;
+	/* Tall and held on the circle; the sheet's edges melt into the page, in the <img> and in the canvas. */
+	.drawing {
+		position: relative;
+		height: min(80svh, 1000px);
+		aspect-ratio: 1112 / 1400;
+		max-width: 100%;
 	}
-	.figure :global(.stage) {
-		max-width: none;
-		scale: 1.32;
-		transform-origin: 50% 46%;
+	.drawing :global(picture),
+	.drawing :global(img),
+	.drawing :global(.vitruvian-canvas) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
 	}
-	:global(html.motion) .figure :global(.controls),
-	:global(html.motion) .figure :global(figcaption) {
-		display: none;
+	.drawing :global(img) {
+		object-fit: cover;
+		object-position: 49.9% 47.1%;
+		mask:
+			linear-gradient(to right, transparent, #000 11%, #000 89%, transparent),
+			linear-gradient(transparent, #000 9%, #000 91%, transparent);
+		mask-composite: intersect;
+	}
+	.drawing:global(.is-live) :global(img) {
+		visibility: hidden;
+	}
+	figcaption {
+		font-size: var(--t-xs);
+		color: var(--text);
 	}
 
 	@media (max-width: 899px) {
-		.figure :global(.stage) {
-			scale: 1.5;
-			transform-origin: 50% 40%;
-		}
 		.stage {
 			grid-template-columns: 1fr;
 			align-content: center;
-			gap: 56px;
+			gap: 24px;
 		}
 		.figure {
 			order: -1;
 		}
-		.figure :global(figcaption),
-		.figure :global(.controls) {
-			display: none;
+		.drawing {
+			height: 52svh;
+			width: 100%;
+			aspect-ratio: auto;
+		}
+		.figure {
+			gap: 8px;
+		}
+		/* The whole scene fits one phone screen, so Book a call never sits below the fold. */
+		:global(html.motion) .stage {
+			padding-block: calc(var(--nav-h) + 4px) 16px;
+		}
+		.call {
+			gap: 12px;
 		}
 		h2 {
-			font-size: clamp(2.2rem, 10vw, 3rem);
+			font-size: clamp(2.1rem, 9.4vw, 3rem);
+			max-width: none;
 		}
 		.line {
 			font-size: 1rem;
