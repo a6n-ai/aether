@@ -1,5 +1,5 @@
 ---
-import Plate from './Plate.astro';
+import Figure from './Figure.astro';
 import { CAPTION as BUILD_NEW } from '../machines/build-new/geometry';
 import { CAPTION as MOVE_OVER } from '../machines/move-over/geometry';
 import { CAPTION as RUN_GROW } from '../machines/run-grow/geometry';
@@ -13,15 +13,15 @@ import { CAPTION as RUN_GROW } from '../machines/run-grow/geometry';
 		<div class="grid">
 			<div class="track" data-reveal-item>
 				<h3>Build something new</h3>
-				<Plate name="build-new" fig="Plate V" title="New" caption={BUILD_NEW} compact />
+				<Figure figure="computer" fig="Plate V" pigment="var(--lapis)" like="Like a desk computer you type on: your idea goes in, and it comes up on the screen." caption={BUILD_NEW} />
 			</div>
 			<div class="track" data-reveal-item>
 				<h3>Move you over</h3>
-				<Plate name="move-over" fig="Plate VI" title="Move over" caption={MOVE_OVER} compact />
+				<Figure figure="hash-map" fig="Plate VI" pigment="var(--ochre)" like="Like a post-office sorting desk: every letter is stamped with its pigeonhole and filed there." caption={MOVE_OVER} />
 			</div>
 			<div class="track" data-reveal-item>
 				<h3>Run and grow</h3>
-				<Plate name="run-grow" fig="Plate VII" title="Run and grow" caption={RUN_GROW} compact />
+				<Figure figure="watch" fig="Plate VII" pigment="var(--umber)" like="Like a watch movement on a bench: it keeps ticking, and we keep it tuned." caption={RUN_GROW} />
 			</div>
 		</div>
 		<p class="more"><a href="/how-it-works/">See how a build works, step by step</a></p>

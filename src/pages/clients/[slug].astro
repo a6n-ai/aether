@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import Plate from '../../components/Plate.astro';
+import Figure from '../../components/Figure.astro';
+import type { FigureName } from '../../scripts/figure';
 import { CLIENTS, type Client } from '../../data/clients';
 import { BOOK_CALL_HREF } from '../../lib/cta';
 import * as tiffingrab from '../../machines/tiffingrab/geometry';
@@ -20,6 +21,12 @@ export function getStaticPaths() {
 }
 
 const { client } = Astro.props as { client: Client };
+const FIGURES: Record<Client['slug'], { figure: FigureName; like: string; pigment: string; lit?: string }> = {
+	tiffingrab: { figure: 'dns', pigment: 'var(--ochre)', like: 'Like a pneumatic tube dispatcher: each order is sent down the right tube, and a flag goes up when it comes back.' },
+	puchkaman: { figure: 'tcp-handshake', pigment: 'var(--verdigris)', like: 'Like a mail ropeway between two stations: the order rides across, and each side signals when it has it.' },
+	xplorers: { figure: 'rate-limiter', pigment: 'var(--lapis)', like: 'Like a ticket punch with a fixed number of tokens: each booking punches one, and when the class is full the press stays shut.' },
+	'copper-cloves': { figure: 'public-key', pigment: 'var(--sanguine)', lit: 'var(--ochre)', like: 'Like a strongbox with a lock in its lid: a member’s pass turns it, and nobody else’s does.' },
+};
 const caption = CAPTIONS[client.slug];
 const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 ---
@@ -34,7 +41,7 @@ const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 			<p class="line">{client.line}</p>
 		</div>
 		<div class="wrap">
-			<Plate name={client.slug} fig={`Plate ${plateNo}`} title={client.name} caption={caption} />
+			<Figure {...FIGURES[client.slug]} fig={`Plate ${plateNo}`} caption={caption} />
 		</div>
 		<section class="wrap features">
 			<h2>What it does</h2>

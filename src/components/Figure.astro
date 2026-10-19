@@ -1,0 +1,55 @@
+---
+// A live figure from the Anatomy collection (anatomy-figures, MIT), tinted in one fresco pigment.
+import { SIZES, type FigureName } from '../scripts/figure';
+
+interface Props {
+	figure: FigureName;
+	fig: string;
+	/** Plain-words reading of the machine: what the visitor is looking at. */
+	like: string;
+	caption: string;
+	pigment: string;
+	lit?: string;
+}
+
+const { figure, fig, like, caption, pigment, lit = 'var(--sanguine)' } = Astro.props;
+const [slope, px] = SIZES[figure];
+---
+
+<figure class="figure" style={`--pigment:${pigment};--lit:${lit};--slope:${slope};--px:${px}px`}>
+	<div class="stage" data-figure={figure} data-fig={fig} role="img" aria-label={like}></div>
+	<figcaption>
+		<span class="like">{like}</span>
+		{caption}
+	</figcaption>
+</figure>
+
+<script>
+	import { mountFigure } from '../scripts/figure';
+	document.querySelectorAll<HTMLElement>('[data-figure]').forEach(mountFigure);
+</script>
+
+<style>
+	.figure {
+		margin: 0;
+		display: grid;
+		gap: 14px;
+		container-type: inline-size;
+	}
+	.stage {
+		min-width: 0;
+		min-height: calc(var(--slope) * 100cqw + var(--px));
+		background: var(--card);
+		box-shadow: 0 0 0 1px color-mix(in oklab, var(--pigment) 30%, var(--card));
+	}
+	figcaption {
+		font-size: 0.95rem;
+		color: var(--muted);
+		max-width: 62ch;
+	}
+	.like {
+		display: block;
+		margin-bottom: 4px;
+		color: var(--text);
+	}
+</style>

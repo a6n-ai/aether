@@ -1,6 +1,5 @@
 ---
-import Plate from './Plate.astro';
-import { CAPTION } from '../machines/relay/geometry';
+import Figure from './Figure.astro';
 
 const KINDS = [
 	{ term: 'Confirmations and receipts', text: 'Sent the moment an order, booking or payment goes through.', pigment: 'var(--lapis)' },
@@ -25,9 +24,18 @@ const KINDS = [
 				}
 			</ul>
 		</div>
-		<div class="plate-wrap" data-reveal-item><Plate name="relay" fig="Plate VIII" title="The post" caption={CAPTION} /></div>
+		<div data-reveal-item>
+			<Figure
+				figure="message-queue"
+				fig="Plate VIII"
+				pigment="var(--verdigris)"
+				like="Like a marble run: two senders drop messages into one lane, they wait their turn in order, and each is taken off one at a time."
+				caption="So none is lost when it gets busy. Drag across it to change how fast they arrive."
+			/>
+		</div>
 	</div>
 </section>
+
 
 <style>
 	.messages {
