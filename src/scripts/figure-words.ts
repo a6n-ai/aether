@@ -6,33 +6,7 @@ type Rule = [RegExp, string | ((...m: string[]) => string)];
 
 const seconds: Rule = [/(\d+) ms\b/g, (_, ms) => `${(Number(ms) / 1000).toFixed(1)} s`];
 
-const DEMO = 'hello, claude';
-const OURS = 'hello, a6n.ai'; // same length as DEMO, so a rewritten line maps to itself
-
 const RULES: Record<FigureName, Rule[]> = {
-	computer: [
-		[/^Desk computer$/, 'Your idea, on screen'],
-		[/^Type on it · click it to switch$/, 'Type on it · click to switch off'],
-		[/ chars\b/, ' letters'],
-		[/ · key .*$/, ''],
-		// The idle tour types a greeting to Claude; type ours instead, letter for letter.
-		[/^> (.*)$/, (line, body) => (body && DEMO.startsWith(body) ? `> ${OURS.slice(0, body.length)}` : line)],
-	],
-	'hash-map': [
-		[/^Tap to file · hover a bucket$/, 'Tap to file · hover a pigeonhole'],
-		[/^get (\w+)/, 'find $1'],
-		[/^put (\w+)/, 'file $1'],
-		[/0x[0-9A-F]+ mod \d+ = (\d+)/, 'pigeonhole $1'],
-		[/check \d+: (\w+) ≠ (\w+)/, '$1 is not $2'],
-		[/\bbuckets?\b/g, 'pigeonhole'],
-		[/^mod 8$/, '8 holes'],
-	],
-	watch: [
-		[/^Drag crown ↑ to wind · S slow · E anatomy$/, 'Drag the crown · S slow · E take apart'],
-		[/\d+ Hz · [\d,]+ vph/, 'ticking'],
-		[/reserve ([\d.]+) h/, '$1 h of power left'],
-		[/ · amplitude \d+°/, ''],
-	],
 	'message-queue': [
 		[/^Message queue$/, 'Messages in line'],
 		[/^Drag to set rate · tap a drum$/, 'Drag to send faster · tap a drum'],
