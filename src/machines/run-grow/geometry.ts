@@ -1,99 +1,91 @@
 import * as k from '../../lib/anatomy/iso-kit';
-import type { Plan, Plane, Point3 } from '../../lib/anatomy/iso-kit';
-import { moverSvg, stepSvg, transformsFrom, type Machine } from '../../lib/plate';
+import type { Flat, Plan, Point3 } from '../../lib/anatomy/iso-kit';
+import { stepSvg, type Machine } from '../../lib/plate';
 
 export const LABELS = ['your app running', 'checked every day', 'fixed and improved', 'grows with you'] as const;
 export const CAPTION = "Once you're live, we keep watch every day, fix what breaks and add what you need next.";
 
-const BASE: Plan = { x: -175, y: -90, w: 350, d: 180, r: 8 };
+const BASE: Plan = { x: -148, y: -54, w: 226, d: 104, r: 8 };
 const BASE_H = 12;
 const FOOT_H = 6;
 
-const STAND: Plan = { x: -120, y: -62, w: 176, d: 100, r: 4 };
-const STAND_H = 10;
-const PLATE: Plan = { x: -112, y: -54, w: 156, d: 84, r: 3 };
-const PLATE_Z = 26;
-const PLATE_TOP = 29;
-const RAIL: Plan = { x: 44, y: -48, w: 100, d: 44, r: 2 };
-const CHIME: Plan = { x: 8, y: -45, w: 34, d: 38, r: 3 };
-const CHIME_SLIDE = 92;
+// planter box on legs, soil level with its rim
+const PL: Plan = { x: -80, y: -45, w: 100, d: 80, r: 3 };
+const BOX_Z = 26;
+const RIM_Z = 52;
+const SOIL = 54.6;
 
-const WZ = 34;
-const BARREL: Plane = [-18, -26];
-const CENTRE: Plane = [-46, -27];
-const THIRD: Plane = [-58.6, -10.2];
-const ESCAPE: Plane = [-74.9, -18];
-const SLOT: Plane = [-64.8, 9.6];
-const TRAY: Plan = { x: 30, y: 44, w: 70, d: 38, r: 3 };
-const TRAY_TOP = 36;
-const SPARE_AT: Plane = [56, 63];
-const SPARE_Z = 41;
-const PEND: Plane = [-130, -34];
-const LOUPE_AT: Plane = [-150, -76];
-const LOUPE_Z = 72;
-const LOUPE_LEN = 95;
-const LOUPE_ON = 45;
-const GAUGE: Plane = [-146, 46];
-const GAUGE_Z = 22;
-const BRIDGE_Z = 46;
+// tree: a fixed lower trunk, an inner trunk that telescopes out, a crown of tiers and a nested top tier
+const TX = -30;
+const TY = -5;
+const T1_TOP = 82;
+const GROW = 24;
+const NEST = 9;
+
+// water: tank, valve, drip line along y = LINE_Y lying on the soil
+const TANK: [number, number] = [-122, -22];
+const TANK_R = 15;
+const VALVE = -94;
+const LINE_Y = -20;
+const LINE_END = 14;
+const EMITTERS = [-52, -12];
+const FRESH_X = 6;
+
+// tool rail at x = 75 with a probe lever on its front post
+const RAIL_X = 58;
+const POST_F = 23;
+const POST_B = -45;
+const BAR_Z = 80;
+const PIVOT: Point3 = [RAIL_X, POST_F, 92];
+const ARM = 50;
+const ARM_UP = 72;
+const ARM_DIP = -20;
+const DIAL: Point3 = [RAIL_X, 28.2, 50];
+
+// branch from the trunk, splint stake beside its tuft
+const BR_Z = 72.5;
+const BR_ROOT = TX + 4.5;
+const BR_LEN = 25;
+const DROOP = -22;
+const STAKE_X = 10;
 
 export function runGrow(width = 720, height = 480): Machine {
+	const tipAt = (deg: number): Point3 => {
+		const t = (deg * Math.PI) / 180;
+		return [PIVOT[0] - ARM * Math.cos(t), PIVOT[1], PIVOT[2] + ARM * Math.sin(t)];
+	};
 	const P = k.fitProjection(
-		[...k.boxCorners(BASE, -BASE_H - FOOT_H, 0), [LOUPE_AT[0], LOUPE_AT[1], LOUPE_Z + 6], [PEND[0], PEND[1], 72], [RAIL.x + RAIL.w, RAIL.y, 60], [SPARE_AT[0], SPARE_AT[1], 50], [LOUPE_AT[0] + 80, LOUPE_AT[1] + 70, LOUPE_Z + 6]],
+		[...k.boxCorners(BASE, -BASE_H - FOOT_H, 0), [TANK[0], TANK[1], 84], [TX, TY, 154], tipAt(ARM_UP), [tipAt(ARM_UP)[0], POST_F, tipAt(ARM_UP)[2] + 4]],
 		width,
 		height,
-		{ pad: 20, azimuth: 40 },
+		{ pad: 18, azimuth: 50 },
 	);
 	const at = (p: Point3) => k.iso(p, P);
 	const S = k.solidSvg;
 	const L = k.lineSvg;
 	const D = k.dotsSvg;
-	const byDepth = (points: Plane[]) => [...points].sort((a, b) => k.depthOf([a[0], a[1], 0], P) - k.depthOf([b[0], b[1], 0], P));
+	type T = 'hi' | 'mid' | 'lo';
+	const dots = (pts: Point3[], size = 0.45, tone: T | 'faint' = 'mid') => D(pts.map(at), { size, tone });
 	const halo = (plan: Plan, z: number, h: number, blur = 0) => `<path class="iso-halo" d="${k.haloOf(plan, z, h, P)}"${blur ? ` style="filter:blur(${blur}px)"` : ''}/>`;
-
-	const seg = (a: Point3, b: Point3) => k.segment(a, b, P);
-	const rectY = (y: number, x0: number, x1: number, z0: number, z1: number) => seg([x0, y, z0], [x1, y, z0]) + seg([x1, y, z0], [x1, y, z1]) + seg([x1, y, z1], [x0, y, z1]) + seg([x0, y, z1], [x0, y, z0]);
-	const rectX = (x: number, y0: number, y1: number, z0: number, z1: number) => seg([x, y0, z0], [x, y1, z0]) + seg([x, y1, z0], [x, y1, z1]) + seg([x, y1, z1], [x, y0, z1]) + seg([x, y0, z1], [x, y0, z0]);
-	const dotsAt = (pts: Point3[], size = 0.4, tone: k.Tone = 'mid') => D(pts.map(at), { size, tone });
-	const slots = (face: 'x' | 'y', at0: number, from: number, to: number, step: number, z0: number, z1: number, half: number) => {
-		let d = '';
-		for (let v = from; v <= to; v += step) d += face === 'x' ? rectX(at0, v - half, v + half, z0, z1) : rectY(at0, v - half, v + half, z0, z1);
-		return d;
+	const slab = (x: number, y: number, w: number, d: number, z: number, h: number, tone: T = 'mid', o: { r?: number; steps?: number; bevel?: number; thin?: boolean; lit?: boolean; seams?: number[] } = {}) => {
+		const plan: Plan = { x, y, w, d, r: o.r ?? 0.5 };
+		const inner = o.seams ? L(o.seams.map((z0) => k.sideSeam(plan, z0, P, o.steps ?? 2)).join(''), { tone: 'faint' }) : '';
+		return S(k.slabOf(plan, z, h, P, o.steps ?? 2, o.bevel ?? 0.2), { tone, crease: o.thin ? 'none' : 'faint', lit: o.lit, inner });
 	};
+	const cyl = (cx: number, cy: number, r: number, z: number, h: number, tone: T = 'mid', bevel = 0.3, o: { lit?: boolean; arcs?: number[]; knurl?: number } = {}) => {
+		const lines = (o.arcs ?? []).map((z0) => k.sideArc(cx, cy, r, z0, P, 24)).join('') + (o.knurl ? k.knurl(cx, cy, r, z, z + h, o.knurl, P, 0.3) : '');
+		return S(k.cylinder(cx, cy, r, z, h, P, r > 6 ? 36 : 18, bevel), { tone, lit: o.lit, inner: lines ? L(lines, { tone: 'faint' }) : '' });
+	};
+	const seg = (a: Point3, b: Point3, tone: T | 'faint' = 'mid') => L(k.segment(a, b, P), { tone, free: true });
+	const tint = (pigment: string, body: string) => `<g class="tint" style="--pigment:var(--${pigment})">${body}</g>`;
+	const mover = (name: string, pigment: string | null, transform: string, body: string) =>
+		pigment ? `<g class="mover tint" style="--pigment:var(--${pigment})" data-part="${name}" transform="${transform}">${body}</g>` : `<g class="mover plain" data-part="${name}" transform="${transform}">${body}</g>`;
+	const shift = (by: Point3) => k.translateAlong(P, by);
 
-	function base() {
-		const out = [halo(BASE, -BASE_H - FOOT_H, BASE_H)];
-		for (const [x, y] of byDepth(k.corners(BASE, 24))) {
-			out.push(S(k.cylinder(x, y, 8, -BASE_H - FOOT_H, 1.8, P, 28), { tone: 'lo' }));
-			out.push(S(k.cylinder(x, y, 6, -BASE_H - FOOT_H + 1.8, FOOT_H - 1.8, P, 28), { tone: 'mid' }));
-		}
-		out.push(S(k.slabOf(BASE, -BASE_H, BASE_H, P, 8, 1.6), { tone: 'mid', inner: L(k.sideSeam(BASE, -BASE_H / 2, P), { tone: 'faint' }) }));
-		out.push(L(k.planOutline(k.insetPlan(BASE, 5), 0, P), { tone: 'lo' }));
-		const screws = k.corners(BASE, 11);
-		out.push(L(screws.map(([x, y]) => k.ring(x, y, 2.2, 0, P, 16)).join(''), { tone: 'lo' }));
-		out.push(D(screws.map(([x, y]) => at([x, y, 0])), { size: 0.5 }));
-		const strip: Plan = { x: -150, y: BASE.y + BASE.d - 16, w: 170, d: 7, r: 1 };
-		out.push(S(k.slabOf(strip, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
-		const ticks = k.topTicks(strip.x + 4, strip.x + strip.w - 4, 4, 5, strip.y + 0.8, 0.6, [2, 3.6], P);
-		out.push(L(ticks.minor, { tone: 'lo' }), L(ticks.major, { tone: 'mid' }));
-		out.push(D([at([strip.x + 2, strip.y + 3.5, 0.6]), at([strip.x + strip.w - 2, strip.y + 3.5, 0.6])], { size: 0.45 }));
-		const label: Plan = { x: 112, y: BASE.y + BASE.d - 24, w: 44, d: 13, r: 1.5 };
-		out.push(S(k.slabOf(label, 0, 0.8, P, 3), { tone: 'lo' }));
-		for (const dy of [3.5, 6.5, 9.5]) out.push(L(k.lineOnTop([label.x + 5, label.y + dy], [label.x + label.w - (dy === 9.5 ? 16 : 5), label.y + dy], 0.8, P), { tone: 'faint', free: true }));
-		out.push(D([at([label.x + 2, label.y + 2, 0.8]), at([label.x + label.w - 2, label.y + label.d - 2, 0.8])], { size: 0.4 }));
-		const fx = BASE.x + BASE.w;
-		const fy = BASE.y + BASE.d;
-		out.push(L(slots('x', fx, -56, 56, 16, -4.8, -2.6, 5) + slots('y', fy, -120, 120, 30, -4.8, -2.6, 7), { tone: 'lo' }));
-		out.push(dotsAt([-150, -90, -30, 30, 90, 150].map((x) => [x, fy, -9] as Point3), 0.45), dotsAt([-60, -20, 20, 60].map((y) => [fx, y, -9] as Point3), 0.45));
-		out.push(L([-120, 0, 120].map((x) => k.ring(x, 83, 1.6, 0, P, 12)).join('') + [-60, 0, 60].map((y) => k.ring(166, y, 1.6, 0, P, 12)).join(''), { tone: 'lo' }), dotsAt([...[-120, 0, 120].map((x) => [x, 83, 0] as Point3), ...[-60, 0, 60].map((y) => [166, y, 0] as Point3)], 0.4));
-		out.push(L(k.planOutline(k.insetPlan(BASE, 9), 0, P), { tone: 'faint' }));
-		return out.join('');
-	}
-	const ZERO: Point3 = [0, 0, 0];
-
-	function swing([px, py]: Plane, deg: number, z: number) {
-		const a = k.axisVector(P, [1, 0, 0]);
-		const b = k.axisVector(P, [0, 1, 0]);
+	/** Screen matrix for a rotation by `deg` in the world plane spanned by axes u and v about `pivot`, then a world shift. */
+	function turn(pivot: Point3, u: Point3, v: Point3, deg: number, by: Point3 = [0, 0, 0]) {
+		const a = k.axisVector(P, u);
+		const b = k.axisVector(P, v);
 		const det = a[0] * b[1] - a[1] * b[0];
 		const inv = [[b[1] / det, -b[0] / det], [-a[1] / det, a[0] / det]];
 		const t = (deg * Math.PI) / 180;
@@ -101,270 +93,287 @@ export function runGrow(width = 720, height = 480): Machine {
 		const A = [[a[0], b[0]], [a[1], b[1]]];
 		const mul = (X: number[][], Y: number[][]) => X.map((row) => [0, 1].map((j) => row[0] * Y[0][j] + row[1] * Y[1][j]));
 		const M = mul(mul(A, R), inv);
-		const q = k.iso([px, py, z], P);
-		const tx = q[0] - (M[0][0] * q[0] + M[0][1] * q[1]);
-		const ty = q[1] - (M[1][0] * q[0] + M[1][1] * q[1]);
+		const q = at(pivot);
+		const s = k.axisVector(P, by);
+		const tx = q[0] - (M[0][0] * q[0] + M[0][1] * q[1]) + s[0];
+		const ty = q[1] - (M[1][0] * q[0] + M[1][1] * q[1]) + s[1];
 		const f = (n: number) => Math.round(n * 1000) / 1000;
 		return `matrix(${f(M[0][0])} ${f(M[1][0])} ${f(M[0][1])} ${f(M[1][1])} ${f(tx)} ${f(ty)})`;
 	}
+	const X: Point3 = [1, 0, 0];
+	const Z: Point3 = [0, 0, 1];
 
-	function gearRing([cx, cy]: Plane, outer: number, root: number, teeth: number, phase: number): Plane[] {
-		const pitch = (Math.PI * 2) / teeth;
-		const ring: Plane[] = [];
-		const pt = (r: number, a: number): Plane => [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
-		for (let i = 0; i < teeth; i++) {
-			const a = phase + i * pitch;
-			ring.push(pt(root, a - 0.5 * pitch), pt(root, a - 0.3 * pitch), pt(outer, a - 0.17 * pitch), pt(outer, a + 0.17 * pitch), pt(root, a + 0.3 * pitch));
-		}
-		return ring;
+	/** Screen outline of a round column's body below its top rim: what a part sliding out of it must stay hidden behind. */
+	function sleeveHole(cx: number, cy: number, r: number, zTop: number, zBot: number) {
+		const [vx, vy] = k.towardViewer(P);
+		const face = Math.atan2(vy, vx);
+		const arc = (z: number, from: number, to: number) =>
+			Array.from({ length: 25 }, (_, i) => {
+				const a = face + ((from + ((to - from) * i) / 24) * Math.PI) / 2;
+				return at([cx + r * Math.cos(a), cy + r * Math.sin(a), z]);
+			});
+		const pts: Flat[] = [...arc(zTop, -1, 1), ...arc(zBot, 1, -1)];
+		return `M-2000 -2000H3000V3000H-2000Z` + k.pathOf(pts, true);
 	}
-	interface Wheel {
-		c: Plane;
-		outer: number;
-		root: number;
-		teeth: number;
-		phase: number;
-		hub: number;
-		z: number;
-		spokes: number;
-		loose?: boolean;
-	}
-	function wheel(w: Wheel) {
-		const [cx, cy] = w.c;
-		const out = [halo({ x: cx - w.outer, y: cy - w.outer, w: w.outer * 2, d: w.outer * 2, r: w.outer }, w.loose ? w.z - 5 : PLATE_TOP, 0.1, 3)];
-		if (w.loose) out.push(S(k.cylinder(cx, cy, w.hub + 0.8, w.z - 5, 5, P, 20), { tone: 'lo' }));
-		else out.push(S(k.cylinder(cx, cy, w.hub + 1, PLATE_TOP, w.z - PLATE_TOP, P, 20), { tone: 'lo' }));
-		out.push(S(k.extrude(gearRing(w.c, w.outer, w.root, w.teeth, w.phase), w.z, 3, P, { convex: false }), { tone: 'hi' }));
-		const top = w.z + 3;
-		out.push(L(k.ring(cx, cy, w.root - 2, top, P, 40), { tone: 'mid' }));
-		for (let i = 0; i < w.spokes; i++) {
-			const a = (i / w.spokes) * Math.PI * 2 + 0.3;
-			out.push(L(k.ring(cx + Math.cos(a) * w.root * 0.55, cy + Math.sin(a) * w.root * 0.55, w.root * 0.17, top, P, 14), { tone: 'lo' }));
-		}
-		out.push(S(k.extrude(gearRing(w.c, w.hub + 2.8, w.hub + 1.2, 7, w.phase + 0.4), top, 2.6, P, { convex: false }), { tone: 'mid' }));
-		out.push(S(k.cylinder(cx, cy, w.hub * 0.55, top + 2.6, 1.6, P, 14), { tone: 'hi' }), D([at([cx, cy, top + 4.2])], { size: 0.45, tone: 'hi' }));
+	const clipDef = (id: string, d: string) => `<clipPath id="${id}"><path clip-rule="evenodd" d="${d}"/></clipPath>`;
+
+	function base() {
+		const out = [halo(BASE, -BASE_H - FOOT_H, BASE_H)];
+		const byDepth = [...k.corners(BASE, 22)].sort((a, b) => k.depthOf([a[0], a[1], 0], P) - k.depthOf([b[0], b[1], 0], P));
+		for (const [x, y] of byDepth) out.push(S(k.cylinder(x, y, 8, -BASE_H - FOOT_H, 1.8, P, 28), { tone: 'lo' }), S(k.cylinder(x, y, 6, -BASE_H - FOOT_H + 1.8, FOOT_H - 1.8, P, 28), { tone: 'mid' }));
+		out.push(S(k.slabOf(BASE, -BASE_H, BASE_H, P, 8, 1.6), { tone: 'mid', inner: L(k.sideSeam(BASE, -BASE_H / 2, P), { tone: 'faint' }) }));
+		out.push(L(k.planOutline(k.insetPlan(BASE, 5), 0, P), { tone: 'lo' }));
+		const screws = k.corners(BASE, 11);
+		out.push(L(screws.map(([x, y]) => k.ring(x, y, 2.2, 0, P, 16)).join(''), { tone: 'lo' }), D(screws.map(([x, y]) => at([x, y, 0])), { size: 0.5 }));
+		const strip: Plan = { x: -130, y: BASE.y + BASE.d - 13, w: 124, d: 7, r: 1 };
+		out.push(S(k.slabOf(strip, 0, 0.6, P, 3), { tone: 'lo', crease: 'none' }));
+		const ticks = k.topTicks(strip.x + 4, strip.x + strip.w - 4, 4, 5, strip.y + 0.8, 0.6, [2, 3.6], P);
+		out.push(L(ticks.minor, { tone: 'lo' }), L(ticks.major, { tone: 'mid' }));
+		const label: Plan = { x: 20, y: BASE.y + BASE.d - 16, w: 40, d: 12, r: 1.5 };
+		out.push(S(k.slabOf(label, 0, 0.8, P, 3), { tone: 'lo' }), L(k.planOutline(k.insetPlan(label, 1.6), 0.8, P, 3), { tone: 'faint' }));
+		for (const dy of [3.5, 6.5, 9.5]) out.push(L(k.lineOnTop([label.x + 5, label.y + dy], [label.x + label.w - (dy === 9.5 ? 18 : 5), label.y + dy], 0.8, P), { tone: 'faint', free: true }));
+		out.push(D([at([label.x + 2.4, label.y + 2.4, 0.8]), at([label.x + label.w - 2.4, label.y + label.d - 2.4, 0.8])], { size: 0.45 }));
+		const fy = BASE.y + BASE.d;
+		const fx = BASE.x + BASE.w;
+		out.push(dots([-120, -60, 0, 50].map((x) => [x, fy, -6] as Point3), 0.45), dots([-40, 0, 40].map((y) => [fx, y, -6] as Point3), 0.45));
 		return out.join('');
 	}
-	const WHEELS: Wheel[] = [
-		{ c: BARREL, outer: 18, root: 14.4, teeth: 16, phase: 0.1, hub: 4, z: WZ, spokes: 5 },
-		{ c: CENTRE, outer: 13, root: 10, teeth: 12, phase: 0.5, hub: 3.4, z: WZ, spokes: 4 },
-		{ c: THIRD, outer: 11, root: 8, teeth: 10, phase: 1.1, hub: 3, z: WZ, spokes: 4 },
-		{ c: ESCAPE, outer: 10, root: 7.2, teeth: 15, phase: 0.2, hub: 2.6, z: WZ, spokes: 3 },
-	];
-	const SPARE: Wheel = { c: SLOT, outer: 13, root: 9.6, teeth: 10, phase: 0.9, hub: 3.2, z: WZ, spokes: 4, loose: true };
 
-	function movement() {
+	function tank() {
+		const [cx, cy] = TANK;
+		const R = TANK_R;
+		const out = [halo({ x: cx - R - 3, y: cy - R - 3, w: 2 * R + 6, d: 2 * R + 6, r: R + 3 }, 0, 4, 2)];
+		out.push(cyl(cx, cy, R + 3, 0, 5, 'lo', 0.6, { knurl: 30 }));
+		out.push(cyl(cx, cy, R, 5, 70, 'mid', 0, { arcs: [24, 44, 64] }));
+		out.push(cyl(cx, cy, R + 1, 75, 3, 'mid', 0.6), cyl(cx, cy, 5.5, 78, 3.4, 'hi', 0.4, { knurl: 14 }), cyl(cx, cy, 2, 81.4, 1.6, 'mid', 0.2));
+		const [vx, vy] = k.towardViewer(P);
+		const g: [number, number] = [cx + (R + 2) * vx, cy + (R + 2) * vy];
+		out.push(cyl(g[0], g[1], 2.6, 12, 3, 'mid', 0.3), cyl(g[0], g[1], 1.8, 15, 52, 'lo', 0), cyl(g[0], g[1], 2.6, 67, 3, 'mid', 0.3));
+		out.push(tint('lapis', cyl(g[0], g[1], 1.1, 15.4, 38, 'hi', 0)));
+		out.push(dots([[cx + R * Math.cos(2.0), cy + R * Math.sin(2.0), 71], [cx + R * Math.cos(-0.6), cy + R * Math.sin(-0.6), 71]], 0.5));
+		return out.join('');
+	}
+
+	function valveAndFeed() {
 		const out: string[] = [];
-		const pg = [...WHEELS].sort((a, b) => k.depthOf([a.c[0], a.c[1], 0], P) - k.depthOf([b.c[0], b.c[1], 0], P));
-		out.push(S(k.cylinder(SLOT[0], SLOT[1], 1.7, PLATE_TOP, 13, P, 12), { tone: 'hi', crease: 'none' }), S(k.cylinder(SLOT[0], SLOT[1], 3, PLATE_TOP, 1.2, P, 14), { tone: 'mid' }));
-		for (const w of pg) out.push(wheel(w));
-		const [px, py] = [-93, -34];
-		out.push(S(k.cylinder(px, py, 2, PLATE_TOP, 12, P, 12), { tone: 'mid' }), S(k.cylinder(px, py, 3, 38, 2, P, 14), { tone: 'lo' }));
-		out.push(S(k.extrude([[-99, -31], [-92, -42], [-79, -30.5], [-83, -26.5], [-92, -34], [-95, -26]], 40, 2.4, P, { convex: false }), { tone: 'hi' }));
-		out.push(S(k.slabOf({ x: PEND[0] - 1.2, y: -35.2, w: 38, d: 2.4, r: 0.6 }, 44, 2, P, 2), { tone: 'mid' }), S(k.cylinder(px, py, 1.6, 42.4, 3, P, 10), { tone: 'hi' }), D([at([px, py, 45.8]), at([-83, -26.5, 42.4]), at([-79, -30.5, 42.4])], { size: 0.45, tone: 'hi' }));
-		const bar: Plan = { x: -50, y: -30, w: 36, d: 6, r: 1.5 };
-		out.push(S(k.cylinder(BARREL[0], BARREL[1], 2.2, WZ + 5.6, BRIDGE_Z - WZ - 5.6, P, 12), { tone: 'hi', crease: 'none' }), S(k.cylinder(CENTRE[0], CENTRE[1], 2.2, WZ + 5.6, BRIDGE_Z - WZ - 5.6, P, 12), { tone: 'hi', crease: 'none' }));
-		out.push(halo(bar, BRIDGE_Z, 0.1, 2), S(k.slabOf(bar, BRIDGE_Z, 3, P, 3, 0.5), { tone: 'mid' }));
-		for (const [x, y] of [BARREL, CENTRE]) out.push(S(k.cylinder(x, y === BARREL[1] ? -27 : -27.2, 2.4, BRIDGE_Z + 3, 1.4, P, 12), { tone: 'hi' }), L(k.lineOnTop([x - 1.6, -27], [x + 1.6, -27], BRIDGE_Z + 4.4, P), { tone: 'lo', free: true }));
-		out.push(L(k.lineOnTop([-46, -28.4], [-22, -28.4], BRIDGE_Z + 3, P) + k.lineOnTop([-46, -25.4], [-22, -25.4], BRIDGE_Z + 3, P), { tone: 'faint', free: true }));
+		const fx = TANK[0] + Math.sqrt(TANK_R * TANK_R - (LINE_Y - TANK[1]) ** 2);
+		out.push(cyl(VALVE, LINE_Y, 3, 0, 2, 'lo', 0.3), cyl(VALVE, LINE_Y, 1.8, 2, SOIL - 4.4, 'mid', 0, { arcs: [30] }));
+		out.push(slab(fx - 1, LINE_Y - 3.5, 4, 7, SOIL - 3, 7.4, 'mid', { r: 0.8, bevel: 0.3 }), dots([[fx + 3, LINE_Y - 2, SOIL + 3.6], [fx + 3, LINE_Y + 2, SOIL + 3.6]], 0.4));
+		out.push(slab(fx + 3, LINE_Y - 1.1, VALVE - 4.5 - fx - 3, 2.2, SOIL, 2.2, 'hi', { r: 0.6, thin: true }));
+		out.push(slab(VALVE - 4.5, LINE_Y - 4, 9, 8, SOIL - 2.4, 7, 'mid', { r: 1, bevel: 0.4, seams: [SOIL + 1] }));
+		out.push(cyl(VALVE, LINE_Y, 1.3, SOIL + 4.6, 3.4, 'mid', 0), cyl(VALVE, LINE_Y, 5, SOIL + 8, 1.8, 'hi', 0.4, { knurl: 18 }), cyl(VALVE, LINE_Y, 1.4, SOIL + 9.8, 1, 'mid', 0.2));
 		return out.join('');
 	}
 
-	function standBody() {
-		const out = [halo(STAND, 0, STAND_H)];
-		out.push(S(k.slabOf(STAND, 0, STAND_H, P, 4, 0.8), { tone: 'lo', inner: L(k.sideSeam(STAND, 5, P, 4), { tone: 'faint' }) }));
-		out.push(L(k.planOutline(k.insetPlan(STAND, 4), STAND_H, P, 4), { tone: 'faint' }));
-		out.push(D(k.corners(STAND, 4).map(([x, y]) => at([x, y, STAND_H])), { size: 0.45 }));
-		const fy = STAND.y + STAND.d;
-		out.push(S(k.slabOf({ x: -60, y: fy, w: 30, d: 1.2, r: 0.4 }, 2.4, 5.2, P, 2), { tone: 'mid', crease: 'none' }));
-		out.push(L(`${k.segment([-56, fy + 1.2, 6.8], [-36, fy + 1.2, 6.8], P)}${k.segment([-56, fy + 1.2, 4.6], [-46, fy + 1.2, 4.6], P)}`, { tone: 'faint', free: true }));
-		out.push(L(slots('y', fy, -100, 40, 20, 3, 7, 4), { tone: 'lo' }), dotsAt([[-114, fy, 2.4], [50, fy, 2.4], [-114, fy, 8], [50, fy, 8]], 0.45));
-		for (const [x, y] of [[-106, -48], [38, -48], [-106, 24], [38, 24]] as const) {
-			out.push(halo({ x: x - 5, y: y - 5, w: 10, d: 10, r: 5 }, STAND_H, 0.1, 1.5), S(k.cylinder(x, y, 5, STAND_H, 2.4, P, 20), { tone: 'mid' }), S(k.cylinder(x, y, 3.2, STAND_H + 2.4, PLATE_Z - STAND_H - 2.4, P, 16), { tone: 'hi', crease: 'none' }), L(k.sideArc(x, y, 3.2, 18, P, 14), { tone: 'faint' }), S(k.cylinder(x, y, 4.4, PLATE_Z - 2, 2, P, 16), { tone: 'mid' }));
-		}
+	function planter() {
+		const out = [halo(PL, 0, BOX_Z, 4)];
+		const LEG = 7;
+		const legs: [number, number][] = [[PL.x + 2, PL.y + 2], [PL.x + PL.w - 2 - LEG, PL.y + 2], [PL.x + 2, PL.y + PL.d - 2 - LEG], [PL.x + PL.w - 2 - LEG, PL.y + PL.d - 2 - LEG]];
+		const leg = ([x, y]: [number, number]) => slab(x - 1, y - 1, LEG + 2, LEG + 2, 0, 2, 'lo', { r: 1 }) + slab(x, y, LEG, LEG, 2, BOX_Z - 2, 'mid', { r: 0.8, seams: [14] });
+		const inX = PL.x + 2 + LEG;
+		const inW = PL.w - 4 - LEG * 2;
+		const inY = PL.y + 2 + LEG;
+		const inD = PL.d - 4 - LEG * 2;
+		const items: [number, string][] = [
+			...legs.map((p): [number, string] => [k.depthOf([p[0] + LEG / 2, p[1] + LEG / 2, 0], P), leg(p)]),
+			[k.depthOf([PL.x + PL.w / 2, PL.y + 5, 0], P), slab(inX, PL.y + 3, inW, 5, 12, 5, 'mid', { r: 0.6 })],
+			[k.depthOf([PL.x + 5, PL.y + PL.d / 2, 0], P), slab(PL.x + 3, inY, 5, inD, 12, 5, 'mid', { r: 0.6 })],
+			[k.depthOf([PL.x + PL.w / 2, PL.y + PL.d - 5, 0], P) - 8, slab(inX, PL.y + PL.d - 8, inW, 5, 12, 5, 'mid', { r: 0.6 }) + dots([[inX + 3, PL.y + PL.d - 3, 14.5], [inX + inW - 3, PL.y + PL.d - 3, 14.5]], 0.4)],
+			[k.depthOf([PL.x + PL.w - 5, PL.y + PL.d / 2, 0], P) - 8, slab(PL.x + PL.w - 8, inY, 5, inD, 12, 5, 'mid', { r: 0.6 })],
+		];
+		items.sort((a, b) => a[0] - b[0]);
+		out.push(...items.map(([, s]) => s));
+		out.push(S(k.slabOf(PL, BOX_Z, RIM_Z - BOX_Z, P, 3, 0.6), { tone: 'mid', inner: L([BOX_Z + 6.5, BOX_Z + 13, BOX_Z + 19.5].map((z) => k.sideSeam(PL, z, P, 3)).join(''), { tone: 'faint' }) }));
+		const fy = PL.y + PL.d;
+		const fx = PL.x + PL.w;
+		for (const x of [PL.x + 25, PL.x + 50, PL.x + 75]) out.push(seg([x, fy, BOX_Z], [x, fy, RIM_Z], 'faint'));
+		for (const y of [PL.y + 27, PL.y + 54]) out.push(seg([fx, y, BOX_Z], [fx, y, RIM_Z], 'faint'));
+		out.push(dots([[PL.x + 4, fy, BOX_Z + 3], [PL.x + 4, fy, RIM_Z - 3], [fx - 4, fy, BOX_Z + 3], [fx - 4, fy, RIM_Z - 3], [fx, PL.y + 4, BOX_Z + 3], [fx, PL.y + 4, RIM_Z - 3]], 0.45));
+		const rim: Plan = { x: PL.x - 1.5, y: PL.y - 1.5, w: PL.w + 3, d: PL.d + 3, r: 4 };
+		out.push(S(k.slabOf(rim, RIM_Z, 2, P, 3, 0.5), { tone: 'mid' }));
+		const soil = k.insetPlan(PL, 4);
+		out.push(S(k.slabOf(soil, RIM_Z + 2, SOIL - RIM_Z - 2, P, 3), { tone: 'lo', crease: 'none' }));
+		const grains = k.dotGrid(soil.x + 4, soil.y + 4, 12, 9, 7.6, SOIL, P).filter((_, i) => i % 3 !== 1);
+		out.push(D(grains, { size: 0.5, tone: 'lo' }));
+		out.push(dots(k.corners(rim, 3).map(([x, y]) => [x, y, RIM_Z + 2] as Point3), 0.45));
 		return out.join('');
 	}
-	function plate() {
-		const out = [halo(PLATE, PLATE_Z, 3, 2)];
-		out.push(S(k.slabOf(PLATE, PLATE_Z, 3, P, 4, 0.6), { tone: 'mid', inner: L(k.sideSeam(PLATE, PLATE_Z + 1.4, P, 4), { tone: 'faint' }) }));
-		out.push(L(k.planOutline(k.insetPlan(PLATE, 3), PLATE_TOP, P, 4), { tone: 'faint' }));
-		const screws = k.corners(PLATE, 6);
-		out.push(L(screws.map(([x, y]) => k.ring(x, y, 1.8, PLATE_TOP, P, 12)).join(''), { tone: 'lo' }), D(screws.map(([x, y]) => at([x, y, PLATE_TOP])), { size: 0.45, tone: 'hi' }));
-		const bay: Plan = { x: CHIME.x - 1.5, y: CHIME.y - 1.5, w: CHIME.w + 3, d: CHIME.d + 3, r: 4 };
-		out.push(L(k.planOutline(bay, PLATE_TOP, P, 4) + k.planOutline(k.insetPlan(bay, 3), PLATE_TOP, P, 4), { tone: 'lo' }));
-		out.push(D([[12, -41], [38, -41], [12, -11], [38, -11]].map(([x, y]) => at([x, y, PLATE_TOP])), { size: 0.4 }));
-		for (const [x, y] of [[-100, -46], [-60, -46], [-100, 22], [-30, 22]] as const) out.push(L(k.ring(x, y, 2.4, PLATE_TOP, P, 12), { tone: 'faint' }));
-		const ff = PLATE.y + PLATE.d;
-		out.push(L(slots('y', ff, -90, 20, 22, PLATE_Z + 0.7, PLATE_Z + 2.3, 4), { tone: 'lo' }), L(k.sideSeam(PLATE, PLATE_Z + 0.7, P, 4), { tone: 'faint' }));
-		const strip: Plan = { x: -98, y: 24, w: 56, d: 3.6, r: 0.6 };
-		out.push(S(k.slabOf(strip, PLATE_TOP, 0.5, P, 2), { tone: 'lo', crease: 'none' }));
-		const tk = k.topTicks(strip.x + 3, strip.x + strip.w - 3, 3, 5, strip.y + 0.4, PLATE_TOP + 0.5, [1.6, 2.8], P);
-		out.push(L(tk.minor, { tone: 'lo' }), L(tk.major, { tone: 'mid' }));
+
+	function emitter(x: number) {
+		return cyl(x, LINE_Y, 3.6, SOIL + 2.2, 3.4, 'hi', 0.5) + cyl(x, LINE_Y, 1.8, SOIL + 5.6, 1.8, 'mid', 0.3) + dots([[x, LINE_Y, SOIL + 7.4]], 0.5, 'hi');
+	}
+	const drops = (x: number) =>
+		tint('lapis', L(k.ring(x, LINE_Y + 7.5, 3.2, SOIL, P, 18) + k.ring(x, LINE_Y + 7.5, 1.7, SOIL, P, 14), { tone: 'mid' }) + D([at([x, LINE_Y + 4.6, SOIL + 4.2]), at([x, LINE_Y + 6, SOIL + 2])], { size: 1.2, tone: 'hi' }));
+
+	function line() {
+		const out: string[] = [];
+		out.push(slab(VALVE + 4.5, LINE_Y - 1.1, LINE_END - VALVE - 4.5, 2.2, SOIL, 2.2, 'hi', { r: 0.6, thin: true }));
+		for (const x of [-68, -36, 0]) out.push(slab(x - 1.5, LINE_Y - 2.4, 3, 4.8, SOIL, 2.8, 'mid', { r: 0.6 }));
+		out.push(slab(LINE_END, LINE_Y - 1.8, 2.6, 3.6, SOIL - 0.4, 3, 'mid', { r: 0.6 }));
+		for (const x of EMITTERS) out.push(emitter(x), drops(x));
 		return out.join('');
 	}
-	function rail() {
-		const out = [halo(RAIL, 0, PLATE_TOP, 3)];
-		for (const [x, y] of [[136, -44], [136, -8]] as const) out.push(S(k.cylinder(x, y, 4, 0, 4, P, 18), { tone: 'lo' }), S(k.cylinder(x, y, 2.8, 4, PLATE_Z - 4, P, 14), { tone: 'mid', crease: 'none' }), L(k.sideArc(x, y, 2.8, 14, P, 12), { tone: 'faint' }));
-		out.push(S(k.slabOf(RAIL, PLATE_Z, 3, P, 3, 0.5), { tone: 'mid', inner: L(k.sideSeam(RAIL, PLATE_Z + 1.4, P, 3), { tone: 'faint' }) }));
-		out.push(S(k.slabOf({ x: RAIL.x, y: RAIL.y, w: RAIL.w, d: 2.2, r: 0.4 }, PLATE_TOP, 2.4, P, 2), { tone: 'lo' }), S(k.slabOf({ x: RAIL.x, y: RAIL.y + RAIL.d - 2.2, w: RAIL.w, d: 2.2, r: 0.4 }, PLATE_TOP, 2.4, P, 2), { tone: 'lo' }));
-		out.push(S(k.slabOf({ x: RAIL.x + RAIL.w - 3, y: RAIL.y + 2.2, w: 3, d: RAIL.d - 4.4, r: 0.4 }, PLATE_TOP, 3.4, P, 2), { tone: 'mid' }));
-		const rt = k.topTicks(RAIL.x + 6, RAIL.x + RAIL.w - 8, 4, 5, RAIL.y + 2.4, PLATE_TOP, [1.4, 2.4], P);
+
+	// trunk1: static; trunk2: telescopes out of trunk1, clipped to stay hidden inside it
+	function trunk() {
+		const out = [cyl(TX, TY, 7.5, SOIL, 1.6, 'lo', 0.4), cyl(TX, TY, 4.5, SOIL + 1.6, T1_TOP - SOIL - 4.6, 'mid', 0, { arcs: [T1_TOP - 18, T1_TOP - 8] })];
+		out.push(cyl(TX, TY, 5.4, T1_TOP - 3, 3, 'mid', 0.4));
+		return out.join('');
+	}
+	const trunk2 = () => cyl(TX, TY, 3.4, T1_TOP - 2, 28, 'mid', 0, { arcs: [T1_TOP + 8, T1_TOP + 16] }) + cyl(TX, TY, 3.9, T1_TOP, 2, 'mid', 0.2);
+
+	// the crown, drawn at its grown height
+	function crown() {
+		const zA = T1_TOP + GROW;
+		const tier = (r: number, z: number, h: number, ribs: number) =>
+			cyl(TX, TY, r, z, h * 0.5, 'hi', 1, { knurl: ribs }) + cyl(TX, TY, r * 0.82, z + h * 0.5, h * 0.3, 'hi', 0.8) + cyl(TX, TY, r * 0.55, z + h * 0.8, h * 0.2, 'hi', 0.6) + dots(Array.from({ length: Math.round(r) }, (_, i): Point3 => [TX + r * 0.7 * Math.cos(i * 2.4), TY + r * 0.7 * Math.sin(i * 2.4), z + h * 0.8]), 0.45, 'mid');
+		const out = [halo({ x: TX - 26, y: TY - 26, w: 52, d: 52, r: 26 }, zA, 0.1, 3)];
+		out.push(tier(26, zA, 8, 40), cyl(TX, TY, 3, zA + 8, 4, 'mid', 0), tier(19, zA + 12, 7, 32), cyl(TX, TY, 3, zA + 19, 4, 'mid', 0), tier(12, zA + 23, 6, 24));
+		const cTop = zA + 29;
+		const nest = cyl(TX, TY, 2.4, cTop, NEST, 'mid', 0) + tier(7, cTop + NEST, 5, 16) + cyl(TX, TY, 1.6, cTop + NEST + 5, 1, 'mid', 0.2) + stepSvg('lit-at', 4, cyl(TX, TY, 3.4, cTop + NEST + 6, 2.2, 'hi', 0.6, { lit: true })) + dots([[TX, TY, cTop + NEST + 8.2]], 0.6, 'hi');
+		out.push(clipDef('rg-nest', sleeveHole(TX, TY, 7, cTop, cTop - 10)));
+		out.push(`<g clip-path="url(#rg-nest)">${mover('tier', 'verdigris', transforms.tier[3], nest)}</g>`);
+		return out.join('');
+	}
+
+	function branch() {
+		const limb = slab(BR_ROOT - 0.5, TY - 1.6, BR_LEN - 4, 3.2, BR_Z - 1.6, 3.2, 'mid', { r: 1, thin: true });
+		const tx = BR_ROOT + BR_LEN;
+		const bud = tint('verdigris', cyl(BR_ROOT + 10, TY, 3.2, BR_Z + 1.6, 3, 'hi', 0.6));
+		const tuft = tint('verdigris', cyl(tx, TY, 7, BR_Z - 3, 4, 'hi', 0.8, { knurl: 18 }) + cyl(tx, TY, 5, BR_Z + 1, 2, 'hi', 0.6) + L(k.ring(tx, TY, 3, BR_Z + 3, P, 20), { tone: 'faint' }));
+		return limb + bud + tuft;
+	}
+
+	function splint() {
+		const z0 = SOIL;
+		const out = [cyl(STAKE_X, TY, 3.4, z0, 1, 'mid', 0.3), cyl(STAKE_X, TY, 2.2, z0 + 1, BR_Z - 3 - z0 - 1, 'hi', 0, { arcs: [z0 + 6, z0 + 10] })];
+		out.push(slab(STAKE_X - 4, TY - 3.5, 10, 7, BR_Z - 3, 5, 'hi', { r: 1.4, bevel: 0.5, seams: [BR_Z - 0.5] }), dots([[STAKE_X + 6, TY - 2, BR_Z - 0.5], [STAKE_X + 6, TY + 2, BR_Z - 0.5]], 0.45, 'hi'));
+		return out.join('');
+	}
+	const splintMarks = () => stepSvg('show-from', 3, L(k.ring(STAKE_X, TY, 3.8, SOIL, P, 18), { tone: 'lo' }));
+
+	function railBack() {
+		const out: string[] = [];
+		out.push(cyl(RAIL_X, POST_B, 5, 0, 3, 'lo', 0.4), cyl(RAIL_X, POST_B, 3, 3, BAR_Z - 3, 'mid', 0, { arcs: [40, 70] }));
+		return out.join('');
+	}
+	function railFront() {
+		const out: string[] = [];
+		out.push(slab(RAIL_X - 3, POST_B - 3, 6, POST_F - POST_B, BAR_Z, 4, 'mid', { r: 1, bevel: 0.4, seams: [BAR_Z + 2] }));
+		out.push(slab(RAIL_X - 9, LINE_Y - 3.5, 6, 7, BAR_Z - 5, 3, 'mid', { r: 0.6 }));
+		out.push(slab(RAIL_X - 3.6, POST_B - 4.5, 7.2, 1.5, BAR_Z - 1, 6, 'mid', { r: 0.5 }), slab(RAIL_X - 1, TY + 4, 4, 2, BAR_Z + 4, 2.4, 'mid', { r: 0.5 }));
+		const rt = k.topTicks(POST_B + 4, POST_F - 6, 4, 5, RAIL_X + 3, BAR_Z + 4, [1.4, 2.4], P, 'y');
 		out.push(L(rt.minor, { tone: 'lo' }), L(rt.major, { tone: 'mid' }));
-		out.push(L(slots('y', RAIL.y + RAIL.d, 52, 130, 13, PLATE_Z + 0.6, PLATE_Z + 2.4, 3.4), { tone: 'lo' }), dotsAt([[RAIL.x + RAIL.w, -42, 31], [RAIL.x + RAIL.w, -10, 31]], 0.4));
+		return out.join('');
+	}
+	function postFront() {
+		const out = [halo({ x: RAIL_X - 6, y: POST_F - 6, w: 12, d: 12, r: 6 }, 0, 3, 2)];
+		out.push(cyl(RAIL_X, POST_F, 5, 0, 3, 'lo', 0.4), cyl(RAIL_X, POST_F, 3, 3, PIVOT[2] - 7, 'mid', 0, { arcs: [30, 66] }));
+		out.push(slab(RAIL_X - 4, POST_F - 5, 8, 2.5, PIVOT[2] - 6, 10, 'mid', { r: 0.6 }));
+		return out.join('');
+	}
+	const cheekFront = () => slab(RAIL_X - 4, POST_F + 2.5, 8, 2.5, PIVOT[2] - 6, 10, 'mid', { r: 0.6 }) + dots([[RAIL_X, POST_F + 5, PIVOT[2]]], 0.6, 'hi');
+
+	function arm() {
+		const [px, py, pz] = PIVOT;
+		const out: string[] = [];
+		out.push(slab(px - ARM - 2, py - 2.2, ARM + 9, 4.4, pz - 2, 4, 'hi', { r: 1.2, bevel: 0.4 }));
+		out.push(slab(px + 4, py - 3, 8, 6, pz - 4, 8, 'mid', { r: 1.2, bevel: 0.5 }));
+		out.push(L(k.lineOnTop([px - ARM + 6, py], [px - 8, py], pz + 2, P), { tone: 'faint' }), dots([[px - ARM, py, pz + 2], [px + 8, py, pz + 4]], 0.45, 'hi'));
+		return out.join('');
+	}
+	const ROD_TOP = 0;
+	function rod() {
+		const [x, y, z] = tipAt(ARM_DIP);
+		const out = [cyl(x, y, 3, z - 4, 5, 'hi', 0.5, { knurl: 12 }), cyl(x, y, 1.2, SOIL - 6, z - 4 - SOIL + 6 + ROD_TOP, 'hi', 0, { arcs: [SOIL + 4] })];
 		return out.join('');
 	}
 
 	function dial() {
-		const [cx, cz] = [-58, 29];
-		const foot: Plan = { x: -86, y: -78, w: 56, d: 9, r: 1.5 };
-		const face: Plan = { x: -80, y: -73, w: 44, d: 2.4, r: 1.2 };
-		const f = face.y + face.d;
-		const out = [halo(foot, 0, 8, 2), S(k.slabOf(foot, 0, 8, P, 3, 0.6), { tone: 'lo' }), L(k.planOutline(k.insetPlan(foot, 1.6), 8, P, 3), { tone: 'faint' })];
-		out.push(S(k.slabOf(face, 8, 42, P, 4, 0.6), { tone: 'hi' }));
-		out.push(L(k.sideRing([cx, f, cz], 18, 'y', P, 48) + k.sideRing([cx, f, cz], 15.4, 'y', P, 40), { tone: 'mid' }));
-		for (let i = 0; i < 12; i++) {
-			const a = (i / 12) * Math.PI * 2;
+		const [cx, fy, cz] = DIAL;
+		const plate: Plan = { x: cx - 14, y: POST_F + 3, w: 28, d: fy - POST_F - 3, r: 1 };
+		const out = [slab(cx - 3, POST_F + 2.6, 6, 2.6, cz - 19, 5, 'mid', { r: 0.5 }), S(k.slabOf(plate, cz - 14, 28, P, 2, 0.4), { tone: 'mid' })];
+		out.push(L(k.sideRing([cx, fy, cz], 12, 'y', P, 48) + k.sideRing([cx, fy, cz], 10.6, 'y', P, 44), { tone: 'mid' }));
+		for (let i = 0; i <= 12; i++) {
+			const a = ((-60 + i * 10) * Math.PI) / 180;
 			const [s, c] = [Math.sin(a), Math.cos(a)];
-			const r0 = i % 3 ? 12.6 : 11;
-			out.push(L(seg([cx + s * r0, f, cz + c * r0], [cx + s * 15.4, f, cz + c * 15.4]), { tone: i % 3 ? 'lo' : 'mid' }));
+			const r0 = i % 3 ? 8.6 : 7.4;
+			out.push(L(k.segment([cx + s * r0, fy, cz + c * r0], [cx + s * 10.6, fy, cz + c * 10.6], P), { tone: i % 3 ? 'lo' : 'mid' }));
 		}
-		out.push(L(seg([cx, f, cz], [cx - 5.2, f, cz + 6]) + seg([cx, f, cz], [cx + 1.2, f, cz + 11]), { tone: 'hi' }), D([at([cx, f, cz]), at([face.x + 3, f, 11]), at([face.x + face.w - 3, f, 11]), at([face.x + 3, f, 47]), at([face.x + face.w - 3, f, 47])], { size: 0.5, tone: 'hi' }));
+		const band = (r: number) => Array.from({ length: 9 }, (_, i) => {
+			const a = ((15 + i * 5) * Math.PI) / 180;
+			return at([cx + Math.sin(a) * r, fy, cz + Math.cos(a) * r]);
+		});
+		out.push(tint('verdigris', L(k.pathOf(band(9.6)) + k.pathOf(band(10.2)), { tone: 'mid' })));
+		out.push(dots([[cx - 12, fy, cz + 12], [cx + 12, fy, cz + 12], [cx - 12, fy, cz - 12], [cx + 12, fy, cz - 12]], 0.5));
+		out.push(seg([cx - 6, fy, cz - 7], [cx + 6, fy, cz - 7], 'faint'));
 		return out.join('');
+	}
+	function needle() {
+		const [cx, fy, cz] = DIAL;
+		const a = (35 * Math.PI) / 180;
+		const dir: [number, number] = [Math.sin(a), Math.cos(a)];
+		const side: [number, number] = [dir[1], -dir[0]];
+		const pt = (along: number, across: number) => at([cx + dir[0] * along + side[0] * across, fy + 0.1, cz + dir[1] * along + side[1] * across]);
+		const poly = [pt(9.4, 0), pt(0, 0.9), pt(-2.6, 0), pt(0, -0.9)];
+		const d = k.pathOf(poly, true);
+		const hub = k.pathOf(Array.from({ length: 16 }, (_, i) => at([cx + 1.5 * Math.cos((i / 16) * Math.PI * 2), fy + 0.15, cz + 1.5 * Math.sin((i / 16) * Math.PI * 2)])), true);
+		return S({ fill: d, outline: d, crease: '', top: d, shades: [] }, { tone: 'hi' }) + S({ fill: hub, outline: hub, crease: '', top: hub, shades: [] }, { tone: 'mid' });
 	}
 
-	function pendulum() {
-		const [px, py] = PEND;
-		const post: Plane = [-147, -34];
-		const out = [halo({ x: post[0] - 6, y: post[1] - 6, w: 12, d: 12, r: 6 }, 0, 4, 2)];
-		out.push(S(k.cylinder(post[0], post[1], 6, 0, 3, P, 20, 0.4), { tone: 'lo' }), S(k.cylinder(post[0], post[1], 3, 3, 62, P, 16), { tone: 'mid', crease: 'none' }), L(k.sideArc(post[0], post[1], 3, 24, P, 14) + k.sideArc(post[0], post[1], 3, 44, P, 14), { tone: 'faint' }));
-		out.push(S(k.slabOf({ x: post[0] - 3, y: -37, w: 25, d: 6, r: 1.5 }, 62, 4, P, 3, 0.4), { tone: 'hi' }), D([at([post[0], post[1], 66]), at([post[0] + 19, post[1], 66])], { size: 0.45, tone: 'hi' }));
-		out.push(S(k.slabOf({ x: px - 1.2, y: py - 1.2, w: 2.4, d: 2.4, r: 0.6 }, 14, 48, P, 2), { tone: 'hi', crease: 'none' }));
-		out.push(S(k.cylinder(px, py, 8, 8, 5, P, 32, 0.6), { tone: 'hi' }), L(k.ring(px, py, 5.4, 13, P, 24), { tone: 'mid' }), L(k.knurl(px, py, 8, 8, 13, 24, P, 0.3), { tone: 'lo' }), S(k.cylinder(px, py, 2.2, 13, 2, P, 12), { tone: 'mid' }), D([at([px, py, 15])], { size: 0.45, tone: 'hi' }));
-		out.push(halo({ x: px - 8, y: py - 8, w: 16, d: 16, r: 8 }, 0, 0.1, 2.5));
-		return out.join('');
-	}
-
-	function gauge() {
-		const [cx, cy] = GAUGE;
-		const out = [halo({ x: cx - 18, y: cy - 18, w: 36, d: 36, r: 18 }, 0, 4)];
-		out.push(S(k.cylinder(cx, cy, 17, 0, 4, P, 40, 0.6), { tone: 'lo' }), L(k.knurl(cx, cy, 17, 0.6, 3.4, 30, P, 0.3), { tone: 'faint' }));
-		out.push(S(k.cylinder(cx, cy, 4.4, 4, GAUGE_Z - 11, P, 20), { tone: 'mid', crease: 'none' }), L(k.sideArc(cx, cy, 4.4, 10, P, 14), { tone: 'faint' }));
-		out.push(S(k.cylinder(cx, cy, 14, GAUGE_Z - 7, 7, P, 52, 0.8), { tone: 'hi' }), L(k.knurl(cx, cy, 14, GAUGE_Z - 7, GAUGE_Z, 40, P, 0.3), { tone: 'lo' }));
-		out.push(L(k.ring(cx, cy, 11.6, GAUGE_Z, P, 44), { tone: 'mid' }), L(k.ring(cx, cy, 8, GAUGE_Z, P, 36), { tone: 'faint' }));
-		const t = k.radialTicks(cx, cy, 11.6, 15, 5, GAUGE_Z, [1.6, 3], P, -2.1, 4.2);
-		out.push(L(t.minor, { tone: 'lo' }), L(t.major, { tone: 'mid' }));
-		const needle = (a: number) => {
-			const tipP: Plane = [cx + Math.sin(a) * 10.2, cy - Math.cos(a) * 10.2];
-			const tail: Plane = [cx - Math.sin(a) * 3.4, cy + Math.cos(a) * 3.4];
-			const [sx, sy] = [Math.cos(a) * 1.2, Math.sin(a) * 1.2];
-			return S(k.extrude([tipP, [cx + sx, cy + sy], tail, [cx - sx, cy - sy]], GAUGE_Z + 2, 0.7, P), { tone: 'lo' });
-		};
-		out.push(S(k.cylinder(cx, cy, 2.2, GAUGE_Z, 2, P, 14), { tone: 'mid' }));
-		out.push(stepSvg('dim-from', 2, needle(-1.5)), stepSvg('show-from', 2, needle(0.5)));
-		out.push(D([at([cx, cy, GAUGE_Z + 2])], { size: 0.5, tone: 'hi' }));
-		const bolts: Point3[] = [0, 1, 2, 3, 4].map((i) => [cx + Math.cos(i * 1.2566 + 0.4) * 14.8, cy + Math.sin(i * 1.2566 + 0.4) * 14.8, 4]);
-		out.push(L(bolts.map(([x, y]) => k.ring(x, y, 1.2, 4, P, 10)).join(''), { tone: 'lo' }), dotsAt(bolts, 0.4, 'hi'));
-		return out.join('');
-	}
-
-	function tray() {
-		const back = [halo(TRAY, 0, TRAY_TOP, 4)];
-		for (const [x, y] of k.corners(TRAY, 4)) back.push(S(k.cylinder(x, y, 2.6, 0, TRAY_TOP - 4, P, 12), { tone: 'mid', crease: 'none' }));
-		back.push(S(k.slabOf(TRAY, TRAY_TOP - 4, 4, P, 3, 0.5), { tone: 'mid', inner: L(k.sideSeam(TRAY, TRAY_TOP - 2, P, 3), { tone: 'faint' }) }));
-		back.push(S(k.slabOf({ x: TRAY.x, y: TRAY.y, w: TRAY.w, d: 3, r: 1 }, TRAY_TOP, 5, P, 2, 0.3), { tone: 'mid' }));
-		for (const x of [TRAY.x, TRAY.x + TRAY.w - 3]) back.push(S(k.slabOf({ x, y: TRAY.y + 3, w: 3, d: TRAY.d - 6, r: 1 }, TRAY_TOP, 5, P, 2, 0.3), { tone: 'mid' }));
-		back.push(L(k.planOutline(k.insetPlan(TRAY, 6), TRAY_TOP, P, 3), { tone: 'faint' }));
-		const [bx, by] = [88, 56];
-		back.push(S(k.cylinder(bx, by, 5, TRAY_TOP, 1.8, P, 14), { tone: 'lo' }), S(k.extrude(gearRing([bx, by], 6.6, 4.6, 8, 0.3), TRAY_TOP + 1.8, 2, P, { convex: false }), { tone: 'hi' }), S(k.cylinder(bx, by, 1.6, TRAY_TOP + 3.8, 1.4, P, 10), { tone: 'mid' }));
-		const box: Plan = { x: 80, y: 64, w: 14, d: 10, r: 1.4 };
-		back.push(S(k.slabOf(box, TRAY_TOP, 3.6, P, 3, 0.4), { tone: 'lo' }), L(k.lineOnTop([box.x + 2, box.y + 5], [box.x + 12, box.y + 5], TRAY_TOP + 3.6, P), { tone: 'faint', free: true }));
-		for (const [x, y] of [[40, 60], [43, 70], [38, 52]] as const) back.push(S(k.cylinder(x, y, 2, TRAY_TOP, 2.2, P, 8), { tone: 'hi' }), L(k.ring(x, y, 0.8, TRAY_TOP + 2.2, P, 8), { tone: 'lo' }));
-		const front: Plan = { x: TRAY.x, y: TRAY.y + TRAY.d - 3, w: TRAY.w, d: 3, r: 1 };
-		const ff = front.y + front.d;
-		const fr = S(k.slabOf(front, TRAY_TOP, 5, P, 2, 0.3), { tone: 'mid' }) + L(k.segment([50, ff, TRAY_TOP + 1.6], [80, ff, TRAY_TOP + 1.6], P), { tone: 'faint', free: true }) + L(`${k.segment([50, ff, TRAY_TOP + 3.4], [66, ff, TRAY_TOP + 3.4], P)}`, { tone: 'faint', free: true }) + dotsAt([[TRAY.x + 4, ff, TRAY_TOP + 2.5], [TRAY.x + TRAY.w - 4, ff, TRAY_TOP + 2.5]], 0.4);
-		return { back: back.join(''), front: fr };
-	}
-
-	function chime() {
-		const out = [halo(CHIME, PLATE_TOP, 7, 2)];
-		out.push(S(k.slabOf(CHIME, PLATE_TOP, 7, P, 4, 0.8), { tone: 'hi', inner: L(k.sideSeam(CHIME, PLATE_TOP + 3, P, 4), { tone: 'faint' }) }));
-		out.push(L(k.planOutline(k.insetPlan(CHIME, 3), PLATE_TOP + 7, P, 4), { tone: 'faint' }));
-		const top = PLATE_TOP + 7;
-		const [bx, by] = [20, -33];
-		out.push(S(k.cylinder(bx, by, 9, top, 3, P, 32, 0.4), { tone: 'mid' }), L(k.knurl(bx, by, 9, top, top + 3, 24, P, 0.3), { tone: 'lo' }));
-		out.push(S(k.cylinder(bx, by, 7.2, top + 3, 4, P, 28), { tone: 'hi' }), S(k.cylinder(bx, by, 5, top + 7, 3, P, 24), { tone: 'hi' }), L(k.sideArc(bx, by, 7.2, top + 5, P, 20), { tone: 'mid' }), S(k.cylinder(bx, by, 2.2, top + 10, 2.2, P, 12), { tone: 'mid' }), D([at([bx, by, top + 12.2])], { size: 0.5, tone: 'hi' }));
-		for (const [x, y, h] of [[33, -39, 15], [33, -31, 11], [33, -23, 7.5]] as const) out.push(S(k.cylinder(x, y, 1.3, top, h, P, 10), { tone: 'hi', crease: 'none' }), L(k.ring(x, y, 2.2, top + 0.4, P, 10), { tone: 'lo' }));
-		out.push(S(k.slabOf({ x: 12, y: -22, w: 21, d: 2.4, r: 0.8 }, top + 5, 2, P, 2), { tone: 'mid' }), S(k.cylinder(31.6, -20.8, 2.4, top + 3.4, 5, P, 12), { tone: 'hi' }), S(k.cylinder(12, -20.8, 2.2, top, 7, P, 12), { tone: 'mid', crease: 'none' }), L(k.ring(12, -20.8, 3.2, top, P, 12), { tone: 'lo' }));
-		out.push(S(k.cylinder(24, -12, 3, top, 4, P, 14), { tone: 'lo' }), S(k.extrude(gearRing([24, -12], 5.2, 3.6, 8, 0.2), top + 4, 2, P, { convex: false }), { tone: 'mid' }), S(k.cylinder(24, -12, 1.2, top + 6, 1.2, P, 8), { tone: 'hi' }));
-		const fy = CHIME.y + CHIME.d;
-		const win: Plan = { x: 14, y: fy, w: 22, d: 1.2, r: 0.6 };
-		out.push(S(k.slabOf(win, PLATE_TOP + 1.4, 4.4, P, 2), { tone: 'lo' }));
-		out.push(stepSvg('lit-at', 4, S(k.slabOf(k.insetPlan(win, 1.2), PLATE_TOP + 2, 3, P, 2), { tone: 'hi', lit: true })));
-		out.push(S(k.slabOf({ x: 11.4, y: fy, w: 2.2, d: 1.4, r: 0.4 }, PLATE_TOP + 1, 5, P, 2), { tone: 'mid', crease: 'none' }), dotsAt([[CHIME.x + 3, fy, PLATE_TOP + 5.4], [CHIME.x + CHIME.w - 3, fy, PLATE_TOP + 5.4], [CHIME.x + CHIME.w, CHIME.y + 5, PLATE_TOP + 5], [CHIME.x + CHIME.w, fy - 5, PLATE_TOP + 5]], 0.45));
-		out.push(L(slots('x', CHIME.x + CHIME.w, -38, -14, 8, PLATE_TOP + 1.6, PLATE_TOP + 5.2, 2.6), { tone: 'lo' }));
-		return out.join('');
-	}
-
-	function loupePillar() {
-		const [x, y] = LOUPE_AT;
-		const out = [halo({ x: x - 9, y: y - 9, w: 18, d: 18, r: 9 }, 0, 4, 2)];
-		out.push(S(k.cylinder(x, y, 9, 0, 3, P, 28, 0.5), { tone: 'lo' }), L(k.knurl(x, y, 9, 0, 3, 20, P, 0.3), { tone: 'faint' }), S(k.cylinder(x, y, 5.6, 3, 4, P, 24), { tone: 'mid' }));
-		out.push(S(k.cylinder(x, y, 3, 7, LOUPE_Z - 9, P, 18), { tone: 'hi', crease: 'none' }), L(k.sideArc(x, y, 3, 24, P, 14) + k.sideArc(x, y, 3, 44, P, 14), { tone: 'faint' }), S(k.cylinder(x, y, 4.2, 30, 2.6, P, 18), { tone: 'mid' }), D([at([x - 2, y, 31])], { size: 0.4, tone: 'hi' }));
-		return out.join('');
-	}
-	function loupeArm() {
-		const [x, y] = LOUPE_AT;
-		const tx = x + LOUPE_LEN;
-		const out: string[] = [];
-		out.push(S(k.slabOf({ x: x - 4, y: y - 3, w: LOUPE_LEN + 4, d: 6, r: 2 }, LOUPE_Z - 2, 4, P, 3, 0.5), { tone: 'hi' }), S(k.cylinder(x, y, 5, LOUPE_Z - 2, 6, P, 22, 0.4), { tone: 'mid' }), L(k.lineOnTop([x + 8, y], [tx - 14, y], LOUPE_Z + 2, P), { tone: 'faint' }));
-		out.push(D([at([x, y, LOUPE_Z + 4.4]), at([tx - 4, y, LOUPE_Z + 2])], { size: 0.45, tone: 'hi' }));
-		return out.join('');
-	}
-	function loupeLens() {
-		const [x, y] = LOUPE_AT;
-		const tx = x + LOUPE_LEN;
-		const out: string[] = [];
-		out.push(S(k.cylinder(tx, y, 1.4, LOUPE_Z - 12, 10, P, 10), { tone: 'hi', crease: 'none' }));
-		const lz = LOUPE_Z - 22;
-		out.push(S(k.cylinder(tx, y, 10, lz, 9, P, 36, 0.6), { tone: 'hi' }), L(k.knurl(tx, y, 10, lz, lz + 9, 28, P, 0.3), { tone: 'lo' }), L(k.ring(tx, y, 7.6, lz + 9, P, 30) + k.ring(tx, y, 5.4, lz + 9, P, 24), { tone: 'mid' }), L(k.lineOnTop([tx - 3, y + 2], [tx + 1, y - 3], lz + 9, P), { tone: 'faint', free: true }), L(k.sideArc(tx, y, 10, lz + 4.5, P, 24), { tone: 'mid' }));
-		return out.join('');
-	}
-
-	const TO_SLOT: Point3 = [SLOT[0] - SPARE_AT[0], SLOT[1] - SPARE_AT[1], WZ - SPARE_Z];
-	const swingOf = [0, LOUPE_ON, LOUPE_ON, 0].map((d) => swing(LOUPE_AT, d, LOUPE_Z));
-	const lensAt = [0, LOUPE_ON, LOUPE_ON, 0].map((d): Point3 => [LOUPE_LEN * (Math.cos((d * Math.PI) / 180) - 1), LOUPE_LEN * Math.sin((d * Math.PI) / 180), 0]);
-	const transforms: Record<'spare' | 'chime' | 'loupe' | 'lens', string[]> = {
-		...(transformsFrom(P, {
-			spare: [ZERO, ZERO, TO_SLOT, TO_SLOT],
-			chime: [[CHIME_SLIDE, 0, 0], [CHIME_SLIDE, 0, 0], [CHIME_SLIDE, 0, 0], ZERO],
-					lens: lensAt,
-		}) as Record<'spare' | 'chime' | 'lens', string[]>),
-		loupe: swingOf,
+	// motion
+	const ZERO: Point3 = [0, 0, 0];
+	const ID = 'matrix(1 0 0 1 0 0)';
+	const tip0 = tipAt(ARM_DIP);
+	const tipPark = tipAt(ARM_UP);
+	const PARK: Point3 = [tipPark[0] - tip0[0], 0, tipPark[2] - tip0[2]];
+	const SPLINT_REST: Point3 = [RAIL_X - 5.5 - STAKE_X, 0, BAR_Z + 4 - (BR_Z - 3)];
+	const FRESH_REST: Point3 = [RAIL_X - 7 - FRESH_X, 0, BAR_Z - 2 - (SOIL + 2.2)];
+	const brPivot: Point3 = [BR_ROOT, TY, BR_Z];
+	const dialPivot: Point3 = [DIAL[0], DIAL[1], DIAL[2]];
+	const transforms: Record<string, string[]> = {
+		needle: [turn(dialPivot, X, Z, 90), ID, ID, ID],
+		arm: [ARM_UP, ARM_DIP, ARM_DIP, ARM_DIP].map((d) => turn(PIVOT, X, Z, -d)),
+		rod: [PARK, ZERO, ZERO, ZERO].map(shift),
+		branch: [DROOP, DROOP, 0, 0].map((d) => turn(brPivot, X, Z, d)),
+		splint: [SPLINT_REST, SPLINT_REST, ZERO, ZERO].map(shift),
+		fresh: [FRESH_REST, FRESH_REST, ZERO, ZERO].map(shift),
+		trunk: [[0, 0, -GROW], [0, 0, -GROW], [0, 0, -GROW], ZERO].map((p) => shift(p as Point3)),
+		crown: [[0, 0, -GROW], [0, 0, -GROW], [0, 0, -GROW], ZERO].map((p) => shift(p as Point3)),
+		tier: [[0, 0, -NEST], [0, 0, -NEST], [0, 0, -NEST], ZERO].map((p) => shift(p as Point3)),
 	};
-	const pair = (name: string, tf: string, body: string) => `<g class="mover tint" style="--pigment:var(--verdigris)" data-part="${name}" transform="${tf}">${body}</g>`;
-	const trayParts = tray();
+	const T4 = (name: string) => transforms[name][3];
 
 	const svg = k.figureSvg({
 		width,
 		height,
 		label:
-			'An open clock movement on a watchmaker service stand: a train of brass gears under a bridge, an escapement, a pendulum and a dial. A loupe on a swing arm comes over the movement to check it and a gauge needle reads, a fresh gear is lifted from the parts tray into the empty slot in the train, and a chime module slides on beside it and lights.',
+			'A raised planter bench with a young tree, fed by a drip line from a water tank through a valve. A probe on a lever swings over and dips into the soil while its gauge needle reads, a splint slides off the tool rail to hold a bent branch level and a fresh drip emitter clips onto the line, then the tree grows taller with a new top tier and a bloom.',
 		body: [
 			base(),
+			tank(),
+			valveAndFeed(),
+			railBack(),
+			planter(),
+			line(),
+			trunk(),
+			clipDef('rg-sleeve', sleeveHole(TX, TY, 5.4, T1_TOP, SOIL)),
+			`<g clip-path="url(#rg-sleeve)">${mover('trunk', null, T4('trunk'), trunk2())}</g>`,
+			mover('crown', 'verdigris', T4('crown'), crown()),
+			mover('branch', null, T4('branch'), branch()),
+			splintMarks(),
+			mover('splint', 'ochre', T4('splint'), splint()),
+			stepSvg('show-from', 4, drops(FRESH_X)),
+			mover('fresh', 'lapis', T4('fresh'), emitter(FRESH_X)),
+			railFront(),
+			postFront(),
+			mover('arm', 'ochre', T4('arm'), arm()),
+			cheekFront(),
+			stepSvg('show-from', 2, L(k.ring(tip0[0], tip0[1], 2.6, SOIL, P, 16), { tone: 'lo' })),
+			clipDef('rg-soil', sleeveHole(tip0[0], tip0[1], 1.7, SOIL, SOIL - 20)),
+			`<g clip-path="url(#rg-soil)">${mover('rod', 'ochre', T4('rod'), rod())}</g>`,
 			dial(),
-			loupePillar(),
-			pendulum(),
-			standBody(),
-			rail(),
-			plate(),
-			movement(),
-			moverSvg('chime', transforms.chime[3], chime()),
-			gauge(),
-			trayParts.back,
-			moverSvg('spare', transforms.spare[3], wheel({ ...SPARE, c: SPARE_AT, z: SPARE_Z })),
-			trayParts.front,
-			pair('loupe', transforms.loupe[3], loupeArm()),
-			pair('lens', transforms.lens[3], loupeLens()),
+			mover('needle', null, T4('needle'), needle()),
 		],
 	});
 	return { svg, labels: LABELS, transforms };
