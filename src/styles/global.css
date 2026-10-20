@@ -236,8 +236,8 @@ html.lenis body {
 }
 .split-line {
 	/* Room inside each mask for descenders and italic overhang, so no letter is clipped. */
-	padding: 0 0.08em 0.12em;
-	margin: 0 -0.08em -0.12em;
+	padding: 0 0.08em 0.26em;
+	margin: 0 -0.08em -0.26em;
 }
 
 /* Page to page: a fresh coat of arriccio is troweled across, then lifted off the new page. */

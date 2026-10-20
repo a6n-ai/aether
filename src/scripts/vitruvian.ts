@@ -82,7 +82,7 @@ void main() {
   float ink = lum(img) + (fibre - 0.5) * 0.25;
   float man = smoothstep(ink - 0.14, ink, uMan * 1.2 - 0.08);
   // A faint ghost of the finished sheet from the start, like the underdrawing, so it never reads as a failed load.
-  vec3 col = mix(blank, img, max(man, 0.1));
+  vec3 col = mix(blank, img, max(man, 0.22));
 
   // The square: all four sides ink along their length, clockwise from each corner.
   float w = 5.0;
@@ -124,7 +124,8 @@ export function mountVitruvian(stage: HTMLElement, img: HTMLImageElement): Vitru
 	if (matchMedia('(prefers-reduced-motion: reduce)').matches) return null;
 	let renderer: Renderer;
 	try {
-		renderer = new Renderer({ dpr: 1, alpha: false, antialias: false });
+		// Transparent until drawn: a freshly sized canvas is clear, never a black box over the picture.
+		renderer = new Renderer({ dpr: 1, alpha: true, antialias: false });
 	} catch {
 		return null;
 	}
@@ -186,6 +187,7 @@ export function mountVitruvian(stage: HTMLElement, img: HTMLImageElement): Vitru
 		const h = stage.clientHeight || 1;
 		renderer.setSize(w, h);
 		program.uniforms.uRes.value.set(w * ratio, h * ratio);
+		if (ready) renderer.render({ scene: mesh }); // resizing clears the canvas; repaint at once
 	};
 	const ro = new ResizeObserver(resize);
 	ro.observe(stage);
@@ -201,7 +203,7 @@ export function mountVitruvian(stage: HTMLElement, img: HTMLImageElement): Vitru
 	const goal = { square: 0, circle: 0, man: 0, light: 0 };
 	const now = { ...goal };
 	let visible = false;
-	let first = true;
+	let frames = 0;
 	let acc = 0;
 	const tick = (time: number, delta: number) => {
 		if (!ready || !visible || document.hidden) return;
@@ -222,10 +224,8 @@ export function mountVitruvian(stage: HTMLElement, img: HTMLImageElement): Vitru
 		u.uLight.value = now.light;
 		u.uMouse.value.set(mouse.x, mouse.y);
 		renderer.render({ scene: mesh });
-		if (first) {
-			first = false;
-			stage.classList.add('is-live');
-		}
+		// The picture underneath hides only once the canvas has painted for real.
+		if (++frames === 3) stage.classList.add('is-live');
 	};
 	gsap.ticker.add(tick);
 	const io = new IntersectionObserver(([e]) => {
