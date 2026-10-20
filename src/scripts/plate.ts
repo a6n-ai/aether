@@ -9,7 +9,7 @@ const PREFETCH = '600px 0px';
 /** Swap the finished-plate <img> for the live inline SVG so its parts can move. */
 async function inline(img: HTMLImageElement): Promise<SVGSVGElement | null> {
 	try {
-		const text = await (await fetch(img.currentSrc || img.src)).text();
+		const text = await (await fetch(img.dataset.svg ?? img.currentSrc ?? img.src)).text();
 		const svg = new DOMParser().parseFromString(text, 'image/svg+xml').documentElement as unknown as SVGSVGElement;
 		if (svg.nodeName !== 'svg') return null;
 		svg.querySelector('style')?.remove(); // the page's own styles already cover it; the embedded copy is for <img>

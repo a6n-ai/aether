@@ -17,8 +17,8 @@ interface Props {
 const { name, fig, title, caption, compact = false, scrub = false } = Astro.props;
 const machine = machineOf(name);
 const steps = machine.labels.length;
-// The page ships the finished plate as a lazy image (no-JS and reduced-motion readers see the whole story);
-// plate.ts swaps in the live SVG as it nears the viewport.
+// The page ships the finished plate as a small lazy poster (no-JS readers see the whole story at once, even on
+// a slow phone); plate.ts swaps in the live SVG (200-400 KB) as it nears the viewport. scripts/posters.ts draws them.
 const label = machine.svg.match(/aria-label="([^"]*)"/)?.[1] ?? caption;
 const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0 720 480').split(' ').map(Number);
 ---
@@ -36,7 +36,7 @@ const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0
 		<span data-corner="title">{title}</span>
 	</div>
 	<div class="stage">
-		<img src={`/plates/${name}.svg`} alt={label} width={width} height={height} loading="lazy" decoding="async" data-plate-img onload="this.dataset.loaded=''" />
+		<img src={`/plates/posters/${name}.webp`} data-svg={`/plates/${name}.svg`} alt={label} width={width} height={height} loading="lazy" decoding="async" data-plate-img onload="this.dataset.loaded=''" />
 	</div>
 	<div class="controls">
 		<ol class="steps">

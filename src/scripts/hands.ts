@@ -56,7 +56,7 @@ vec2 toImage(vec2 uv) {
 void main() {
   vec2 t = toImage(vUv);
   // The pointer leans each half a hair toward it; at rest they breathe.
-  float lean = (uMouse.x - 0.5) * 0.006 + sin(uTime * 0.6) * 0.0015;
+  float lean = (uMouse.x - 0.5) * 0.006 + sin(uTime * 0.6) * 0.00025;
   float s = uSpread;
   float d = t.x - uGap.x;
   vec2 src;

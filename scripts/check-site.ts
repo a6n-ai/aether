@@ -1,4 +1,5 @@
 import { readFileSync, existsSync, statSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 const failures: string[] = [];
 const check = (ok: boolean, message: string) => {
@@ -11,6 +12,7 @@ if (!existsSync(file)) {
 	process.exit(1);
 }
 const html = readFileSync(file, 'utf8');
+const posters: Record<string, string> = existsSync('public/plates/posters/manifest.json') ? JSON.parse(readFileSync('public/plates/posters/manifest.json', 'utf8')) : {};
 const markup = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '');
 const ariaLabels = [...markup.matchAll(/aria-label="([^"]*)"/g)].map((m) => m[1]);
 const visible = markup.replace(/<[^>]+>/g, ' ') + ' ' + ariaLabels.join(' ');
@@ -37,6 +39,9 @@ for (const page of PAGES) {
 		check(/loading="lazy"/.test(img), `${page}: plate ${fig[1]} image must load lazily`);
 		const file = `dist/plates/${fig[1]}.svg`;
 		check(existsSync(file) && /<style>svg\.machine\{/.test(readFileSync(file, 'utf8')), `${page}: ${file} missing or without embedded styles`);
+		const svg = existsSync(file) ? readFileSync(file, 'utf8') : '';
+		const hash = createHash('sha1').update(svg).digest('hex');
+		check(existsSync(`public/plates/posters/${fig[1]}.webp`) && posters[fig[1]] === hash, `${page}: poster for ${fig[1]} missing or out of date, run npm run posters`);
 		check(/<div[^>]*class="nav[^"]*"[^>]*hidden/.test(fig[0]), `${page}: plate ${fig[1]} step buttons must be hidden until JS can run them`);
 		check(!/data-readout[^>]*aria-live="polite"/.test(fig[0]), `${page}: plate ${fig[1]} readout must not announce during the auto tour`);
 		const items = [...fig[0].matchAll(/<li[^>]*data-step="(\d+)"[^>]*>/g)];

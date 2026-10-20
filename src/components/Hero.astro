@@ -22,7 +22,7 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		<div class="copy" data-hero-copy>
 			<h1 id="hero-title" data-split="lines" data-intro>Your business, <em>working on its own.</em></h1>
 			<p class="sub">We build the website and app your business runs on: orders, bookings, payments and messages, all in one place.</p>
-			<p class="actions" data-reveal="up" data-intro data-delay="0.5">
+			<p class="actions">
 				<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
 				<a class="how" href="#who">How we work</a>
 			</p>
@@ -50,7 +50,7 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 	if (hero && stage && img && document.documentElement.classList.contains('motion')) {
 		const start = () => {
 			const small = matchMedia('(max-width: 767px)').matches;
-			const open = small ? 0.08 : 0.23;
+			const open = small ? 0.08 : 0.13;
 			const scene = mountHands(stage, img, [0.925, 0.902, 0.855]);
 			if (!scene) stage.classList.add('no-gl');
 			// First frame: hands drawn apart, then they ease in a little as the page arrives.
@@ -65,7 +65,7 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 				autoAlpha: 0,
 				y: -60,
 				ease: 'none',
-				scrollTrigger: { trigger: hero, start: 'top top', end: '22% top', scrub: true },
+				scrollTrigger: { trigger: hero, start: '12% top', end: '30% top', scrub: true },
 			});
 			gsap.to('[data-cue]', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: hero, start: '2% top', end: '10% top', scrub: true } });
 
@@ -166,8 +166,22 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		gap: 12px 28px;
 		margin-top: 28px;
 	}
+	/* The same highlighter as the page's other secondary links, stronger so it reads over the painting. */
 	.how {
+		display: inline-block;
+		padding-block: 3px;
 		color: var(--strong);
+		text-decoration: none;
+		background: linear-gradient(color-mix(in oklab, var(--sanguine) 55%, transparent) 0 0) left 100% / 100% 2px no-repeat;
+		transition: background-size 420ms var(--ease);
+	}
+	.how:focus-visible {
+		background-size: 100% 0.55em;
+	}
+	@media (hover: hover) {
+		.how:hover {
+			background-size: 100% 0.55em;
+		}
 	}
 
 	.touch {

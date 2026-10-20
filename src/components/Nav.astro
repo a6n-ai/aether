@@ -5,7 +5,7 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 const path = Astro.url.pathname;
 const LINKS = [
 	{ href: '/how-it-works/', label: 'How it works', current: path.startsWith('/how-it-works') },
-	{ href: '/#clients', label: 'Clients', current: path.startsWith('/clients'), hide: true },
+	{ href: '/#clients', label: 'Clients', current: path.startsWith('/clients') },
 ];
 ---
 
@@ -18,7 +18,7 @@ const LINKS = [
 		<nav aria-label="Main">
 			{
 				LINKS.map((l) => (
-					<a class:list={['link', { 'hide-sm': l.hide }]} href={l.href} aria-current={l.current ? 'page' : undefined}>
+					<a class="link" href={l.href} aria-current={l.current ? 'page' : undefined}>
 						{l.label}
 					</a>
 				))
@@ -91,14 +91,32 @@ const LINKS = [
 	.link[aria-current='page'] {
 		background-size: calc(100% - 24px) 2px;
 	}
+	.link,
+	nav .btn-call {
+		white-space: nowrap;
+	}
 	@media (max-width: 480px) {
-		.hide-sm {
+		/* All three links fit on a phone; the mark keeps the brand and its aria-label names it. */
+		.mark span {
 			display: none;
+		}
+		nav {
+			gap: 2px;
+		}
+		nav .btn-call {
+			padding: 0 14px;
+			gap: 8px;
 		}
 		.link {
 			padding: 0 8px;
 			font-size: 0.88rem;
 			background-position: 8px calc(100% - 10px);
+		}
+	}
+	@media (max-width: 340px) {
+		.link {
+			padding: 0 6px;
+			font-size: 0.84rem;
 		}
 	}
 	@media (prefers-reduced-transparency: reduce) {

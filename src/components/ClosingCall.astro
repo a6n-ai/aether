@@ -150,6 +150,10 @@ import vitruvian from '../assets/art/vitruvian.jpg';
 	.drawing:global(.is-live) :global(img) {
 		visibility: hidden;
 	}
+	/* The canvas is opaque: keep it out of sight until its first frame, or a slow phone sees a black box. */
+	.drawing:not(:global(.is-live)) :global(.vitruvian-canvas) {
+		visibility: hidden;
+	}
 	figcaption {
 		font-size: var(--t-xs);
 		color: var(--text);
