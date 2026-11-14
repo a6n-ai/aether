@@ -1,22 +1,77 @@
 ---
-import { Picture } from 'astro:assets';
-import hands from '../assets/art/hands.jpg';
+import trace from '../data/hands-trace.json';
 import { BOOK_CALL_HREF } from '../lib/cta';
+
+// The two arms of the Creation of Adam, traced from the fresco (scripts/hands-trace.py) and drawn here in
+// red and black chalk, so every stroke, the gap and the light are ours to animate.
+const { width: W, height: H } = trace;
+const GAP = [762, 435]; // between the fingertips, in the fresco's pixels
+const arms = Object.entries(trace.arms).map(([name, a]) => ({
+	name,
+	outline: a.outline,
+	shade: a.shade,
+	lines: a.lines.map((l) => 'M' + l.map((p) => p.join(' ')).join(' L')).join(' '),
+	// the cut end of each arm melts into the paper, like an unfinished study
+	fade: name === 'adam' ? ['0', '0.22'] : ['1', '0.78'],
+}));
 ---
 
 <section class="hero" data-hero aria-labelledby="hero-title">
 	<div class="stage" data-stage>
-		<Picture
-			src={hands}
-			formats={['avif', 'webp']}
-			widths={[480, 800, 1280, 1533]}
-			sizes="100vw"
-			alt="Michelangelo's Creation of Adam: two hands reaching toward each other, almost touching."
-			loading="eager"
-			fetchpriority="high"
-			class="wall-img"
-			data-wall
-		/>
+		<svg class="drawing" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice" role="img" aria-label="Two hands reaching toward each other, almost touching, after Michelangelo's Creation of Adam, drawn in red and black chalk." data-drawing>
+			<defs>
+				<filter id="hero-chalk" x="-2%" y="-2%" width="104%" height="104%">
+					<feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="3" result="n" />
+					<feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" result="d" />
+					<feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="9" result="g" />
+					<feColorMatrix in="g" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.2 -0.5" result="ga" />
+					<feComposite in="d" in2="ga" operator="in" />
+				</filter>
+				<filter id="hero-wash"><feGaussianBlur stdDeviation="3" /></filter>
+				<pattern id="hero-hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(48)">
+					<line x1="0" y1="0" x2="0" y2="5" class="hatch" />
+				</pattern>
+				<pattern id="hero-cross" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(-30)">
+					<line x1="0" y1="0" x2="0" y2="7" class="cross" />
+				</pattern>
+				<radialGradient id="hero-glow">
+					<stop offset="0" class="glow-in" />
+					<stop offset="1" class="glow-out" />
+				</radialGradient>
+				{
+					arms.map((a) => (
+						<>
+							<linearGradient id={`hero-fade-${a.name}`} x1={a.fade[0]} x2={a.fade[1]} y1="0" y2="0">
+								<stop offset="0" stop-color="#fff" stop-opacity="0" />
+								<stop offset="1" stop-color="#fff" />
+							</linearGradient>
+							<mask id={`hero-mask-${a.name}`}>
+								<rect width={W} height={H} fill={`url(#hero-fade-${a.name})`} />
+							</mask>
+							<clipPath id={`hero-shade-${a.name}`}>
+								<path d={a.shade} fill-rule="evenodd" />
+							</clipPath>
+						</>
+					))
+				}
+			</defs>
+			<g data-zoom>
+				<circle class="glow" cx={GAP[0]} cy={GAP[1]} r="230" fill="url(#hero-glow)" data-glow />
+				{
+					arms.map((a) => (
+						<g data-arm={a.name} mask={`url(#hero-mask-${a.name})`}>
+							<path class="wash" d={a.outline} fill-rule="evenodd" filter="url(#hero-wash)" data-tone />
+							<g data-tone>
+								<rect width={W} height={H} fill="url(#hero-hatch)" clip-path={`url(#hero-shade-${a.name})`} filter="url(#hero-chalk)" />
+								<rect width={W} height={H} fill="url(#hero-cross)" clip-path={`url(#hero-shade-${a.name})`} filter="url(#hero-chalk)" opacity="0.45" />
+							</g>
+							<path class="outline" d={a.outline} pathLength="1" filter="url(#hero-chalk)" data-stroke />
+							<path class="inner" d={a.lines} pathLength="1" filter="url(#hero-chalk)" data-stroke="inner" />
+						</g>
+					))
+				}
+			</g>
+		</svg>
 		<div class="veil" aria-hidden="true"></div>
 
 		<div class="copy" data-hero-copy>
@@ -40,57 +95,73 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 <script>
 	import { gsap } from 'gsap';
 	import { ScrollTrigger } from 'gsap/ScrollTrigger';
-	import { mountHands } from '../scripts/hands';
 
 	gsap.registerPlugin(ScrollTrigger);
 	const hero = document.querySelector<HTMLElement>('[data-hero]');
-	const stage = hero?.querySelector<HTMLElement>('[data-stage]');
-	const img = stage?.querySelector<HTMLImageElement>('img[data-wall]');
+	const svg = hero?.querySelector<SVGSVGElement>('[data-drawing]');
 
-	if (hero && stage && img && document.documentElement.classList.contains('motion')) {
-		const start = () => {
-			const small = matchMedia('(max-width: 767px)').matches;
-			// Phones start closer: at 0.08 only the fingertips showed at the screen edges.
-			const open = small ? 0.035 : 0.13;
-			const scene = mountHands(stage, img, [0.925, 0.902, 0.855]);
-			if (!scene) stage.classList.add('no-gl');
-			// First frame: hands drawn apart, then they ease in a little as the page arrives.
-			scene?.set({ spread: open * 1.15 });
-			gsap.delayedCall(0.2, () => scene?.set({ spread: open }));
-
-			const touch = hero.querySelector<HTMLElement>('[data-touch]');
-			const bar = hero.querySelector<HTMLElement>('[data-bar]');
-			const range = (p: number, a: number, b: number) => Math.min(1, Math.max(0, (p - a) / (b - a)));
-
-			gsap.to('[data-hero-copy]', {
-				autoAlpha: 0,
-				y: -60,
-				ease: 'none',
-				scrollTrigger: { trigger: hero, start: '12% top', end: '30% top', scrub: true },
-			});
-			gsap.to('[data-cue]', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: hero, start: '2% top', end: '10% top', scrub: true } });
-
-			ScrollTrigger.create({
-				trigger: hero,
-				start: 'top top',
-				end: 'bottom bottom',
-				onUpdate: (self) => {
-					const p = self.progress;
-					// Close by 0.42, then hold the touching hands until 0.72 so the meeting is a resting frame, not a pass-through.
-					const close = gsap.parseEase('power2.inOut')(range(p, 0, 0.42));
-					const light = range(p, 0.32, 0.5);
-					const push = gsap.parseEase('power2.inOut')(range(p, 0.72, 1));
-					scene?.set({ spread: open * (1 - close), light: light + push * 0.8, zoom: 1 + push * 0.9, fade: 0 });
-					if (touch) {
-						const t = range(p, 0.4, 0.5) * (1 - range(p, 0.74, 0.84));
-						touch.style.opacity = String(t);
-						touch.style.translate = `0 ${(1 - range(p, 0.4, 0.5)) * 24}px`;
-					}
-					if (bar) bar.style.transform = `scaleX(${p})`;
-				},
-			});
+	if (hero && svg && document.documentElement.classList.contains('motion')) {
+		const W = svg.viewBox.baseVal.width;
+		const small = matchMedia('(max-width: 767px)').matches;
+		// How far apart the arms start, as a share of the fresco's width; phones start closer so both hands show.
+		const open = (small ? 0.035 : 0.13) * W * 0.5;
+		const adam = svg.querySelector<SVGGElement>('[data-arm="adam"]')!;
+		const god = svg.querySelector<SVGGElement>('[data-arm="god"]')!;
+		const zoom = svg.querySelector<SVGGElement>('[data-zoom]')!;
+		const glow = svg.querySelector<SVGCircleElement>('[data-glow]')!;
+		const set = (spread: number, light: number, push: number) => {
+			adam.setAttribute('transform', `translate(${-spread} 0)`);
+			god.setAttribute('transform', `translate(${spread} 0)`);
+			zoom.setAttribute('transform', `translate(762 435) scale(${1 + push * 0.9}) translate(-762 -435)`);
+			glow.style.opacity = String(Math.min(1, light));
 		};
-		img.complete ? start() : img.addEventListener('load', start, { once: true });
+		set(open * 1.15, 0, 0);
+
+		// The drawing is made in front of you: each outline is drawn along its length in red chalk, the
+		// painter's inner lines follow, then the hatching and the flesh tone settle in.
+		const strokes = svg.querySelectorAll<SVGPathElement>('[data-stroke]');
+		const tones = svg.querySelectorAll<SVGElement>('[data-tone]');
+		gsap.timeline({ delay: 0.15 })
+			.to(svg.querySelectorAll('[data-stroke=""]'), { strokeDashoffset: 0, duration: 2.2, ease: 'power2.inOut', stagger: 0.25 })
+			.to(svg.querySelectorAll('[data-stroke="inner"]'), { strokeDashoffset: 0, duration: 1.6, ease: 'power1.out', stagger: 0.2 }, '-=1.1')
+			.to(tones, { opacity: 1, duration: 1.4, ease: 'power1.out', stagger: 0.12 }, '-=1')
+			.add(() => set(open, 0, 0), 0.4);
+		void strokes;
+
+		const touch = hero.querySelector<HTMLElement>('[data-touch]');
+		const bar = hero.querySelector<HTMLElement>('[data-bar]');
+		const range = (p: number, a: number, b: number) => Math.min(1, Math.max(0, (p - a) / (b - a)));
+		const spread = { v: open * 1.15 };
+		gsap.to(spread, { v: open, duration: 1.6, ease: 'power3.out', delay: 0.4, onUpdate: () => set(spread.v, 0, 0) });
+
+		gsap.to('[data-hero-copy]', {
+			autoAlpha: 0,
+			y: -60,
+			ease: 'none',
+			scrollTrigger: { trigger: hero, start: '12% top', end: '30% top', scrub: true },
+		});
+		gsap.to('[data-cue]', { autoAlpha: 0, ease: 'none', scrollTrigger: { trigger: hero, start: '2% top', end: '10% top', scrub: true } });
+
+		ScrollTrigger.create({
+			trigger: hero,
+			start: 'top top',
+			end: 'bottom bottom',
+			onUpdate: (self) => {
+				const p = self.progress;
+				if (p <= 0) return;
+				// Close by 0.42, then hold the touching hands until 0.72 so the meeting is a resting frame, not a pass-through.
+				const close = gsap.parseEase('power2.inOut')(range(p, 0, 0.42));
+				const light = range(p, 0.32, 0.5);
+				const push = gsap.parseEase('power2.inOut')(range(p, 0.72, 1));
+				set(open * (1 - close), light + push * 0.8, push);
+				if (touch) {
+					const t = range(p, 0.4, 0.5) * (1 - range(p, 0.74, 0.84));
+					touch.style.opacity = String(t);
+					touch.style.translate = `0 ${(1 - range(p, 0.4, 0.5)) * 24}px`;
+				}
+				if (bar) bar.style.transform = `scaleX(${p})`;
+			},
+		});
 	}
 </script>
 
@@ -108,19 +179,61 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		place-items: center;
 		background: var(--page);
 	}
-	.stage :global(.hands-canvas),
-	.wall-img,
-	.stage :global(picture) {
+	.drawing {
 		position: absolute;
 		inset: 0;
 		width: 100%;
 		height: 100%;
 	}
-	.stage :global(img) {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		object-position: 49.6% 50%;
+	.drawing .outline {
+		fill: none;
+		stroke: var(--sanguine-ink);
+		stroke-width: 2.4;
+		stroke-linejoin: round;
+		stroke-dasharray: 1;
+		stroke-dashoffset: 0;
+	}
+	.drawing .inner {
+		fill: none;
+		stroke: var(--strong);
+		stroke-width: 1.5;
+		stroke-linecap: round;
+		opacity: 0.7;
+		stroke-dasharray: 1;
+		stroke-dashoffset: 0;
+	}
+	.drawing .wash {
+		fill: var(--sanguine);
+		fill-opacity: 0.14;
+	}
+	.drawing .hatch {
+		stroke: var(--sanguine-ink);
+		stroke-width: 1.2;
+		opacity: 0.75;
+	}
+	.drawing .cross {
+		stroke: var(--strong);
+		stroke-width: 1;
+		opacity: 0.55;
+	}
+	.glow-in {
+		stop-color: var(--gap-light);
+		stop-opacity: 0.9;
+	}
+	.glow-out {
+		stop-color: var(--gap-light);
+		stop-opacity: 0;
+	}
+	.glow {
+		opacity: 0;
+		mix-blend-mode: multiply;
+	}
+	/* With motion the drawing starts as bare paper and is drawn in; without it, it is simply there. */
+	:global(html.motion) .drawing [data-stroke] {
+		stroke-dashoffset: 1;
+	}
+	:global(html.motion) .drawing [data-tone] {
+		opacity: 0;
 	}
 	/* Behind the type only: a soft wash of the painting's own sky, so every word reads. */
 	.veil {
@@ -232,21 +345,13 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		transform-origin: left;
 	}
 
-	/* Motion: 180svh of scroll belongs to the hands. The canvas replaces the picture once it draws. */
+	/* Motion: 180svh of scroll belongs to the hands. */
 	:global(html.motion) .hero {
 		height: 280svh;
 	}
 	:global(html.motion) .stage {
 		position: sticky;
 		top: 0;
-	}
-	.stage:global(.is-live) :global(picture) {
-		visibility: hidden;
-	}
-	/* Without the canvas the painting sits whole; a wider wash keeps the type on sky. */
-	:global(html:not(.motion)) .veil,
-	.stage.no-gl .veil {
-		background: linear-gradient(color-mix(in oklab, var(--page) 86%, transparent) 30%, color-mix(in oklab, var(--page) 40%, transparent) 70%, transparent);
 	}
 	:global(html:not(.motion)) .cue,
 	:global(html:not(.motion)) .touch {
