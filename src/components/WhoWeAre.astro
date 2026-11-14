@@ -65,7 +65,7 @@ const PARTS = [
 <script>
 	// Hover or focus a legend entry to spotlight the matching part on the plate.
 	const figure = document.querySelector<HTMLElement>('[data-machine="system"]');
-	const parts = (key: string) => figure?.querySelectorAll<SVGElement>(`svg [data-key="${key}"]`) ?? [];
+	const parts = (key: string) => figure?.querySelectorAll<Element>(`[data-key="${key}"]`) ?? [];
 	document.querySelectorAll<HTMLElement>('.legend li[data-key]').forEach((li) => {
 		const on = () => {
 			figure?.classList.add('keyed');

@@ -29,6 +29,9 @@ export function mountPlate(root: HTMLElement): () => void {
 	const nav = root.querySelector<HTMLElement>('.nav')!;
 	const prev = root.querySelector<HTMLButtonElement>('[data-prev]')!;
 	const next = root.querySelector<HTMLButtonElement>('[data-next]')!;
+	// An old-master sheet: steps move a light over it instead of moving parts (see data/drawings.ts).
+	const spots: [number, number, number][] | null = root.dataset.drawing ? JSON.parse(root.dataset.drawing) : null;
+	let inked = false;
 	let movers: SVGGElement[] = [];
 	let staged: SVGGElement[] = [];
 	// The plate shows its final step; the tour rewinds to step 1 only once it is seen, so nothing jumps on load.
@@ -48,6 +51,12 @@ export function mountPlate(root: HTMLElement): () => void {
 		if (instant) moving.forEach((g) => g.setAttribute('transform', transforms[g.dataset.part!][step - 1]));
 		else if (moving.length) gsap.to(moving, { ...GLIDE, attr: { transform: (_: number, g: SVGGElement) => transforms[g.dataset.part!][step - 1] } });
 		for (const g of staged) g.classList.toggle('on', step >= Number(g.dataset.at));
+		const spot = spots?.[step - 1];
+		if (spot) {
+			root.style.setProperty('--fx', `${spot[0] * 100}%`);
+			root.style.setProperty('--fy', `${spot[1] * 100}%`);
+			root.style.setProperty('--fr', `${spot[2] * 100}%`);
+		}
 		labels.forEach((li, i) => (i + 1 === step ? li.setAttribute('aria-current', 'step') : li.removeAttribute('aria-current')));
 		readout.textContent = `${step} / ${steps}`;
 	};
@@ -72,7 +81,29 @@ export function mountPlate(root: HTMLElement): () => void {
 		started = true;
 		timer = window.setTimeout(() => (show(1), schedule()), DWELL_MS / 2);
 	};
+	// Ink settles from the darkest lines to the paper, then the light comes up and the tour may start.
+	const ink = () => {
+		if (inked) return;
+		inked = true;
+		const sheet = root.querySelector<HTMLElement>('.sheet');
+		const done = () => {
+			sheet?.classList.add('inked'); // drop the filter: the finished sheet at full quality, nothing left to compute
+			root.classList.add('lit');
+			if (visible) begin();
+		};
+		const fn = root.querySelector('[data-ink]');
+		if (still || !fn) return done();
+		const level = { v: -6 };
+		gsap.to(level, { v: 1.6, duration: 2.6, ease: 'power2.inOut', onUpdate: () => fn.setAttribute('intercept', String(level.v)), onComplete: done });
+	};
 	const goLive = async () => {
+		if (spots) {
+			live = true;
+			nav.hidden = false;
+			if (scrubbed && wanted) show(wanted, true);
+			if (visible) ink();
+			return;
+		}
 		const img = root.querySelector<HTMLImageElement>('img[data-plate-img]');
 		const svg = img ? await inline(img) : root.querySelector('svg');
 		if (!svg) return;
@@ -107,6 +138,7 @@ export function mountPlate(root: HTMLElement): () => void {
 	const seen = new IntersectionObserver(([entry]) => {
 		visible = entry.isIntersecting;
 		if (!visible) return clearTimeout(timer);
+		if (live && spots && !inked) return ink();
 		if (live) begin();
 	});
 	near.observe(root);

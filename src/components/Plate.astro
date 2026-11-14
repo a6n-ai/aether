@@ -1,7 +1,9 @@
 ---
 import '../styles/anatomy.css';
 import '../styles/plate.css';
+import { Picture } from 'astro:assets';
 import { machineOf, plateStyle, type PlateName } from '../machines/registry';
+import { DRAWINGS } from '../data/drawings';
 
 interface Props {
 	/** Plate id from the registry; also data-machine, used by tests and styles. */
@@ -21,23 +23,61 @@ const steps = machine.labels.length;
 // a slow phone); plate.ts swaps in the live SVG (200-400 KB) as it nears the viewport. scripts/posters.ts draws them.
 const label = machine.svg.match(/aria-label="([^"]*)"/)?.[1] ?? caption;
 const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0 720 480').split(' ').map(Number);
+// An old-master sheet stands in for the machine when one is listed; the light rests on the last step until it tours.
+const drawing = DRAWINGS[name];
+const last = drawing?.steps[steps - 1];
+const spot = last ? `--fx:${last[0] * 100}%;--fy:${last[1] * 100}%;--fr:${last[2] * 100}%;` : '';
 ---
 
 <figure
-	class:list={['iso machine plate', { compact }]}
-	style={plateStyle(name)}
+	class:list={['iso machine plate', { compact, drawn: drawing }]}
+	style={spot + plateStyle(name)}
 	data-machine={name}
 	data-steps={steps}
 	data-scrub={scrub ? '' : undefined}
-	data-transforms={JSON.stringify(machine.transforms)}
+	data-transforms={drawing ? undefined : JSON.stringify(machine.transforms)}
+	data-drawing={drawing ? JSON.stringify(drawing.steps) : undefined}
 >
 	<div class="corners" aria-hidden="true">
 		<span data-corner="fig">{fig}</span>
 		<span data-corner="title">{title}</span>
 	</div>
-	<div class="stage">
-		<img src={`/plates/posters/${name}.webp`} data-svg={`/plates/${name}.svg`} alt={label} width={width} height={height} loading="lazy" decoding="async" data-plate-img onload="this.dataset.loaded=''" />
-	</div>
+	{
+		drawing ? (
+			<div class="stage sheet" style={`--ar:${drawing.image.width / drawing.image.height};--ink:url(#ink-${name})`}>
+				{/* Ink settles darkest lines first: luminance becomes a mask whose threshold plate.ts raises (feFuncA intercept). */}
+				<svg class="ink-defs" aria-hidden="true" focusable="false">
+					<filter id={`ink-${name}`} x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+						<feColorMatrix in="SourceGraphic" type="luminanceToAlpha" result="lum" />
+						<feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="3" seed="7" result="fibre" />
+						<feComposite in="lum" in2="fibre" operator="arithmetic" k1="0" k2="-1" k3="0.3" k4="0.85" result="dark" />
+						<feComponentTransfer in="dark" result="mask">
+							<feFuncA type="linear" slope="6" intercept="-6" data-ink />
+						</feComponentTransfer>
+						<feComposite in="SourceGraphic" in2="mask" operator="in" result="inked" />
+						<feComponentTransfer in="SourceGraphic" result="ghost">
+							<feFuncA type="linear" slope="0.2" />
+						</feComponentTransfer>
+						<feMerge>
+							<feMergeNode in="ghost" />
+							<feMergeNode in="inked" />
+						</feMerge>
+					</filter>
+				</svg>
+				<Picture src={drawing.image} formats={['avif', 'webp']} quality={60} widths={[600, 900, 1300]} sizes="(max-width: 899px) 100vw, 880px" alt={drawing.alt} loading="lazy" decoding="async" />
+				<span class="light" aria-hidden="true" />
+				{drawing.keys?.map(([x, y], i) => (
+					<span class="tag" data-key={i + 1} style={`left:${x * 100}%;top:${y * 100}%`} aria-hidden="true">
+						{i + 1}
+					</span>
+				))}
+			</div>
+		) : (
+			<div class="stage">
+				<img src={`/plates/posters/${name}.webp`} data-svg={`/plates/${name}.svg`} alt={label} width={width} height={height} loading="lazy" decoding="async" data-plate-img onload="this.dataset.loaded=''" />
+			</div>
+		)
+	}
 	<div class="controls">
 		<ol class="steps">
 			{machine.labels.map((label, i) => <li data-step={i + 1} aria-current={i + 1 === steps ? 'step' : undefined}>{label}</li>)}
@@ -176,5 +216,109 @@ const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0
 		.plate {
 			padding: 40px 12px 20px;
 		}
+	}
+
+	/* An old-master sheet: it melts into the plate at its edges, inks in, and a warm light rests on each step. */
+	@property --fx {
+		syntax: '<percentage>';
+		inherits: true;
+		initial-value: 50%;
+	}
+	@property --fy {
+		syntax: '<percentage>';
+		inherits: true;
+		initial-value: 50%;
+	}
+	@property --fr {
+		syntax: '<percentage>';
+		inherits: true;
+		initial-value: 20%;
+	}
+	.drawn {
+		transition:
+			--fx 1100ms var(--ease),
+			--fy 1100ms var(--ease),
+			--fr 1100ms var(--ease);
+	}
+	/* The whole sheet fits one screen, with room for the plate's corners and steps. */
+	.sheet {
+		position: relative;
+		aspect-ratio: var(--ar);
+		width: min(100%, calc((100svh - 240px) * var(--ar)));
+		mask:
+			linear-gradient(to right, transparent, #000 3%, #000 97%, transparent),
+			linear-gradient(transparent, #000 4%, #000 96%, transparent);
+		mask-composite: intersect;
+	}
+	.ink-defs {
+		position: absolute;
+		width: 0;
+		height: 0;
+	}
+	.sheet :global(picture),
+	.sheet :global(img) {
+		display: block;
+		width: 100%;
+		height: 100%;
+	}
+	/* Before plate.ts starts the ink, a motion reader sees only the faint underdrawing; scripting off shows the sheet. */
+	:global(html.motion) .sheet:not(.inked) :global(img) {
+		filter: var(--ink);
+	}
+	.light {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
+		/* Outside the spot the sheet sinks a little into shade. */
+		background: radial-gradient(ellipse calc(var(--fr) * 1.6) calc(var(--fr) * 1.7) at var(--fx) var(--fy), transparent 45%, color-mix(in oklab, var(--strong) 16%, transparent));
+		mix-blend-mode: multiply;
+		opacity: 0;
+		transition: opacity 900ms var(--ease);
+	}
+	/* Inside it, the hero's warm gap light. */
+	.light::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: radial-gradient(ellipse var(--fr) calc(var(--fr) * 1.07) at var(--fx) var(--fy), color-mix(in oklab, var(--gap-light) 55%, transparent), transparent 100%);
+		mix-blend-mode: screen;
+	}
+	.drawn.lit .light {
+		opacity: 1;
+	}
+	.tag {
+		position: absolute;
+		translate: -50% -50%;
+		display: grid;
+		place-items: center;
+		width: 22px;
+		height: 22px;
+		border-radius: 999px;
+		background: var(--card);
+		box-shadow: 0 0 0 1px var(--sanguine-ink);
+		color: var(--sanguine-ink);
+		font: 600 var(--t-xs) / 1 var(--font-body);
+		transition:
+			scale 300ms var(--ease),
+			background-color 300ms var(--ease),
+			color 300ms var(--ease),
+			opacity 300ms var(--ease);
+	}
+	@media (max-width: 560px) {
+		.tag {
+			width: 18px;
+			height: 18px;
+			font-size: 0.7rem;
+		}
+	}
+	.keyed .tag {
+		opacity: 0.35;
+	}
+	.keyed .tag:global(.hl),
+	.tag:global(.hl) {
+		opacity: 1;
+		scale: 1.25;
+		background: var(--sanguine);
+		color: var(--card);
 	}
 </style>
