@@ -96,21 +96,36 @@ const LINKS = [
 		white-space: nowrap;
 	}
 	@media (max-width: 480px) {
-		/* All three links fit on a phone; the mark keeps the brand and its aria-label names it. */
-		.mark span {
-			display: none;
+		/* The wordmark stays: the spiral alone does not name the brand. */
+		.mark {
+			gap: 6px;
+			font-size: 1.2rem;
 		}
 		nav {
-			gap: 2px;
+			gap: 0;
 		}
 		nav .btn-call {
 			padding: 0 14px;
 			gap: 8px;
 		}
 		.link {
-			padding: 0 8px;
+			padding: 0 7px;
 			font-size: 0.88rem;
-			background-position: 8px calc(100% - 10px);
+			background-position: 7px calc(100% - 10px);
+		}
+		@media (hover: hover) {
+			.link:hover {
+				background-size: calc(100% - 14px) 2px;
+			}
+		}
+		.link:focus-visible,
+		.link[aria-current='page'] {
+			background-size: calc(100% - 14px) 2px;
+		}
+	}
+	@media (max-width: 360px) {
+		.mark span {
+			display: none;
 		}
 	}
 	@media (max-width: 340px) {

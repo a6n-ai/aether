@@ -73,9 +73,8 @@ const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0
 	.corners span {
 		position: absolute;
 		top: 18px;
-		font: 10.5px/1 var(--font-mono);
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+		/* Sentence case in the body face, to match the live figures' corners ("Plate VIII"). */
+		font: var(--t-xs) / 1 var(--font-body);
 		color: var(--muted);
 	}
 	.corners [data-corner='fig'] {

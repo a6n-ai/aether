@@ -52,6 +52,19 @@ function tokensOf(stage: HTMLElement) {
 	};
 }
 
+// The package sets its corners in tracked mono capitals; ours are sentence case in the body face, like the plates.
+// Built on first use: this module is also imported at build time (for SIZES), where CSSStyleSheet does not exist.
+let corners: CSSStyleSheet | undefined;
+function cornerSheet() {
+	if (!corners) {
+		corners = new CSSStyleSheet();
+		corners.replaceSync(
+			'.iso-plate-corner.iso-plate-corner{font-family:var(--font-body);font-size:var(--t-xs);letter-spacing:0;text-transform:none}',
+		);
+	}
+	return corners;
+}
+
 /** Load and render the figure once it nears the viewport. */
 export function mountFigure(stage: HTMLElement) {
 	const load = FIGURES[stage.dataset.figure as FigureName];
@@ -66,6 +79,7 @@ export function mountFigure(stage: HTMLElement) {
 			stage.classList.add('is-live');
 			const root = stage.shadowRoot;
 			if (!root) return;
+			root.adoptedStyleSheets = [...root.adoptedStyleSheets, cornerSheet()];
 			plain(name, root);
 		},
 		// Two screens ahead: at 600px a throttled phone reached the figure before its module rendered.
