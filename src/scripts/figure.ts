@@ -68,7 +68,8 @@ export function mountFigure(stage: HTMLElement) {
 			if (!root) return;
 			plain(name, root);
 		},
-		{ rootMargin: '600px 0px' },
+		// Two screens ahead: at 600px a throttled phone reached the figure before its module rendered.
+		{ rootMargin: '200% 0px' },
 	);
 	near.observe(stage);
 }

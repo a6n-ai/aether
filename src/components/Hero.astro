@@ -50,7 +50,8 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 	if (hero && stage && img && document.documentElement.classList.contains('motion')) {
 		const start = () => {
 			const small = matchMedia('(max-width: 767px)').matches;
-			const open = small ? 0.08 : 0.13;
+			// Phones start closer: at 0.08 only the fingertips showed at the screen edges.
+			const open = small ? 0.035 : 0.13;
 			const scene = mountHands(stage, img, [0.925, 0.902, 0.855]);
 			if (!scene) stage.classList.add('no-gl');
 			// First frame: hands drawn apart, then they ease in a little as the page arrives.
@@ -75,14 +76,15 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 				end: 'bottom bottom',
 				onUpdate: (self) => {
 					const p = self.progress;
-					const close = gsap.parseEase('power2.inOut')(range(p, 0, 0.55));
-					const light = range(p, 0.42, 0.62);
-					const push = gsap.parseEase('power2.inOut')(range(p, 0.7, 1));
+					// Close by 0.42, then hold the touching hands until 0.72 so the meeting is a resting frame, not a pass-through.
+					const close = gsap.parseEase('power2.inOut')(range(p, 0, 0.42));
+					const light = range(p, 0.32, 0.5);
+					const push = gsap.parseEase('power2.inOut')(range(p, 0.72, 1));
 					scene?.set({ spread: open * (1 - close), light: light + push * 0.8, zoom: 1 + push * 0.9, fade: 0 });
 					if (touch) {
-						const t = range(p, 0.5, 0.6) * (1 - range(p, 0.74, 0.84));
+						const t = range(p, 0.4, 0.5) * (1 - range(p, 0.74, 0.84));
 						touch.style.opacity = String(t);
-						touch.style.translate = `0 ${(1 - range(p, 0.5, 0.6)) * 24}px`;
+						touch.style.translate = `0 ${(1 - range(p, 0.4, 0.5)) * 24}px`;
 					}
 					if (bar) bar.style.transform = `scaleX(${p})`;
 				},
@@ -230,9 +232,9 @@ import { BOOK_CALL_HREF } from '../lib/cta';
 		transform-origin: left;
 	}
 
-	/* Motion: 160svh of scroll belongs to the hands. The canvas replaces the picture once it draws. */
+	/* Motion: 180svh of scroll belongs to the hands. The canvas replaces the picture once it draws. */
 	:global(html.motion) .hero {
-		height: 240svh;
+		height: 280svh;
 	}
 	:global(html.motion) .stage {
 		position: sticky;

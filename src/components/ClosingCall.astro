@@ -169,7 +169,8 @@ import vitruvian from '../assets/art/vitruvian.jpg';
 			order: -1;
 		}
 		.drawing {
-			height: 52svh;
+			/* What the call block leaves of the screen, so Book a call stays above the fold on short phones. */
+			height: clamp(200px, calc(100svh - 430px), 52svh);
 			width: 100%;
 			aspect-ratio: auto;
 		}
