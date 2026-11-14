@@ -9,7 +9,9 @@ import { blob, fillShape, hatchRuns, inside } from "./gallery";
 export type Clock = (id: string) => number;
 export const done: Clock = () => 1;
 export const CHALK_M: Medium = { nib: 2.1, taper: 0.55, pressure: 0.95, retrace: true, wobble: 1.4, rough: 1.2 };
-export const CHALK = "#f4f0e6", YEL = "#f6e6a4", BLUE = "#a9d3e8", PINK = "#f3c1cf";
+// Leonardo's trois crayons on toned paper: red chalk carries the drawing, black chalk the accents,
+// white chalk the lights, with ochre and verdigris washes. (Names kept from the slate version.)
+export const CHALK = "#8e3a22", YEL = "#9a5f14", BLUE = "#3f7560", PINK = "#2e2520", WHITE = "#f8f1e2";
 export const W = 1200, H = 800;
 
 export const chalk = (g: Gfx, draw: (dust: boolean) => void, dustAlpha = 0.2) => {
@@ -20,6 +22,7 @@ export const line = (g: Gfx, dust: boolean, pts: P[], w: number, color: string, 
   if (progress <= 0) return;
   g.pen(pts, { w: dust ? w * 2.6 : w, color, seed, wobble: wob, boil: 0, opacity: op, retrace: !dust, taper: 1, progress });
 };
+// Leonardo hatched left-handed: strokes run down from upper left to lower right (angle about +0.85).
 export const scumble = (g: Gfx, dust: boolean, region: P[], color: string, o: { angle: number; gap: number; w: number; alpha: number; seed: number; progress?: number }) => {
   const { angle, gap, w, alpha, seed, progress = 1 } = o, r = rng(seed);
   if (progress <= 0) return;
@@ -67,17 +70,19 @@ export const person = (g: Gfx, dust: boolean, x: number, y: number, s: number, s
 
 // ---------------------------------------------------------------- the board
 export const board = (g: Gfx, ctx: Ctx, ck: Clock) => {
-  const gr = ctx.createRadialGradient(W * 0.5, H * 0.45, 60, W * 0.5, H * 0.45, W * 0.75);
-  gr.addColorStop(0, "#35493f"); gr.addColorStop(0.62, "#27352f"); gr.addColorStop(1, "#1b2622");
+  // a sheet prepared with a warm ground, paler where the light falls, darker and foxed at the edges
+  const gr = ctx.createRadialGradient(W * 0.48, H * 0.42, 60, W * 0.5, H * 0.5, W * 0.78);
+  gr.addColorStop(0, "#e3d2ad"); gr.addColorStop(0.6, "#d4bd92"); gr.addColorStop(1, "#b89c70");
   ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
-  g.paper("coldpress", 0.3);
+  g.paper("coldpress", 0.35);
+  g.group("plain", () => { const r = rng(17); for (let i = 0; i < 26; i++) { const x = r() * W, y = r() * H, edge = Math.min(x, y, W - x, H - y) < 120; if (!edge && r() < 0.7) continue; fillShape(g, blob(x, y, 3 + r() * 9, 2 + r() * 7, 60 + i, 0.4, 10), "#9c7440", 0.08 + r() * 0.12); } }, { blur: 2 });
   // the eraser's arcs: yesterday's lesson rubbed down to haze, following the felt across
   g.group("plain", () => {
     const r = rng(5);
-    for (let i = 0; i < 8; i++) { const cx = 120 + r() * (W - 240), cy = 100 + r() * (H - 200), rr = 110 + r() * 150, a0 = r() * 6; const pts: P[] = []; for (let k = 0; k <= 12; k++) { const a = a0 + (k / 12) * 2.2; pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.55]); } g.pen(pts, { w: 40 + r() * 30, color: CHALK, seed: 6 + i, wobble: 3, boil: 0, opacity: 0.05, retrace: false, taper: 0.4, progress: ck(`swipe${i}`) }); }
+    for (let i = 0; i < 8; i++) { const cx = 120 + r() * (W - 240), cy = 100 + r() * (H - 200), rr = 110 + r() * 150, a0 = r() * 6; const pts: P[] = []; for (let k = 0; k <= 12; k++) { const a = a0 + (k / 12) * 2.2; pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * 0.55]); } g.pen(pts, { w: 40 + r() * 30, color: "#7a5a36", seed: 6 + i, wobble: 3, boil: 0, opacity: 0.06, retrace: false, taper: 0.4, progress: ck(`swipe${i}`) }); }
   }, { blur: 9 });
   // dust settled along the bottom edge of the board
-  g.group("plain", () => { const r = rng(9); for (let i = 0; i < 90; i++) { const x = r() * W, y = H - 6 - r() * 16; fillShape(g, blob(x, y, 0.8 + r() * 1.6, 0.6 + r(), 30 + i, 0.3, 6), CHALK, 0.12 + r() * 0.25); } });
+  g.group("plain", () => { const r = rng(9); for (let i = 0; i < 90; i++) { const x = r() * W, y = H - 6 - r() * 16; fillShape(g, blob(x, y, 0.8 + r() * 1.6, 0.6 + r(), 30 + i, 0.3, 6), CHALK, 0.08 + r() * 0.15); } });
 };
 
 // ---------------------------------------------------------------- cue clock (moonPhasesDraw's pattern)
@@ -101,4 +106,34 @@ export const chalkFilm = (title: string, N: number, HOLD: number, cues: Cue[], l
     lesson(g, ck);
   };
   return { meta: { title, W, H, fps: 30, bpm: 120, durationFrames: N, kind: "drawing", holds: [[N - HOLD, N]] } as Film["meta"], assets: { images: {} }, shots: [{ id: "board", start: 0, end: N, draw }] };
+};
+
+// ---------------------------------------------------------------- shared subjects
+/** The kiosk (Plates V and VII): counter, posts, roof, awning scumbled in stripes, the OPEN sign. Origin is the counter's bottom centre. */
+export const kiosk = (g: Gfx, dust: boolean, x: number, y: number, s: number, seed: number, q: number, color = CHALK) => {
+  const st = (i: number, n = 5) => Math.max(0, Math.min(1, q * n - i)), w = 200 * s, h = 70 * s, top = y - 210 * s;
+  box(g, dust, x - w / 2, y - h, w, h, 2.4, CHALK, seed, st(0), 0.95);
+  line(g, dust, [[x - w / 2 + 12 * s, y - h], [x - w / 2 + 12 * s, top + 40 * s]], 2.2, CHALK, seed + 5, 0.92, 0.6, st(1));
+  line(g, dust, [[x + w / 2 - 12 * s, y - h], [x + w / 2 - 12 * s, top + 40 * s]], 2.2, CHALK, seed + 6, 0.92, 0.6, st(1));
+  line(g, dust, [[x - w / 2 - 14 * s, top + 40 * s], [x, top], [x + w / 2 + 14 * s, top + 40 * s]], 2.4, CHALK, seed + 7, 0.95, 0.6, st(2));
+  const n = 5, sw = (w + 20 * s) / n, ax = x - w / 2 - 10 * s;
+  for (let i = 0; i < n; i++) {
+    const x0 = ax + i * sw, sc: P[] = [[x0, top + 40 * s], [x0 + sw, top + 40 * s], [x0 + sw, top + 70 * s], ...Array.from({ length: 6 }, (_, k): P => [x0 + sw - (k / 5) * sw, top + 70 * s + Math.sin((k / 5) * Math.PI) * 12 * s])];
+    scumble(g, dust, sc, i % 2 ? WHITE : color, { angle: 1.2, gap: 3.2, w: 3.6, alpha: 0.42, seed: seed + 10 + i, progress: Math.max(0, Math.min(1, st(3) * n - i)) });
+  }
+  if (st(4) > 0) { box(g, dust, x - 34 * s, y - h + 14 * s, 68 * s, 28 * s, 1.6, YEL, seed + 20, st(4)); write(g, "OPEN", x, y - h + 20 * s, 15 * s, YEL, seed + 25, Math.max(0, st(4) * 2 - 1)); }
+};
+/** A sheet of paper with ruled lines, slightly turned. */
+export const paper = (g: Gfx, dust: boolean, x: number, y: number, w: number, h: number, tilt: number, seed: number, q: number, color = CHALK) => {
+  const c = Math.cos(tilt), sn = Math.sin(tilt), p = (u: number, v: number): P => [x + u * c - v * sn, y + u * sn + v * c];
+  const st = (i: number) => Math.max(0, Math.min(1, q * 2 - i));
+  const sides: [P, P][] = [[p(0, 0), p(w, 0)], [p(w, 0), p(w, h)], [p(w, h), p(0, h)], [p(0, h), p(0, 0)]];
+  sides.forEach(([a, b], i) => line(g, dust, [a, b], 1.9, color, seed + 10 + i, 0.9, 0.4, Math.max(0, Math.min(1, st(0) * 4 - i))));
+  for (let i = 1; i < 5; i++) line(g, dust, [p(10, (h * i) / 5), p(w - 10 - (i % 2) * 18, (h * i) / 5)], 1.1, color, seed + i, 0.6, 0.4, Math.max(0, Math.min(1, st(1) * 4 - (i - 1))));
+};
+
+/** A polyline drawn segment by segment, so every corner stays a corner. */
+export const ruled = (g: Gfx, dust: boolean, pts: P[], w: number, color: string, seed: number, q: number, op = 0.92) => {
+  const n = pts.length - 1;
+  for (let i = 0; i < n; i++) line(g, dust, [pts[i], pts[i + 1]], w, color, seed + i, op, 0.5, Math.max(0, Math.min(1, q * n - i)));
 };

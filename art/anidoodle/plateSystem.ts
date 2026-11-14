@@ -1,6 +1,6 @@
 import { type Ctx, type Env, Gfx, type P } from "./core";
 import type { Film } from "./film";
-import { CYAN, DIM, DRAFT, type Kit, blit, border, cut, kit, sheet, slot, stagger, tooth } from "./blueprintKit";
+import { CYAN, DIM, DRAFT, type Kit, blit, border, cut, kit, sheet, slot, stagger, tooth } from "./leoKit";
 // PLATE II · THE ANATOMY OF A6N · cyanotype drafting sheet (a6n.ai home page).
 //
 // IDEA: the tools a small business already runs on stand on one bench, each cabled into one hub,
@@ -28,8 +28,9 @@ const CUES: [string, number, number][] = [
   ["letter", 305, 315],
   ["report", 315, 335],
   ["cables", 335, 360],
-  ["lining", 360, 380],
-  ["dims", 380, 415],
+  ["lining", 360, 375],
+  ["washes", 375, 395],
+  ["dims", 395, 415],
   ["balloons", 415, 445],
   ["table", 445, 475],
   ["notes", 475, 495],
@@ -155,6 +156,22 @@ const lining = (k: Kit, q: number) => { if (q <= 0) return; k.ink(() => {
   k.hatch(rbox(616, 616, 168, 158, 10), 45, 9, 0.85, 2100, { color: CYAN, opacity: 0.8, progress: q });
 }); };
 
+// watercolour washes laid over the ink, as Leonardo tinted his machine studies: each part flooded
+// once, pale, in the order the brush reaches it
+const WASH: [P[], string, number][] = [
+  [rbox(120, BENCH, 1160, 30, 6), "#b98a4e", 0.3],
+  [rbox(196, 606, 70, 144, 6), "#4f8a6e", 0.35],
+  [rbox(357, 610, 176, 136, 4), "#4f8a6e", 0.32],
+  [rbox(610, 610, 180, 170, 14), "#a8452a", 0.26],
+  [[at(792, 780), at(806, 716), at(866, 728), at(852, 780)], "#fbf3df", 0.7],
+  [rbox(880, 700, 210, 80, 8), "#c8902e", 0.32],
+  [rbox(916, 551, 138, 70, 4), "#4f8a6e", 0.3],
+  [rbox(1152, 614, 58, 50, 4), "#4f8a6e", 0.32],
+  [rbox(1140, 600, 82, 180, 18), "#a8452a", 0.16],
+  ...([[648, 34], [676, 52], [704, 44], [732, 70]] as [number, number][]).map(([x, h]): [P[], string, number] => [rbox(x, 560 - h, 18, h, 2), "#c8902e", 0.45]),
+];
+const washes = (k: Kit, q: number) => { if (q <= 0) return; const st = stagger(q, WASH.length, 0.35); WASH.forEach(([pts, c, a], i) => { const p = st(i); if (p > 0) k.fill(pts, c, a * p); }); };
+
 const dims = (k: Kit, q: number) => { if (q <= 0) return; k.ink(() => {
   const s = stagger(q, 3, 0.45);
   k.dim(at(120, 1060), at(1280, 1060), 34, "1160", 2200, s(0), { cap: 10, gap: 4, ext: 4 });
@@ -202,7 +219,7 @@ const title = (k: Kit, q: number) => { if (q <= 0) return; k.ink(() => {
 
 // ---------------------------------------------------------------- composition (blueprint.ts's stack pattern)
 type Part = (k: Kit, q: number) => void;
-const PART: Record<string, Part> = { border: (k, q) => border(k, q), titleBox, construct, bench, arch, hub, phone, laptop, till, terminal, letter, report, cables, lining, dims, balloons, table, notes, title };
+const PART: Record<string, Part> = { border: (k, q) => border(k, q), titleBox, construct, bench, arch, hub, phone, laptop, till, terminal, letter, report, cables, lining, washes, dims, balloons, table, notes, title };
 const progressAt = (f: number, a: number, b: number) => (f >= b ? 1 : f <= a ? 0 : (f - a) / (b - a));
 const stack = (env: Env, n: number) => {
   const s = slot(env, "stack"), have = s.key === null ? -1 : Number(s.key);
@@ -222,7 +239,7 @@ const draw = (ctx: Ctx, frame: number, env: Env) => {
 };
 
 export const plateSystem: Film = {
-  meta: { title: "Plate II · The anatomy of a6n · cyanotype", W: 1400, H: 900, fps: 30, bpm: 120, durationFrames: N, kind: "drawing", holds: [[N - HOLD, N]] } as Film["meta"],
+  meta: { title: "Plate II · The anatomy of a6n · sepia drafting", W: 1400, H: 900, fps: 30, bpm: 120, durationFrames: N, kind: "drawing", holds: [[N - HOLD, N]] } as Film["meta"],
   assets: { images: {} },
   shots: [{ id: "plate", start: 0, end: N, draw }],
 };

@@ -345,14 +345,10 @@ const notes = drawing
 		overflow: visible;
 		pointer-events: none;
 	}
-	/* The tour is drawn in the sheet's own medium: red chalk on ink, white ink on blueprint, chalk on slate. */
+	/* The tour is drawn in red chalk over the sheet, with a wash of paper behind its notes. */
 	.sheet {
 		--trace: var(--sanguine-ink);
 		--trace-halo: color-mix(in oklab, var(--card) 88%, transparent);
-	}
-	.sheet.blueprint {
-		--trace: var(--blueprint-ink);
-		--trace-halo: color-mix(in oklab, var(--blueprint-ground) 85%, transparent);
 	}
 	.leg {
 		fill: none;
@@ -408,10 +404,9 @@ const notes = drawing
 	.note:global(.on) {
 		clip-path: inset(0 -2% 0 -2%);
 	}
-	/* On a dark sheet the gap light has to carry further to read. */
-	.blueprint .light::after,
-	.chalk .light::after {
-		background: radial-gradient(ellipse var(--fr) calc(var(--fr) * 1.07) at var(--fx) var(--fy), color-mix(in oklab, var(--gap-light) 70%, transparent), transparent 100%);
+	/* Toned paper is already mid-tone: a lighter shade keeps the sheets clear. */
+	.filmed .light {
+		background: radial-gradient(ellipse calc(var(--fr) * 1.6) calc(var(--fr) * 1.7) at var(--fx) var(--fy), transparent 45%, color-mix(in oklab, var(--strong) 7%, transparent));
 	}
 	/* A chalkboard writes its own labels and arrows: only the light tours it. */
 	.chalk .trace {
@@ -461,9 +456,8 @@ const notes = drawing
 	.keyed .tag {
 		opacity: 0.35;
 	}
-	/* A drawn sheet numbers its own parts: the tag only lights the balloon its legend entry points at. */
-	.blueprint .tag,
-	.chalk .tag,
+	/* A filmed sheet numbers its own parts: the tag only lights the balloon its legend entry points at. */
+	.filmed .tag,
 	.drawn:not(.lit) .tag {
 		opacity: 0;
 	}

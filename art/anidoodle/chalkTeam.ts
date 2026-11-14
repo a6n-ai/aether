@@ -1,5 +1,5 @@
 import type { Gfx, P } from "./core";
-import { BLUE, CHALK, type Clock, type Cue, PINK, YEL, arrow, box, chalk, chalkFilm, curve, line, person, ring, scumble, write } from "./a6nChalk";
+import { BLUE, CHALK, WHITE, type Clock, type Cue, PINK, YEL, arrow, box, chalk, chalkFilm, curve, line, person, ring, scumble, write } from "./a6nChalk";
 // PLATE III · YOUR OWN TEAM · chalkboard (a6n.ai home page, "Built for businesses like yours").
 // IDEA: we work like your own team, not a vendor you chase: our bench sits inside your shop, and
 // what breaks is fixed there and then, by the same people, every week.
@@ -18,8 +18,8 @@ const CUES: Cue[] = [
   { id: "window", a: 160, b: 175 }, { id: "door", a: 175, b: 190 }, { id: "lab1", a: 190, b: 210 },
   { id: "bench", a: 210, b: 225 }, { id: "laptop", a: 225, b: 235 }, { id: "worker", a: 235, b: 255 }, { id: "ring2", a: 255, b: 265 }, { id: "lab2", a: 265, b: 285 },
   { id: "arrow1", a: 285, b: 300 }, { id: "spanner", a: 300, b: 320 }, { id: "sparks", a: 320, b: 330 }, { id: "tick", a: 330, b: 340 }, { id: "lab3", a: 340, b: 365 },
-  { id: "arrow2", a: 365, b: 380 }, { id: "owner", a: 380, b: 400 }, { id: "ours", a: 400, b: 420 }, { id: "hands", a: 420, b: 425 }, { id: "ring4", a: 425, b: 440 }, { id: "lab4", a: 440, b: 465 },
-  { id: "note", a: 465, b: 510 },
+  { id: "arrow2", a: 365, b: 380 }, { id: "owner", a: 380, b: 400 }, { id: "ours", a: 400, b: 420 }, { id: "hands", a: 420, b: 425 }, { id: "ring4", a: 425, b: 440 }, { id: "lab4", a: 440, b: 480 },
+  { id: "note", a: 480, b: 510 },
 ];
 
 const AWN: [number, number] = [150, 640];
@@ -31,7 +31,7 @@ const lesson = (g: Gfx, ck: Clock) => {
     for (let i = 0; i < stripes; i++) {
       const x0 = AWN[0] + i * sw, scallop: P[] = [[x0, 218], [x0 + sw, 218], [x0 + sw, 280], ...Array.from({ length: 7 }, (_, k): P => [x0 + sw - (k / 6) * sw, 280 + Math.sin((k / 6) * Math.PI) * 18])];
       const q = Math.max(0, Math.min(1, ck("awning") * stripes - i));
-      scumble(g, dust, scallop, i % 2 ? CHALK : PINK, { angle: 1.2, gap: 3.4, w: 4, alpha: 0.4, seed: 110 + i, progress: q });
+      scumble(g, dust, scallop, i % 2 ? WHITE : CHALK, { angle: 0.85, gap: 3.4, w: 4, alpha: 0.4, seed: 110 + i, progress: q });
     }
     line(g, dust, [[AWN[0] - 6, 218], [AWN[1] + 6, 218]], 2.4, CHALK, 120, 0.9, 1, ck("awnLine"));
     box(g, dust, 200, 330, 230, 200, 2.2, CHALK, 130, ck("window"), 0.9);
@@ -72,7 +72,7 @@ const lesson = (g: Gfx, ck: Clock) => {
     write(g, "OUR BENCH INSIDE IT", 315, 584, 15, BLUE, 31, ck("lab2"));
     write(g, "FIXED ON THE SPOT", 900, 470, 17, YEL, 32, ck("lab3"), "left");
     write(g, "ONE TEAM, YOURS", 910, 716, 20, PINK, 33, ck("lab4"));
-    write(g, "SAME PEOPLE, EVERY WEEK", 1150, 760, 12, CHALK, 34, ck("note"), "right");
+    write(g, "SAME PEOPLE, EVERY WEEK", 1160, 768, 17, PINK, 34, ck("note"), "right");
   }, 0.22);
 };
 
