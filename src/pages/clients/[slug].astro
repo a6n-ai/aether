@@ -33,14 +33,14 @@ const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 
 <Layout title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} Built by a6n.`}>
 	<main class="client" style={`--pigment:${client.pigment}`}>
-		<div class="wrap head">
-			<a class="back" href="/#clients">All clients</a>
-			<h1>{client.name}</h1>
-			<p class="meta">{client.kind}, {client.where}</p>
-			<p class="intro">{client.intro}</p>
-			<p class="line">{client.line}</p>
-		</div>
-		<div class="wrap">
+		<div class="wrap top">
+			<div class="head">
+				<a class="back" href="/#clients">All clients</a>
+				<h1>{client.name}</h1>
+				<p class="meta">{client.kind}, {client.where}</p>
+				<p class="intro">{client.intro}</p>
+				<p class="line">{client.line}</p>
+			</div>
 			<Figure {...FIGURES[client.slug]} fig={`Plate ${plateNo}`} caption={caption} />
 		</div>
 		<section class="wrap features">
@@ -70,8 +70,22 @@ const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 <style>
 	.head {
 		display: grid;
+		align-content: start;
 		gap: 14px;
 		padding-block: 56px 40px;
+	}
+	/* Wide screens: the story and its machine share the first screen. */
+	@media (min-width: 1100px) {
+		.top {
+			display: grid;
+			grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+			gap: clamp(32px, 4vw, 64px);
+			align-items: start;
+			padding-top: 32px;
+		}
+		.head {
+			padding-block: 24px 0;
+		}
 	}
 	.back {
 		justify-self: start;
