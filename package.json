@@ -11,6 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "check:site": "node scripts/check-site.ts",
+		"test:world": "node --test src/scripts/world/",
 		"posters": "node scripts/posters.ts"
   },
   "dependencies": {
