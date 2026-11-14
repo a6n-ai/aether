@@ -61,7 +61,7 @@ const notes = drawing
 	</div>
 	{
 		drawing ? (
-			<div class="stage sheet" style={`--ar:${drawing.image.width / drawing.image.height};--ink:url(#ink-${name})`}>
+			<div class:list={['stage sheet', drawing.medium, { filmed: drawing.film }]} style={`--ar:${drawing.image.width / drawing.image.height};--ink:url(#ink-${name})`}>
 				{/* Ink settles darkest lines first: luminance becomes a mask whose threshold plate.ts raises (feFuncA intercept). */}
 				<svg class="ink-defs" aria-hidden="true" focusable="false">
 					<filter id={`ink-${name}`} x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
@@ -82,6 +82,8 @@ const notes = drawing
 					</filter>
 				</svg>
 				<Picture src={drawing.image} formats={['avif', 'webp']} quality={60} widths={[600, 900, 1300]} sizes="(max-width: 899px) 100vw, 880px" alt={drawing.alt} loading="lazy" decoding="async" />
+				{/* The sheet being drawn, stroke by stroke; its last frame is the picture under it. plate.ts plays it once. */}
+				{drawing.film && <video class="film" src={`/plates/films/${drawing.film}.mp4`} muted playsinline preload="none" aria-hidden="true" tabindex="-1" data-film />}
 				<span class="light" aria-hidden="true" />
 				<svg class="trace" viewBox={`0 0 1000 ${traceH}`} aria-hidden="true" focusable="false">
 					<filter id={`hand-${name}`}>
@@ -318,6 +320,22 @@ const notes = drawing
 	.drawn.lit .light {
 		opacity: 1;
 	}
+	/* The film covers the still until it has drawn the whole sheet, then steps aside. Motion readers only. */
+	.film {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: none;
+	}
+	:global(html.motion) .filmed:not(.inked) .film {
+		display: block;
+	}
+	/* A filmed sheet is never inked by the filter: the film is how it is drawn. */
+	:global(html.motion) .filmed :global(img) {
+		filter: none;
+	}
 	/* Red chalk over the ink: the route between steps draws itself, and each step pens a margin note. */
 	.trace {
 		position: absolute;
@@ -327,9 +345,18 @@ const notes = drawing
 		overflow: visible;
 		pointer-events: none;
 	}
+	/* The tour is drawn in the sheet's own medium: red chalk on ink, white ink on blueprint, chalk on slate. */
+	.sheet {
+		--trace: var(--sanguine-ink);
+		--trace-halo: color-mix(in oklab, var(--card) 88%, transparent);
+	}
+	.sheet.blueprint {
+		--trace: var(--blueprint-ink);
+		--trace-halo: color-mix(in oklab, var(--blueprint-ground) 85%, transparent);
+	}
 	.leg {
 		fill: none;
-		stroke: var(--sanguine-ink);
+		stroke: var(--trace);
 		stroke-width: 3;
 		stroke-linecap: round;
 		stroke-dasharray: 1;
@@ -338,7 +365,7 @@ const notes = drawing
 	}
 	.dot {
 		fill: none;
-		stroke: var(--sanguine-ink);
+		stroke: var(--trace);
 		stroke-width: 3;
 		opacity: 0;
 		scale: 0.4;
@@ -350,10 +377,10 @@ const notes = drawing
 	}
 	.note {
 		font: italic 400 30px var(--font-display);
-		fill: var(--sanguine-ink);
-		/* A wash of paper behind the letters, so a note stays readable over hatching. */
+		fill: var(--trace);
+		/* A wash of the sheet behind the letters, so a note stays readable over hatching. */
 		paint-order: stroke;
-		stroke: color-mix(in oklab, var(--card) 88%, transparent);
+		stroke: var(--trace-halo);
 		stroke-width: 9px;
 		stroke-linejoin: round;
 		clip-path: inset(0 100% 0 0);
@@ -424,6 +451,12 @@ const notes = drawing
 	}
 	.keyed .tag {
 		opacity: 0.35;
+	}
+	/* A drawn sheet numbers its own parts: the tag only lights the balloon its legend entry points at. */
+	.blueprint .tag,
+	.chalk .tag,
+	.drawn:not(.lit) .tag {
+		opacity: 0;
 	}
 	.keyed .tag:global(.hl),
 	.tag:global(.hl) {

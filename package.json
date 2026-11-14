@@ -11,8 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "check:site": "node scripts/check-site.ts",
-		"posters": "node scripts/posters.ts",
-		"sheets": "node scripts/sheets.ts"
+		"posters": "node scripts/posters.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

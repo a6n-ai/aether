@@ -89,11 +89,25 @@ export function mountPlate(root: HTMLElement): () => void {
 		if (inked) return;
 		inked = true;
 		const sheet = root.querySelector<HTMLElement>('.sheet');
+		let finished = false;
 		const done = () => {
+			if (finished) return;
+			finished = true;
 			sheet?.classList.add('inked'); // drop the filter: the finished sheet at full quality, nothing left to compute
 			root.classList.add('lit');
 			if (visible) begin();
 		};
+		// A filmed sheet draws itself stroke by stroke; the film's last frame is the still beneath it.
+		const film = root.querySelector<HTMLVideoElement>('video[data-film]');
+		if (film && !still) {
+			film.playbackRate = 1.5;
+			film.addEventListener('ended', done, { once: true });
+			film.addEventListener('error', done, { once: true });
+			film.play().catch(done);
+			// A browser may hold back a film it was not asked to preload; never leave the sheet unfinished.
+			setTimeout(() => film.currentTime === 0 && done(), 4000);
+			return;
+		}
 		const fn = root.querySelector('[data-ink]');
 		if (still || !fn) return done();
 		const level = { v: -6 };
