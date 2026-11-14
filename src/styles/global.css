@@ -286,3 +286,10 @@ html.lenis body {
 		animation: none !important;
 	}
 }
+
+/* The world canvas sits fixed behind every page; the page's own content stacks above it. */
+main,
+footer {
+	position: relative;
+	z-index: 1;
+}

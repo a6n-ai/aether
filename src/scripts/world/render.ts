@@ -5,6 +5,7 @@ import type { Cam } from './camera.ts';
 import { visible } from './camera.ts';
 import { createFilms, featherMask, type FilmVideo } from './films.ts';
 import { WORLD, type Region, type Stroke } from './layout.ts';
+import { foxing } from './paper.ts';
 
 export type WorldData = { regions: Region[]; strokes: Stroke[]; stills: Record<string, string>; films: Record<string, string>; vitruvian: string };
 export type World = ReturnType<typeof createWorld>;
@@ -72,10 +73,7 @@ export function createWorld(canvas: HTMLCanvasElement, data: WorldData) {
 	});
 	const frame = document.createElement('canvas');
 	// paper: a sheet-wide warm ground and some foxing, in world space
-	const foxing = Array.from({ length: 90 }, (_, i) => {
-		const s = Math.sin(i * 12.9898) * 43758.5453, t = Math.sin(i * 78.233) * 12345.678;
-		return [(s - Math.floor(s)) * WORLD.w, (t - Math.floor(t)) * WORLD.h, 20 + ((s * 7) % 1) * 90] as const;
-	});
+	const spots = foxing(90, WORLD.w, WORLD.h);
 	// the Vitruvian, inked by its own luminance: darkest lines first
 	const vit = data.regions.find((r) => r.id === 'vitruvian');
 	let vitImg: HTMLImageElement | null = null, vitLum: Uint8ClampedArray | null = null, vitMask: HTMLCanvasElement | null = null;
@@ -126,8 +124,8 @@ export function createWorld(canvas: HTMLCanvasElement, data: WorldData) {
 		gr.addColorStop(1, '#c9ad80');
 		ctx.fillStyle = gr;
 		ctx.fillRect(0, 0, WORLD.w, WORLD.h);
-		ctx.fillStyle = 'rgba(156,116,64,0.06)';
-		for (const [x, y, r] of foxing) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+		ctx.fillStyle = 'rgba(156,116,64,0.035)';
+		for (const [x, y, r] of spots) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
 		// places in view
 		for (const r of data.regions) {
 			if (!visible(r, cam, vw, vh)) continue;

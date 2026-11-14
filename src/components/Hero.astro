@@ -49,6 +49,8 @@ const picture = { src: creation, formats: ['avif', 'webp'], widths: [900, 1400, 
 	import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 	gsap.registerPlugin(ScrollTrigger);
+	// the router swaps pages without reloading, so the hero sets itself up each time the home page arrives
+	document.addEventListener('astro:page-load', () => {
 	const hero = document.querySelector<HTMLElement>('[data-hero]');
 	const scene = hero?.querySelector<HTMLElement>('[data-scene]');
 
@@ -103,6 +105,7 @@ const picture = { src: creation, formats: ['avif', 'webp'], widths: [900, 1400, 
 			},
 		});
 	}
+	});
 </script>
 
 <style>
