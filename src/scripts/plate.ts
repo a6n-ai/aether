@@ -50,7 +50,10 @@ export function mountPlate(root: HTMLElement): () => void {
 		const moving = movers.filter((g) => transforms[g.dataset.part!]?.[step - 1] !== g.getAttribute('transform'));
 		if (instant) moving.forEach((g) => g.setAttribute('transform', transforms[g.dataset.part!][step - 1]));
 		else if (moving.length) gsap.to(moving, { ...GLIDE, attr: { transform: (_: number, g: SVGGElement) => transforms[g.dataset.part!][step - 1] } });
-		for (const g of staged) g.classList.toggle('on', step >= Number(g.dataset.at));
+		for (const g of staged) {
+			g.classList.toggle('on', step >= Number(g.dataset.at));
+			g.classList.toggle('now', step === Number(g.dataset.at));
+		}
 		const spot = spots?.[step - 1];
 		if (spot) {
 			root.style.setProperty('--fx', `${spot[0] * 100}%`);
@@ -98,6 +101,7 @@ export function mountPlate(root: HTMLElement): () => void {
 	};
 	const goLive = async () => {
 		if (spots) {
+			staged = [...root.querySelectorAll<SVGGElement>('.trace [data-at]')];
 			live = true;
 			nav.hidden = false;
 			if (scrubbed && wanted) show(wanted, true);

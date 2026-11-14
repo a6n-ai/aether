@@ -27,6 +27,23 @@ const [, , width, height] = (machine.svg.match(/viewBox="([^"]*)"/)?.[1] ?? '0 0
 const drawing = DRAWINGS[name];
 const last = drawing?.steps[steps - 1];
 const spot = last ? `--fx:${last[0] * 100}%;--fy:${last[1] * 100}%;--fr:${last[2] * 100}%;` : '';
+// The pen's route between the step spots, in a 1000-wide box that keeps the sheet's proportions.
+const traceH = drawing ? Math.round((1000 * drawing.image.height) / drawing.image.width) : 0;
+const pts = drawing?.steps.map(([x, y]) => [x * 1000, y * traceH] as const) ?? [];
+// Each leg bows a little to one side, like a hand-drawn arrow between two notes.
+const legs = pts.slice(1).map(([x, y], i) => {
+	const [px, py] = pts[i];
+	const [mx, my] = [(px + x) / 2, (py + y) / 2];
+	const [dx, dy] = [x - px, y - py];
+	return `M${px} ${py} Q${mx - dy * 0.22} ${my + dx * 0.22} ${x} ${y}`;
+});
+const notes = drawing
+	? pts.map(([x, y], i) => {
+			const at = drawing.notes?.[i];
+			const nx = at ? at[0] * 1000 : x < 500 ? x + 46 : x - 46;
+			return { x: nx, y: at ? at[1] * traceH : y - 34, anchor: nx < 500 ? 'start' : 'end', text: `${['i', 'ii', 'iii', 'iv', 'v'][i]}. ${machine.labels[i]}` };
+		})
+	: [];
 ---
 
 <figure
@@ -66,6 +83,21 @@ const spot = last ? `--fx:${last[0] * 100}%;--fy:${last[1] * 100}%;--fr:${last[2
 				</svg>
 				<Picture src={drawing.image} formats={['avif', 'webp']} quality={60} widths={[600, 900, 1300]} sizes="(max-width: 899px) 100vw, 880px" alt={drawing.alt} loading="lazy" decoding="async" />
 				<span class="light" aria-hidden="true" />
+				<svg class="trace" viewBox={`0 0 1000 ${traceH}`} aria-hidden="true" focusable="false">
+					<filter id={`hand-${name}`}>
+						<feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" seed="3" />
+						<feDisplacementMap in="SourceGraphic" scale="5" />
+					</filter>
+					<g filter={`url(#hand-${name})`}>
+						{legs.map((d, i) => <path class="leg on" d={d} pathLength="1" data-at={i + 2} />)}
+						{pts.map(([x, y], i) => <circle class="dot on" cx={x} cy={y} r="7" data-at={i + 1} />)}
+					</g>
+					{notes.map((n, i) => (
+						<text class:list={["note on", { now: i === pts.length - 1 }]} x={n.x} y={n.y} text-anchor={n.anchor} data-at={i + 1}>
+							{n.text}
+						</text>
+					))}
+				</svg>
 				{drawing.keys?.map(([x, y], i) => (
 					<span class="tag" data-key={i + 1} style={`left:${x * 100}%;top:${y * 100}%`} aria-hidden="true">
 						{i + 1}
@@ -285,6 +317,85 @@ const spot = last ? `--fx:${last[0] * 100}%;--fy:${last[1] * 100}%;--fr:${last[2
 	}
 	.drawn.lit .light {
 		opacity: 1;
+	}
+	/* Red chalk over the ink: the route between steps draws itself, and each step pens a margin note. */
+	.trace {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		overflow: visible;
+		pointer-events: none;
+	}
+	.leg {
+		fill: none;
+		stroke: var(--sanguine-ink);
+		stroke-width: 3;
+		stroke-linecap: round;
+		stroke-dasharray: 1;
+		stroke-dashoffset: 1;
+		transition: stroke-dashoffset 1100ms var(--ease) 250ms;
+	}
+	.dot {
+		fill: none;
+		stroke: var(--sanguine-ink);
+		stroke-width: 3;
+		opacity: 0;
+		scale: 0.4;
+		transform-box: fill-box;
+		transform-origin: center;
+		transition:
+			opacity 400ms var(--ease) 900ms,
+			scale 600ms var(--ease) 900ms;
+	}
+	.note {
+		font: italic 400 30px var(--font-display);
+		fill: var(--sanguine-ink);
+		/* A wash of paper behind the letters, so a note stays readable over hatching. */
+		paint-order: stroke;
+		stroke: color-mix(in oklab, var(--card) 88%, transparent);
+		stroke-width: 9px;
+		stroke-linejoin: round;
+		clip-path: inset(0 100% 0 0);
+		opacity: 0.4;
+		transition:
+			clip-path 900ms var(--ease) 1000ms,
+			opacity 500ms var(--ease);
+	}
+	.note:global(.now) {
+		opacity: 1;
+	}
+	:global(html:not(.motion)) .note {
+		opacity: 1;
+	}
+	.note[text-anchor='end'] {
+		clip-path: inset(0 0 0 100%);
+	}
+	.leg:global(.on) {
+		stroke-dashoffset: 0;
+	}
+	.dot:global(.on) {
+		opacity: 1;
+		scale: 1;
+	}
+	.note:global(.on) {
+		clip-path: inset(0 -2% 0 -2%);
+	}
+	/* The route and notes wait for the ink; a still reader sees them all at once. */
+	:global(html.motion) .drawn:not(.lit) .trace {
+		visibility: hidden;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.leg,
+		.dot,
+		.note {
+			transition: none;
+		}
+	}
+	@media (max-width: 560px) {
+		.note {
+			font-size: 40px;
+		}
 	}
 	.tag {
 		position: absolute;

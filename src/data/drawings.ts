@@ -11,6 +11,8 @@ export type Drawing = {
 	alt: string;
 	/** Where the light rests at each step, in step order. */
 	steps: Spot[];
+	/** Where each step's margin note sits (uv, its left or right edge); defaults to beside the spot. */
+	notes?: [x: number, y: number][];
 	/** Numbered tags pinned to parts of the sheet, matched by data-key to a legend beside the plate. */
 	keys?: [x: number, y: number][];
 };
@@ -25,6 +27,13 @@ export const DRAWINGS: Partial<Record<string, Drawing>> = {
 			[0.45, 0.31, 0.13], // joined into one: every arm meets at the hub
 			[0.46, 0.57, 0.3], // shaped around you: the curved frame built around the shaft
 			[0.46, 0.68, 0.13], // running every day: the rope screw and gear that keep it turning
+		],
+		// Clear paper for each note: top right, above the hub, the left margin, under the gear.
+		notes: [
+			[0.97, 0.16],
+			[0.55, 0.06],
+			[0.03, 0.88],
+			[0.62, 0.8],
 		],
 		keys: [
 			[0.05, 0.58],
