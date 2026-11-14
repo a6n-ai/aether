@@ -3,6 +3,7 @@
 // the step labels and caption still come from the plate's machine module, verbatim.
 import type { ImageMetadata } from 'astro';
 import system from '../assets/art/sheet-system.jpg';
+import team from '../assets/art/sheet-team.jpg';
 
 /** A point on the sheet as image uv (0-1, y down); r is the light's radius as a fraction of the sheet width. */
 export type Spot = [x: number, y: number, r: number];
@@ -50,6 +51,20 @@ export const DRAWINGS: Partial<Record<string, Drawing>> = {
 			[0.636, 0.433],
 			[0.704, 0.228],
 			[0.421, 0.167],
+		],
+	},
+	// Chalkboard (aether-art/src/canvas-core/chalkTeam.ts, 1200x800); u = x / 1200, v = y / 800.
+	// The board writes each step's label and arrow itself, so only the light tours it.
+	team: {
+		image: team,
+		medium: 'chalk',
+		film: 'team',
+		alt: "A chalkboard lesson titled Your own team: a shop with a striped awning, and inside its window our bench with one of us at a laptop, ringed in blue; an arrow out to a spanner, sparks and a tick, fixed on the spot; an arrow down to two people side by side, hand in hand, ringed in pink: one team, yours.",
+		steps: [
+			[0.329, 0.5625, 0.22], // your shop
+			[0.2625, 0.55, 0.13], // our bench inside it
+			[0.733, 0.4125, 0.15], // fixed on the spot
+			[0.758, 0.7625, 0.12], // one team, yours
 		],
 	},
 };

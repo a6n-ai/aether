@@ -408,6 +408,15 @@ const notes = drawing
 	.note:global(.on) {
 		clip-path: inset(0 -2% 0 -2%);
 	}
+	/* On a dark sheet the gap light has to carry further to read. */
+	.blueprint .light::after,
+	.chalk .light::after {
+		background: radial-gradient(ellipse var(--fr) calc(var(--fr) * 1.07) at var(--fx) var(--fy), color-mix(in oklab, var(--gap-light) 70%, transparent), transparent 100%);
+	}
+	/* A chalkboard writes its own labels and arrows: only the light tours it. */
+	.chalk .trace {
+		display: none;
+	}
 	/* The route and notes wait for the ink; a still reader sees them all at once. */
 	:global(html.motion) .drawn:not(.lit) .trace {
 		visibility: hidden;
