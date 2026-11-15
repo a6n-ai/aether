@@ -70,10 +70,11 @@ const { id, side, heading, still, stillAlt = '', href, linkText, first = false, 
 	}
 
 	/* The still page: each place's drawing inline, then its words, in page order. */
+	/* the drawings are inked on white for the world's multiply; here too, so only the ink lands on the page */
 	.still {
 		width: 100%;
 		height: auto;
-		border-radius: 4px;
+		mix-blend-mode: multiply;
 	}
 	:global(html:not(.world)) .stop {
 		padding-block: clamp(48px, 9vh, 96px);

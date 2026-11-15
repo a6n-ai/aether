@@ -293,3 +293,7 @@ footer {
 	position: relative;
 	z-index: 1;
 }
+/* On the still page main carries the paper itself, so the drawings' multiply has something to land on. */
+html:not(.world) main {
+	background: var(--page);
+}
