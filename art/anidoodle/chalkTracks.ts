@@ -157,3 +157,6 @@ const yearLesson = (g: Gfx, ck: Clock) => {
   }, 0.22);
 };
 export const chalkYear = chalkFilm("Plate VII · A year on · chalkboard", N, HOLD, YEAR_CUES, yearLesson);
+export const bareStreetNew = chalkFilm("World region · the street, build new", N, HOLD, KIOSK_CUES, kioskLesson, { bare: true });
+export const bareStreetMove = chalkFilm("World region · the street, move over", N, HOLD, WEIGH_CUES, weighLesson, { bare: true });
+export const bareStreetGrow = chalkFilm("World region · the street, run and grow", N, HOLD, YEAR_CUES, yearLesson, { bare: true });

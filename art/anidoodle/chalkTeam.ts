@@ -77,3 +77,4 @@ const lesson = (g: Gfx, ck: Clock) => {
 };
 
 export const chalkTeam = chalkFilm("Plate III · Your own team · chalkboard", N, HOLD, CUES, lesson);
+export const bareShop = chalkFilm("World region · the shop window", N, HOLD, CUES, lesson, { bare: true });

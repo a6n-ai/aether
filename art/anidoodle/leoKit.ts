@@ -74,9 +74,13 @@ export const kit = (g: Gfx) => {
 };
 
 // ---------------------------------------------------------------- the sheet (the ground: frame 0)
-export const sheet = (k: Kit) => {
+// bare: a piece of the a6n world sheet on plain white, no paper, lamp, folds or furniture; the world multiplies it
+// onto its own paper, so only the ink and the washes land.
+export const WORLD_PAPER = "#e9d8b4";
+export const sheet = (k: Kit, o: { bare?: boolean } = {}) => {
   const c = k.g.main, e = k.g.env, W = e.W, H = e.H, dw = Math.round(W * e.scale), dh = Math.round(H * e.scale);
-  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = GROUND; c.fillRect(0, 0, dw, dh); c.restore();
+  c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.fillStyle = o.bare ? "#ffffff" : GROUND; c.fillRect(0, 0, dw, dh); c.restore();
+  if (o.bare) return; // the world multiplies the piece onto its own paper: white is no mark at all
   c.save(); c.setTransform(e.scale, 0, 0, e.scale, 0, 0); /* the exposure is never even: brighter where the arc lamp stood */
   const glow = c.createRadialGradient(W * 0.46, H * 0.4, 60, W * 0.5, H * 0.5, W * 0.78); glow.addColorStop(0, "rgba(255,248,230,0.4)"); glow.addColorStop(0.55, "rgba(240,225,190,0.1)"); glow.addColorStop(1, "rgba(110,80,44,0.38)"); c.fillStyle = glow; c.fillRect(0, 0, W, H);
   c.restore();
@@ -109,3 +113,11 @@ export const slot = (env: Env, name: string): Slot => {
 };
 export const blit = (ctx: Ctx, L: Layer) => { ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = "source-over"; ctx.drawImage(L.canvas as CanvasImageSource, 0, 0); ctx.restore(); };
 export { arc, poly };
+
+/** Drops the cues a bare piece does not draw (the sheet's furniture, at its start and end), shifts the rest to start at
+ * frame 0 keeping their timing, and returns the film length and its hold, which starts where the last cue ends. */
+export const packCues = (cues: [string, number, number][], drop: string[], hold: number): { cues: [string, number, number][]; N: number; holdFrom: number } => {
+  const kept = cues.filter(([id]) => !drop.includes(id)), shift = Math.min(...kept.map(([, a]) => a));
+  const out = kept.map(([id, a, b]): [string, number, number] => [id, a - shift, b - shift]), end = Math.max(...out.map(([, , b]) => b));
+  return { cues: out, N: Math.ceil((end + hold) / 15) * 15, holdFrom: end };
+};

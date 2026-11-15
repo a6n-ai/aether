@@ -1,6 +1,6 @@
 import { type Ctx, type Env, Gfx, type P } from "./core";
 import type { Film } from "./film";
-import { CYAN, DIM, DRAFT, type Kit, blit, border, cut, kit, sheet, slot, stagger, tooth } from "./leoKit";
+import { CYAN, DIM, DRAFT, type Kit, blit, border, cut, kit, packCues, sheet, slot, stagger, tooth } from "./leoKit";
 // PLATE II · THE ANATOMY OF A6N · cyanotype drafting sheet (a6n.ai home page).
 //
 // IDEA: the tools a small business already runs on stand on one bench, each cabled into one hub,
@@ -31,8 +31,8 @@ const CUES: [string, number, number][] = [
   ["lining", 360, 375],
   ["washes", 375, 395],
   ["dims", 395, 415],
-  ["balloons", 415, 445],
-  ["table", 445, 475],
+  ["balloons", 415, 430],
+  ["table", 430, 475],
   ["notes", 475, 495],
   ["title", 495, 510],
 ];
@@ -159,16 +159,16 @@ const lining = (k: Kit, q: number) => { if (q <= 0) return; k.ink(() => {
 // watercolour washes laid over the ink, as Leonardo tinted his machine studies: each part flooded
 // once, pale, in the order the brush reaches it
 const WASH: [P[], string, number][] = [
-  [rbox(120, BENCH, 1160, 30, 6), "#b98a4e", 0.3],
-  [rbox(196, 606, 70, 144, 6), "#4f8a6e", 0.35],
-  [rbox(357, 610, 176, 136, 4), "#4f8a6e", 0.32],
-  [rbox(610, 610, 180, 170, 14), "#a8452a", 0.26],
+  [rbox(120, BENCH, 1160, 30, 6), "#c98a3e", 0.36],
+  [rbox(196, 606, 70, 144, 6), "#1c8a7a", 0.42],
+  [rbox(357, 610, 176, 136, 4), "#1c8a7a", 0.4],
+  [rbox(610, 610, 180, 170, 14), "#d4472c", 0.34],
   [[at(792, 780), at(806, 716), at(866, 728), at(852, 780)], "#fbf3df", 0.7],
-  [rbox(880, 700, 210, 80, 8), "#c8902e", 0.32],
-  [rbox(916, 551, 138, 70, 4), "#4f8a6e", 0.3],
-  [rbox(1152, 614, 58, 50, 4), "#4f8a6e", 0.32],
-  [rbox(1140, 600, 82, 180, 18), "#a8452a", 0.16],
-  ...([[648, 34], [676, 52], [704, 44], [732, 70]] as [number, number][]).map(([x, h]): [P[], string, number] => [rbox(x, 560 - h, 18, h, 2), "#c8902e", 0.45]),
+  [rbox(880, 700, 210, 80, 8), "#e8a317", 0.42],
+  [rbox(916, 551, 138, 70, 4), "#2858a8", 0.36],
+  [rbox(1152, 614, 58, 50, 4), "#1c8a7a", 0.4],
+  [rbox(1140, 600, 82, 180, 18), "#d4472c", 0.22],
+  ...([[648, 34], [676, 52], [704, 44], [732, 70]] as [number, number][]).map(([x, h]): [P[], string, number] => [rbox(x, 560 - h, 18, h, 2), "#e8a317", 0.55]),
 ];
 const washes = (k: Kit, q: number) => { if (q <= 0) return; const st = stagger(q, WASH.length, 0.35); WASH.forEach(([pts, c, a], i) => { const p = st(i); if (p > 0) k.fill(pts, c, a * p); }); };
 
@@ -221,25 +221,30 @@ const title = (k: Kit, q: number) => { if (q <= 0) return; k.ink(() => {
 type Part = (k: Kit, q: number) => void;
 const PART: Record<string, Part> = { border: (k, q) => border(k, q), titleBox, construct, bench, arch, hub, phone, laptop, till, terminal, letter, report, cables, lining, washes, dims, balloons, table, notes, title };
 const progressAt = (f: number, a: number, b: number) => (f >= b ? 1 : f <= a ? 0 : (f - a) / (b - a));
-const stack = (env: Env, n: number) => {
-  const s = slot(env, "stack"), have = s.key === null ? -1 : Number(s.key);
-  if (have === n) return s.L;
-  const g = new Gfx(s.L.ctx, env, 0, DRAFT), k = kit(g);
-  let from = have;
-  if (have < 0 || have > n) { s.L.ctx.setTransform(1, 0, 0, 1, 0, 0); s.L.ctx.clearRect(0, 0, s.L.canvas.width, s.L.canvas.height); g.cur = s.L.ctx; sheet(k); from = 0; }
-  for (let i = from; i < n; i++) PART[CUES[i][0]](k, 1);
-  s.key = String(n); return s.L;
+// bare: Plate II as the world's bench, without the sheet's furniture (border, title block, table, notes)
+const build = (bare: boolean): Film => {
+  const { cues, N: n, holdFrom } = bare ? packCues(CUES, ["border", "titleBox", "table", "notes", "title"], HOLD) : { cues: CUES, N, holdFrom: N - HOLD };
+  const stack = (env: Env, upto: number) => {
+    const s = slot(env, "stack"), have = s.key === null ? -1 : Number(s.key);
+    if (have === upto) return s.L;
+    const g = new Gfx(s.L.ctx, env, 0, DRAFT), k = kit(g);
+    let from = have;
+    if (have < 0 || have > upto) { s.L.ctx.setTransform(1, 0, 0, 1, 0, 0); s.L.ctx.clearRect(0, 0, s.L.canvas.width, s.L.canvas.height); g.cur = s.L.ctx; sheet(k, { bare }); from = 0; }
+    for (let i = from; i < upto; i++) PART[cues[i][0]](k, 1);
+    s.key = String(upto); return s.L;
+  };
+  const draw = (ctx: Ctx, frame: number, env: Env) => {
+    const f = Math.max(0, Math.min(n - 1, frame)), done = cues.filter(([, , b]) => f >= b).length;
+    blit(ctx, stack(env, done));
+    const g = new Gfx(ctx, env, 0, DRAFT), k = kit(g);
+    cues.forEach(([id, a, b], i) => { if (i < done) return; const q = progressAt(f, a, b); if (q > 0) PART[id](k, q); });
+    if (!bare) tooth(g);
+  };
+  return {
+    meta: { title: bare ? "World region · the bench" : "Plate II · The anatomy of a6n · sepia drafting", W: 1400, H: 900, fps: 30, bpm: 120, durationFrames: n, kind: "drawing", holds: [[holdFrom, n]] } as Film["meta"],
+    assets: { images: {} },
+    shots: [{ id: "plate", start: 0, end: n, draw }],
+  };
 };
-const draw = (ctx: Ctx, frame: number, env: Env) => {
-  const f = Math.max(0, Math.min(N - 1, frame)), n = CUES.filter(([, , b]) => f >= b).length;
-  blit(ctx, stack(env, n));
-  const g = new Gfx(ctx, env, 0, DRAFT), k = kit(g);
-  CUES.forEach(([id, a, b], i) => { if (i < n) return; const q = progressAt(f, a, b); if (q > 0) PART[id](k, q); });
-  tooth(g);
-};
-
-export const plateSystem: Film = {
-  meta: { title: "Plate II · The anatomy of a6n · sepia drafting", W: 1400, H: 900, fps: 30, bpm: 120, durationFrames: N, kind: "drawing", holds: [[N - HOLD, N]] } as Film["meta"],
-  assets: { images: {} },
-  shots: [{ id: "plate", start: 0, end: N, draw }],
-};
+export const plateSystem = build(false);
+export const bareBench = build(true);

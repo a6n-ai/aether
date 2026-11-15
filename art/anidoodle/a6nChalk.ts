@@ -11,7 +11,8 @@ export const done: Clock = () => 1;
 export const CHALK_M: Medium = { nib: 2.1, taper: 0.55, pressure: 0.95, retrace: true, wobble: 1.4, rough: 1.2 };
 // Leonardo's trois crayons on toned paper: red chalk carries the drawing, black chalk the accents,
 // white chalk the lights, with ochre and verdigris washes. (Names kept from the slate version.)
-export const CHALK = "#8e3a22", YEL = "#9a5f14", BLUE = "#3f7560", PINK = "#2e2520", WHITE = "#f8f1e2";
+// Brightened toward the Sistine ceiling's own hues (vermilion, saffron, verdigris), black chalk for accents.
+export const CHALK = "#b5381c", YEL = "#d4890c", BLUE = "#1c8a7a", PINK = "#2e2520", WHITE = "#fbf4e4", LAPIS = "#2858a8";
 export const W = 1200, H = 800;
 
 export const chalk = (g: Gfx, draw: (dust: boolean) => void, dustAlpha = 0.2) => {
@@ -69,10 +70,12 @@ export const person = (g: Gfx, dust: boolean, x: number, y: number, s: number, s
 };
 
 // ---------------------------------------------------------------- the board
-export const board = (g: Gfx, ctx: Ctx, ck: Clock) => {
+export const board = (g: Gfx, ctx: Ctx, ck: Clock, bare = false) => {
+  // bare: plain white, which the world's multiply turns into its own paper
+  if (bare) { ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, W, H); return; }
   // a sheet prepared with a warm ground, paler where the light falls, darker and foxed at the edges
   const gr = ctx.createRadialGradient(W * 0.48, H * 0.42, 60, W * 0.5, H * 0.5, W * 0.78);
-  gr.addColorStop(0, "#e3d2ad"); gr.addColorStop(0.6, "#d4bd92"); gr.addColorStop(1, "#b89c70");
+  gr.addColorStop(0, "#efe2c2"); gr.addColorStop(0.6, "#e2cfa6"); gr.addColorStop(1, "#c9ad80");
   ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
   g.paper("coldpress", 0.35);
   g.group("plain", () => { const r = rng(17); for (let i = 0; i < 26; i++) { const x = r() * W, y = r() * H, edge = Math.min(x, y, W - x, H - y) < 120; if (!edge && r() < 0.7) continue; fillShape(g, blob(x, y, 3 + r() * 9, 2 + r() * 7, 60 + i, 0.4, 10), "#9c7440", 0.08 + r() * 0.12); } }, { blur: 2 });
@@ -97,15 +100,23 @@ export const clockOf = (name: string, cues: Cue[], N: number, HOLD: number) => {
   }
   return (f: number): Clock => (id) => { const s = m.get(id); if (!s || f >= s[1]) return 1; if (f <= s[0]) return 0; return (f - s[0]) / (s[1] - s[0]); };
 };
-export const chalkFilm = (title: string, N: number, HOLD: number, cues: Cue[], lesson: (g: Gfx, ck: Clock) => void): Film => {
-  const at = clockOf(title, cues, N, HOLD);
+export const chalkFilm = (title: string, N0: number, HOLD: number, cues0: Cue[], lesson: (g: Gfx, ck: Clock) => void, opts: { bare?: boolean } = {}): Film => {
+  // bare: no eraser ghosts, so their cues go and the rest is packed from frame 0
+  let cues = cues0, N = N0, holdFrom = N0 - HOLD;
+  if (opts.bare) {
+    const shift = Math.min(...cues0.filter((c) => !c.id.startsWith("swipe")).map((c) => c.a));
+    cues = cues0.filter((c) => !c.id.startsWith("swipe")).map((c) => ({ ...c, a: c.a - shift, b: c.b - shift }));
+    holdFrom = Math.max(...cues.map((c) => c.b));
+    N = Math.ceil((holdFrom + HOLD) / 15) * 15;
+  }
+  const at = clockOf(title, cues, N, N - holdFrom);
   const draw = (ctx: Ctx, f: number, env: Env) => {
-    const g = new Gfx(ctx, env, 0, CHALK_M), ck = f >= N - HOLD ? done : at(f);
+    const g = new Gfx(ctx, env, 0, CHALK_M), ck = f >= holdFrom ? done : at(f);
     ctx.setTransform(env.scale, 0, 0, env.scale, 0, 0);
-    board(g, ctx, ck);
+    board(g, ctx, ck, opts.bare);
     lesson(g, ck);
   };
-  return { meta: { title, W, H, fps: 30, bpm: 120, durationFrames: N, kind: "drawing", holds: [[N - HOLD, N]] } as Film["meta"], assets: { images: {} }, shots: [{ id: "board", start: 0, end: N, draw }] };
+  return { meta: { title, W, H, fps: 30, bpm: 120, durationFrames: N, kind: "drawing", holds: [[holdFrom, N]] } as Film["meta"], assets: { images: {} }, shots: [{ id: "board", start: 0, end: N, draw }] };
 };
 
 // ---------------------------------------------------------------- shared subjects
