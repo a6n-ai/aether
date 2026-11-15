@@ -1,9 +1,11 @@
-// The a6n world: one sheet, 6400 x 4000 world units, laid out as a walk around its centre (see
+// The a6n world: one sheet, 7200 x 4600 world units, laid out as a walk around its centre (see
 // docs/superpowers/specs/2026-11-15-one-sheet-design.md). Pure numbers: the stills are attached in
 // src/data/world.ts, which Astro can import and these tests cannot.
 import type { Box, Side } from './camera.ts';
 
-export const WORLD = { w: 6400, h: 4000 };
+// a margin all round, so no place sits against an edge where keeping the view on the sheet would push it off-centre
+export const WORLD = { w: 7200, h: 4600 };
+const MX = 400, MY = 300;
 
 /** A drawn place on the sheet. `film` is its id under public/world/ (also its still's name); none for an area with no art. */
 export type Region = Box & { id: string; film?: string };
@@ -12,20 +14,22 @@ export type Region = Box & { id: string; film?: string };
 // workshops are shown smaller so each row fits the sheet.
 const S = 0.8, W = 0.7;
 export const REGIONS: Region[] = [
-	{ id: 'bench', film: 'bench', x: 250, y: 250, w: 1400, h: 900 },
-	{ id: 'shop', film: 'shop', x: 1900, y: 300, w: 1200, h: 800 },
-	{ id: 'street-new', film: 'street-new', x: 3350, y: 330, w: 1200 * S, h: 800 * S },
-	{ id: 'street-move', film: 'street-move', x: 4380, y: 330, w: 1200 * S, h: 800 * S },
-	{ id: 'street-grow', film: 'street-grow', x: 5410, y: 330, w: 1200 * S, h: 800 * S },
-	{ id: 'post', film: 'post', x: 4900, y: 1350, w: 1400 * 0.85, h: 900 * 0.85 },
-	{ id: 'workshop-tiffingrab', film: 'workshop-tiffingrab', x: 5300, y: 2950, w: 1400 * W, h: 900 * W },
-	{ id: 'workshop-puchkaman', film: 'workshop-puchkaman', x: 4200, y: 2950, w: 1400 * W, h: 900 * W },
-	{ id: 'workshop-xplorers', film: 'workshop-xplorers', x: 3100, y: 2950, w: 1400 * W, h: 900 * W },
-	{ id: 'workshop-copper-cloves', film: 'workshop-copper-cloves', x: 2000, y: 2950, w: 1400 * W, h: 900 * W },
-	{ id: 'road', film: 'road', x: 250, y: 2750, w: 1200, h: 800 },
-	{ id: 'notes', x: 300, y: 1450, w: 1300, h: 900 },
-	{ id: 'vitruvian', x: 2700, y: 1370, w: 1000, h: 1260 },
-	{ id: 'corner', x: 5700, y: 3720, w: 600, h: 240 },
+	{ id: 'bench', film: 'bench', x: MX + 250, y: MY + 250, w: 1400, h: 900 },
+	{ id: 'shop', film: 'shop', x: MX + 1900, y: MY + 300, w: 1200, h: 800 },
+	// the street: two shops over one, a cluster the camera can frame large without leaving the sheet
+	{ id: 'street-new', film: 'street-new', x: MX + 3300, y: MY + 400, w: 1200 * S, h: 800 * S },
+	{ id: 'street-move', film: 'street-move', x: MX + 4330, y: MY + 400, w: 1200 * S, h: 800 * S },
+	{ id: 'street-grow', film: 'street-grow', x: MX + 3815, y: MY + 1110, w: 1200 * S, h: 800 * S },
+	{ id: 'post', film: 'post', x: MX + 5150, y: MY + 1450, w: 1400 * 0.85, h: 900 * 0.85 },
+	// the four workshops in a 2 x 2 block, so the camera frames them together at a readable size
+	{ id: 'workshop-tiffingrab', film: 'workshop-tiffingrab', x: MX + 4760, y: MY + 2620, w: 1400 * W, h: 900 * W },
+	{ id: 'workshop-puchkaman', film: 'workshop-puchkaman', x: MX + 3700, y: MY + 2620, w: 1400 * W, h: 900 * W },
+	{ id: 'workshop-xplorers', film: 'workshop-xplorers', x: MX + 3700, y: MY + 3320, w: 1400 * W, h: 900 * W },
+	{ id: 'workshop-copper-cloves', film: 'workshop-copper-cloves', x: MX + 4760, y: MY + 3320, w: 1400 * W, h: 900 * W },
+	{ id: 'road', film: 'road', x: MX + 250, y: MY + 2750, w: 1200, h: 800 },
+	{ id: 'notes', x: MX + 300, y: MY + 1450, w: 1300, h: 900 },
+	{ id: 'vitruvian', x: MX + 2700, y: MY + 1370, w: 1000, h: 1260 },
+	{ id: 'corner', x: MX + 5820, y: MY + 3740, w: 520, h: 220 },
 ];
 
 /** A few regions read as one place: the street's three shops, and the four workshops. */

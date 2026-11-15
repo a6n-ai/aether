@@ -1,0 +1,123 @@
+---
+// One stop on the walk across the world: a stretch of scroll (1.6 screens) with its words pinned beside the place
+// the camera is framing. On the still page (no canvas) the place's drawing sits inline above the words.
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+	id: string;
+	side: 'left' | 'right';
+	heading: string;
+	still?: ImageMetadata;
+	stillAlt?: string;
+	href?: string;
+	linkText?: string;
+	first?: boolean;
+}
+const { id, side, heading, still, stillAlt = '', href, linkText, first = false } = Astro.props;
+---
+
+<section class:list={['stop', side]} data-stop={id} aria-labelledby={`stop-${id}`}>
+	<div class="panel">
+		{still && <Picture src={still} formats={['avif', 'webp']} widths={[480, 900]} sizes="(max-width: 767px) 100vw, 640px" alt={stillAlt} class="still" loading={first ? 'eager' : 'lazy'} />}
+		<h2 id={`stop-${id}`}>{heading}</h2>
+		<slot />
+		{href && <a class="go" href={href}>{linkText}</a>}
+	</div>
+</section>
+
+<style>
+	.stop {
+		position: relative;
+		padding-inline: var(--gutter);
+	}
+	.panel {
+		max-width: 38ch;
+		display: grid;
+		gap: 14px;
+	}
+	.panel :global(p) {
+		color: var(--strong);
+		font-size: var(--t-m);
+		line-height: 1.45;
+	}
+	h2 {
+		font-size: var(--t-xl);
+		line-height: 0.95;
+		letter-spacing: -0.03em;
+	}
+	.go {
+		justify-self: start;
+		color: var(--strong);
+		text-decoration: none;
+		padding-block: 3px;
+		background: linear-gradient(color-mix(in oklab, var(--sanguine) 55%, transparent) 0 0) left 100% / 100% 2px no-repeat;
+		transition: background-size 420ms var(--ease);
+	}
+	.go:focus-visible {
+		background-size: 100% 0.55em;
+	}
+	@media (hover: hover) {
+		.go:hover {
+			background-size: 100% 0.55em;
+		}
+	}
+
+	/* The still page: each place's drawing inline, then its words, in page order. */
+	.still {
+		width: 100%;
+		height: auto;
+		border-radius: 4px;
+	}
+	:global(html:not(.world)) .stop {
+		padding-block: clamp(48px, 9vh, 96px);
+	}
+	:global(html:not(.world)) .panel {
+		max-width: 720px;
+		margin-inline: auto;
+	}
+
+	/* The world: the stop is a stretch of scroll; its words ride pinned beside the place in view. */
+	:global(html.world) .stop {
+		height: 160svh;
+	}
+	:global(html.world) .still {
+		display: none;
+	}
+	:global(html.world) h2 {
+		font-size: clamp(1.9rem, 1.2rem + 1.6vw, 3rem);
+	}
+	:global(html.world) .panel {
+		position: sticky;
+		top: max(calc(var(--nav-h) + 16px), calc(50svh - 220px));
+		margin-top: 60svh;
+		padding: 26px 28px;
+		background: color-mix(in oklab, var(--card) 86%, transparent);
+		-webkit-backdrop-filter: blur(6px);
+		backdrop-filter: blur(6px);
+		box-shadow: 0 18px 50px -24px color-mix(in oklab, var(--strong) 40%, transparent);
+		border-radius: 6px;
+	}
+	:global(html.world) .right .panel {
+		margin-left: auto;
+		margin-right: clamp(0px, 4vw, 64px);
+	}
+	:global(html.world) .left .panel {
+		margin-left: clamp(0px, 4vw, 64px);
+	}
+	@media (max-width: 767px) {
+		/* phones: the place fills the top of the screen, the words ride below it */
+		:global(html.world) .panel,
+		:global(html.world) .right .panel,
+		:global(html.world) .left .panel {
+			/* pinned under the drawing, which the camera frames in the top third */
+			position: sticky;
+			top: 58svh;
+			margin: 40svh 0 0;
+			max-width: none;
+			max-height: 40svh;
+			overflow: auto;
+			padding: 18px 20px;
+		}
+	}
+</style>

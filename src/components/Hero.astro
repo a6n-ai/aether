@@ -47,14 +47,17 @@ const picture = { src: creation, formats: ['avif', 'webp'], widths: [900, 1400, 
 <script>
 	import { gsap } from 'gsap';
 	import { ScrollTrigger } from 'gsap/ScrollTrigger';
+	import { getWorld } from '../scripts/world/index';
+	import { boxOf } from '../scripts/world/layout';
 
 	gsap.registerPlugin(ScrollTrigger);
 	// the router swaps pages without reloading, so the hero sets itself up each time the home page arrives
 	document.addEventListener('astro:page-load', () => {
 	const hero = document.querySelector<HTMLElement>('[data-hero]');
 	const scene = hero?.querySelector<HTMLElement>('[data-scene]');
+	const stage = hero?.querySelector<HTMLElement>('[data-stage]');
 
-	if (hero && scene && document.documentElement.classList.contains('motion')) {
+	if (hero && scene && stage && document.documentElement.classList.contains('motion')) {
 		const adam = scene.querySelector<HTMLElement>('[data-side="adam"]')!;
 		const god = scene.querySelector<HTMLElement>('[data-side="god"]')!;
 		const glow = scene.querySelector<HTMLElement>('[data-glow]')!;
@@ -96,6 +99,12 @@ const picture = { src: creation, formats: ['avif', 'webp'], widths: [900, 1400, 
 				const light = range(p, 0.32, 0.5);
 				const push = gsap.parseEase('power2.inOut')(range(p, 0.72, 1));
 				set(open() * (1 - close), light + push * 0.8, push);
+				// through the finger gap and onto the sheet: the fresco gives way to the world, framed on the bench,
+				// and the gap's light carries over and fades as you land
+				const out = range(p, 0.92, 1);
+				stage.style.opacity = String(1 - out);
+				const world = getWorld(), bench = boxOf('bench')!;
+				world?.setLight(out > 0 ? 1 - out : 0, [bench.x + bench.w / 2, bench.y + bench.h / 2]);
 				if (touch) {
 					const t = range(p, 0.4, 0.5) * (1 - range(p, 0.74, 0.84));
 					touch.style.opacity = String(t);

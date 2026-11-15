@@ -101,7 +101,7 @@ export function createWorld(canvas: HTMLCanvasElement, data: WorldData) {
 	const buildVitMask = () => {
 		if (!vitLum || !vitMask || Math.abs(vitBuilt - vitP) < 0.004) return;
 		vitBuilt = vitP;
-		const g = vitMask.getContext('2d')!, m = g.createImageData(VW, VH), t = vitP * 300 - 40;
+		const g = vitMask.getContext('2d')!, m = g.createImageData(VW, VH), t = 30 + vitP * 240; // darkest lines first, the paper last
 		for (let i = 0; i < VW * VH; i++) m.data[i * 4 + 3] = Math.max(0, Math.min(255, (t - vitLum[i]) * 6));
 		g.putImageData(m, 0, 0);
 	};
@@ -115,7 +115,7 @@ export function createWorld(canvas: HTMLCanvasElement, data: WorldData) {
 	const toScreen = () => ctx.setTransform(cam.z * dpr, 0, 0, cam.z * dpr, (vw / 2 - cam.x * cam.z) * dpr, (vh / 2 - cam.y * cam.z) * dpr);
 	const draw = () => {
 		ctx.setTransform(1, 0, 0, 1, 0, 0);
-		ctx.fillStyle = '#d8c39a';
+		ctx.fillStyle = '#c9ad80'; // past the sheet's edge, its own edge tone carries on
 		ctx.fillRect(0, 0, canvas.width, canvas.height);
 		toScreen();
 		const gr = ctx.createRadialGradient(WORLD.w * 0.48, WORLD.h * 0.45, 200, WORLD.w / 2, WORLD.h / 2, WORLD.w * 0.62);
@@ -126,7 +126,8 @@ export function createWorld(canvas: HTMLCanvasElement, data: WorldData) {
 		ctx.fillRect(0, 0, WORLD.w, WORLD.h);
 		ctx.fillStyle = 'rgba(156,116,64,0.035)';
 		for (const [x, y, r] of spots) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
-		// places in view
+		// places in view, multiplied onto the paper: their white is no mark, their ink and washes land
+		ctx.globalCompositeOperation = 'multiply';
 		for (const r of data.regions) {
 			if (!visible(r, cam, vw, vh)) continue;
 			if (films.playing() === r.id) {
@@ -137,6 +138,7 @@ export function createWorld(canvas: HTMLCanvasElement, data: WorldData) {
 				if (s) ctx.drawImage(s, r.x, r.y, r.w, r.h);
 			}
 		}
+		ctx.globalCompositeOperation = 'source-over';
 		// the lines between places
 		ctx.strokeStyle = ink;
 		ctx.lineWidth = 3;
@@ -198,9 +200,10 @@ export function createWorld(canvas: HTMLCanvasElement, data: WorldData) {
 		setCamera(c: Cam) { cam = c; dirty = true; },
 		camera: () => cam,
 		setStrokeProgress(id: string, p: number) { if (strokeP.get(id) !== p) { strokeP.set(id, p); dirty = true; } },
-		playRegion: (id: string) => films.playRegion(id),
+		playRegion: (id: string, rate?: number) => films.playRegion(id, rate),
 		isDrawn: (id: string) => films.isDrawn(id),
 		markDrawn(id: string) { films.markDrawn(id); dirty = true; },
+		skip(id: string) { films.skip(id); dirty = true; },
 		setLight(p: number, at: [number, number]) { lightP = p; lightAt = at; dirty = true; },
 		revealVitruvian(p: number) { vitP = p; dirty = true; },
 		resize,

@@ -19,9 +19,10 @@ export function createFilms(make: (id: string) => FilmVideo, rate = 1.5) {
 	const drawn = new Set<string>();
 	const videos = new Map<string, FilmVideo>();
 	let current: string | null = null;
+	let finish: (() => void) | null = null;
 	let queue: Promise<void> = Promise.resolve();
 
-	const run = (id: string) =>
+	const run = (id: string, r = rate) =>
 		new Promise<void>((resolve) => {
 			const v = videos.get(id) ?? make(id);
 			videos.set(id, v);
@@ -32,11 +33,13 @@ export function createFilms(make: (id: string) => FilmVideo, rate = 1.5) {
 				settled = true;
 				drawn.add(id);
 				current = null;
+				finish = null;
 				resolve();
 			};
+			finish = () => { (v as unknown as { pause?: () => void }).pause?.(); done(); };
 			v.preload = 'auto';
 			v.muted = true;
-			v.playbackRate = rate;
+			v.playbackRate = r;
 			v.addEventListener('ended', done, { once: true });
 			v.addEventListener('error', done, { once: true });
 			v.play().catch(done);
@@ -46,9 +49,9 @@ export function createFilms(make: (id: string) => FilmVideo, rate = 1.5) {
 
 	return {
 		/** Play a region's film once; resolves when it has ended, failed, or was already drawn. */
-		playRegion(id: string): Promise<void> {
+		playRegion(id: string, r?: number): Promise<void> {
 			if (drawn.has(id)) return Promise.resolve();
-			queue = queue.then(() => (drawn.has(id) ? undefined : run(id)));
+			queue = queue.then(() => (drawn.has(id) ? undefined : run(id, r)));
 			return queue;
 		},
 		isDrawn: (id: string) => drawn.has(id),
@@ -57,6 +60,11 @@ export function createFilms(make: (id: string) => FilmVideo, rate = 1.5) {
 		video: (id: string) => videos.get(id),
 		/** Mark a region drawn without playing it (the finale, or a direct load past it). */
 		markDrawn: (id: string) => drawn.add(id),
+		/** A place left behind: its film stops (or never starts) and it shows its finished still. */
+		skip(id: string) {
+			if (current === id) finish?.();
+			else drawn.add(id);
+		},
 	};
 }
 export type Films = ReturnType<typeof createFilms>;

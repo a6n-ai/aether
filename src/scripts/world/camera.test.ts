@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cameraAt, fit, scrollForStop, stopIndexForScroll, visible, type Cam } from './camera.ts';
+import { cameraAt, clampCam, fit, scrollForStop, stopIndexForScroll, visible, type Cam } from './camera.ts';
 
 const keys: Cam[] = [
 	{ x: 1000, y: 800, z: 0.5 },
@@ -58,4 +58,23 @@ test('stopIndexForScroll inverts scrollForStop', () => {
 test('visible is true for the framed region and false far away', () => {
 	assert.equal(visible(r, fit(r, 1440, 900, 'right'), 1440, 900), true);
 	assert.equal(visible({ ...r, x: r.x + 3000 }, fit(r, 1440, 900, 'right'), 1440, 900), false);
+});
+
+test('clampCam keeps the view inside the sheet', () => {
+	const c = clampCam({ x: 100, y: 50, z: 0.5 }, 1440, 900, { w: 6400, h: 4000 });
+	assert.equal(c.x, 1440 / 2 / 0.5);
+	assert.equal(c.y, 900 / 2 / 0.5);
+	const d = clampCam({ x: 6300, y: 3990, z: 0.5 }, 1440, 900, { w: 6400, h: 4000 });
+	assert.equal(d.x, 6400 - 1440 / 2 / 0.5);
+	assert.equal(d.y, 4000 - 900 / 2 / 0.5);
+});
+
+test('clampCam centres the sheet when the view is bigger than it', () => {
+	const c = clampCam({ x: 10, y: 10, z: 0.1 }, 1440, 900, { w: 6400, h: 4000 });
+	assert.deepEqual([c.x, c.y], [3200, 2000]);
+});
+
+test('clampCam leaves a camera well inside the sheet alone', () => {
+	const cam = { x: 3000, y: 2000, z: 0.6 };
+	assert.deepEqual(clampCam(cam, 1440, 900, { w: 6400, h: 4000 }), cam);
 });

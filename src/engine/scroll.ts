@@ -43,3 +43,9 @@ export const onScroll = (fn: (s: ScrollState) => void) => {
 	return () => listeners.delete(fn);
 };
 export const scrollState = () => state;
+
+/** Jumps the page to `y` at once, through Lenis when it drives the scroll (a plain scrollTo would be eased back). */
+export function scrollToY(y: number) {
+	if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
+	else scrollTo(0, y);
+}

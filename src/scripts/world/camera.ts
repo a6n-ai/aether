@@ -16,7 +16,7 @@ const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2); /
  * width on the side away from the panel (8% margins); on phones it fills the width less 16px gutters
  * and sits in the top of the screen, with the panel below.
  */
-export function fit(r: Box | 'whole', vw: number, vh: number, side: Side, world: { w: number; h: number } = { w: 6400, h: 4000 }): Cam {
+export function fit(r: Box | 'whole', vw: number, vh: number, side: Side, world: { w: number; h: number } = { w: 7200, h: 4600 }): Cam {
 	if (r === 'whole') {
 		const z = Math.min(vw / world.w, vh / world.h) * 0.94;
 		return { x: world.w / 2, y: world.h / 2, z };
@@ -50,4 +50,12 @@ export const stopIndexForScroll = (y: number, vh: number) => Math.max(0, Math.fl
 export function visible(r: Box, cam: Cam, vw: number, vh: number, margin = 0.25): boolean {
 	const hw = (vw / (2 * cam.z)) * (1 + margin), hh = (vh / (2 * cam.z)) * (1 + margin);
 	return r.x < cam.x + hw && r.x + r.w > cam.x - hw && r.y < cam.y + hh && r.y + r.h > cam.y - hh;
+}
+
+/** Keeps the view inside the sheet: never past an edge while the view is smaller than the sheet, centred when it is not. */
+export function clampCam(c: Cam, vw: number, vh: number, world: { w: number; h: number } = { w: 7200, h: 4600 }): Cam {
+	const hw = vw / 2 / c.z, hh = vh / 2 / c.z;
+	const x = hw * 2 >= world.w ? world.w / 2 : Math.min(world.w - hw, Math.max(hw, c.x));
+	const y = hh * 2 >= world.h ? world.h / 2 : Math.min(world.h - hh, Math.max(hh, c.y));
+	return x === c.x && y === c.y ? c : { x, y, z: c.z };
 }

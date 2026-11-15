@@ -57,3 +57,32 @@ test('one film at a time: the second waits for the first to end', async () => {
 	await pb;
 	assert.equal(films.playing(), null);
 });
+
+test('skipping a playing film leaves its place drawn and lets the next play at once', async () => {
+	const a = stub(), b = stub();
+	const films = createFilms((id) => (id === 'a' ? a : b));
+	const pa = films.playRegion('a');
+	await Promise.resolve();
+	films.skip('a');
+	await pa;
+	assert.equal(films.isDrawn('a'), true);
+	assert.equal(films.playing(), null);
+	const pb = films.playRegion('b');
+	await new Promise((r) => setTimeout(r, 0));
+	assert.equal(b.plays(), 1);
+	b.fire('ended');
+	await pb;
+});
+
+test('skipping a queued film draws it without ever playing it', async () => {
+	const a = stub(), b = stub();
+	const films = createFilms((id) => (id === 'a' ? a : b));
+	const pa = films.playRegion('a');
+	const pb = films.playRegion('b');
+	films.skip('b');
+	a.fire('ended');
+	await pa;
+	await pb;
+	assert.equal(b.plays(), 0);
+	assert.equal(films.isDrawn('b'), true);
+});

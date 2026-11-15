@@ -1,27 +1,95 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
-import WhoWeAre from '../components/WhoWeAre.astro';
-import Workbench from '../machines/workbench/Workbench.astro';
-import Tracks from '../components/Tracks.astro';
-import Messages from '../components/Messages.astro';
-import Clients from '../components/Clients.astro';
-import Faq from '../components/Faq.astro';
-import ClosingCall from '../components/ClosingCall.astro';
+import Stop from '../components/Stop.astro';
+import { STILLS } from '../data/world';
+import { CLIENTS } from '../data/clients';
+import { FAQ } from '../data/faq';
+import { BOOK_CALL_HREF } from '../lib/cta';
+
+// The four questions a first visitor asks most; the rest live on /how-it-works.
+const NOTES = ['How long does it take?', 'How much does it cost?', 'I already use spreadsheets or another system. Can you move it over?', 'What happens if something breaks?'].map((q) => FAQ.find((f) => f.q === q)!);
 ---
 
 <Layout
 	title="a6n · (Ai)ny Management System: built for businesses like yours"
 	description="We build the website and app your business runs on: orders, bookings, payments and messages, all in one place. You keep doing the work you love."
 >
-	<main>
-		<Hero />
-		<WhoWeAre />
-		<Workbench />
-		<Tracks />
-		<Messages />
-		<Clients />
-		<Faq />
-		<ClosingCall />
-	</main>
+	<Hero />
+	<div class="journey" data-journey>
+		<Stop id="bench" side="right" heading="Everything your business runs on, in one place." still={STILLS.bench} stillAlt="A drafting sheet: a phone, a laptop, a till and a card terminal on one bench, each cabled to one hub." first>
+			<p>Your website, your customers' app, payments, messages, the screen your staff use and your reports: joined into one system, shaped around how you already work.</p>
+		</Stop>
+		<Stop id="shop" side="left" heading="A team, not a vendor." still={STILLS.shop} stillAlt="A chalk drawing: a shop, our bench inside its window, a spanner fixing something on the spot, two people side by side.">
+			<p>A small team in Singapore and India. You talk to the same people who build your system, every week, the way you would with your own tech team.</p>
+		</Stop>
+		<Stop id="street" side="left" heading="Start where you are." still={STILLS['street-new']} stillAlt="Three chalk shops on one street: a kiosk being built, old papers weighed over into an app, the kiosk a year on with a new wing." href="/how-it-works/" linkText="See how a build works">
+			<p><strong>Build something new:</strong> we draw your idea up and build it from parts that already work.</p>
+			<p><strong>Move you over:</strong> off paper and spreadsheets, nothing lost.</p>
+			<p><strong>Run and grow:</strong> we keep watch every day and add what you need next.</p>
+		</Stop>
+		<Stop id="post" side="left" heading="Every message, delivered." still={STILLS.post} stillAlt="A drafting sheet: a message sent from a laptop, kept in a pigeonhole cabinet, tried again, and arriving on a phone.">
+			<p>Confirmations, reminders and offers go out on their own. If one fails, it is sent again, and you can see every one that went.</p>
+		</Stop>
+		<Stop id="workshops" side="right" heading="Businesses we've already built for." still={STILLS['workshop-tiffingrab']} stillAlt="Four workshops drawn on one sheet: a meal-plan kitchen, a restaurant, a kids' class and a gym with a cafe.">
+			<ul class="clients">
+				{CLIENTS.map((c) => <li><a href={`/clients/${c.slug}/`}>{c.name}</a> <span>{c.kind}</span></li>)}
+			</ul>
+		</Stop>
+		<Stop id="notes" side="right" heading="Before you ask." href="/how-it-works/#questions" linkText="More questions">
+			<dl class="notes">
+				{NOTES.map((n) => (<><dt>{n.q}</dt><dd>{n.a}</dd></>))}
+			</dl>
+		</Stop>
+		<Stop id="finale" side="right" heading="Tell us about your business.">
+			<p>One short call: no jargon, no pressure, and an honest answer about whether we can help.</p>
+			<p><a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a></p>
+		</Stop>
+	</div>
 </Layout>
+
+<script>
+	import { bindJourney } from '../scripts/world/scroll';
+	import { getWorld } from '../scripts/world/index';
+
+	let unbind: (() => void) | null = null;
+	document.addEventListener('astro:page-load', () => {
+		unbind?.();
+		unbind = null;
+		const world = getWorld(), stops = [...document.querySelectorAll<HTMLElement>('[data-journey] [data-stop]')];
+		if (world && stops.length) unbind = bindJourney(stops, world);
+	});
+	document.addEventListener('astro:before-swap', () => { unbind?.(); unbind = null; });
+</script>
+
+<style>
+	.clients {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: 8px;
+	}
+	.clients a {
+		color: var(--strong);
+		font: 500 1.15rem/1.2 var(--font-display);
+	}
+	.clients span {
+		color: var(--muted);
+		font-size: var(--t-xs);
+	}
+	.notes {
+		display: grid;
+		gap: 6px;
+		margin: 0;
+	}
+	.notes dt {
+		font: italic 400 1.1rem/1.2 var(--font-display);
+		color: var(--sanguine-ink);
+	}
+	.notes dd {
+		margin: 0 0 10px;
+		color: var(--strong);
+		font-size: 0.95rem;
+	}
+</style>
