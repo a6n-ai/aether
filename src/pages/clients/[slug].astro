@@ -1,169 +1,69 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import Figure from '../../components/Figure.astro';
-import type { FigureName } from '../../scripts/figure';
+import Stop from '../../components/Stop.astro';
 import { CLIENTS, type Client } from '../../data/clients';
+import { STILLS } from '../../data/world';
 import { BOOK_CALL_HREF } from '../../lib/cta';
-import * as tiffingrab from '../../machines/tiffingrab/geometry';
-import * as puchkaman from '../../machines/puchkaman/geometry';
-import * as xplorers from '../../machines/xplorers/geometry';
-import * as copperCloves from '../../machines/copper-cloves/geometry';
-
-const CAPTIONS: Record<Client['slug'], string> = {
-	tiffingrab: tiffingrab.CAPTION,
-	puchkaman: puchkaman.CAPTION,
-	xplorers: xplorers.CAPTION,
-	'copper-cloves': copperCloves.CAPTION,
-};
 
 export function getStaticPaths() {
 	return CLIENTS.map((client) => ({ params: { slug: client.slug }, props: { client } }));
 }
 
+// Each client is its workshop on the sheet: the camera flies to it, and its story rides beside it.
 const { client } = Astro.props as { client: Client };
-const FIGURES: Record<Client['slug'], { figure: FigureName; like: string; pigment: string; lit?: string }> = {
-	tiffingrab: { figure: 'dns', pigment: 'var(--ochre)', like: 'Like a pneumatic tube dispatcher: each order is sent down the right tube, and a flag goes up when it comes back.' },
-	puchkaman: { figure: 'tcp-handshake', pigment: 'var(--verdigris)', like: 'Like a mail ropeway between two stations: the order rides across, and each side signals when it has it.' },
-	xplorers: { figure: 'rate-limiter', pigment: 'var(--lapis)', like: 'Like a ticket punch with a fixed number of tokens: each booking punches one, and when the class is full the press stays shut.' },
-	'copper-cloves': { figure: 'public-key', pigment: 'var(--sanguine)', lit: 'var(--ochre)', like: 'Like a strongbox with a lock in its lid: a member’s pass turns it, and nobody else’s does.' },
-};
-const caption = CAPTIONS[client.slug];
-const plateNo = ['X', 'XI', 'XII', 'XIII'][CLIENTS.indexOf(client)];
 ---
 
 <Layout title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} Built by a6n.`}>
-	<main class="client" style={`--pigment:${client.pigment}`}>
-		<div class="wrap top">
-			<div class="head">
-				<a class="back" href="/#clients">All clients</a>
-				<h1>{client.name}</h1>
-				<p class="meta">{client.kind}, {client.where}</p>
-				<p class="intro">{client.intro}</p>
-				<p class="line">{client.line}</p>
-			</div>
-			<Figure {...FIGURES[client.slug]} fig={`Plate ${plateNo}`} caption={caption} />
-		</div>
-		<section class="wrap features">
-			<h2>What it does</h2>
-			<div class="groups">
-				{
-					client.features.map((group) => (
-						<div class="group">
-							<h3>{group.title}</h3>
-							<ul>
-								{group.items.map((item) => (
-									<li>{item}</li>
-								))}
-							</ul>
-						</div>
-					))
-				}
-			</div>
-		</section>
-		<section class="wrap cta">
-			<h2>Want one like this for your business?</h2>
-			<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
-		</section>
-	</main>
+	<div class="journey" data-journey>
+		<Stop id={client.slug} side="right" heading={client.name} still={STILLS[`workshop-${client.slug}`]} stillAlt={`A drafting sheet of ${client.name}'s system, step by step.`} first long>
+			<p class="kind">{client.kind}, {client.where}</p>
+			<p>{client.intro}</p>
+			<p>{client.line}</p>
+			{
+				client.features.map((group) => (
+					<div class="group">
+						<h3>{group.title}</h3>
+						<ul>
+							{group.items.map((item) => (
+								<li>{item}</li>
+							))}
+						</ul>
+					</div>
+				))
+			}
+			<p class="actions">
+				<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
+				<a class="back" href="/">Back to the sheet</a>
+			</p>
+		</Stop>
+	</div>
 </Layout>
 
 <style>
-	.head {
-		display: grid;
-		align-content: start;
-		gap: 14px;
-		padding-block: 56px 40px;
-	}
-	/* Wide screens: the story and its machine share the first screen. */
-	@media (min-width: 1100px) {
-		.top {
-			display: grid;
-			grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-			gap: clamp(32px, 4vw, 64px);
-			align-items: start;
-			padding-top: 32px;
-		}
-		.head {
-			padding-block: 24px 0;
-		}
-	}
-	.back {
-		justify-self: start;
-		min-height: 44px;
-		display: inline-flex;
-		align-items: center;
-		font-size: 0.95rem;
-	}
-	.back::before {
-		content: '‹ ';
-		white-space: pre;
-		display: inline-block;
-		transition: translate 400ms var(--ease);
-	}
-	/* The arrow reaches back toward where you came from. */
-	@media (hover: hover) {
-		.back:hover::before {
-			translate: -6px 0;
-		}
-	}
-	.back:focus-visible::before {
-		translate: -6px 0;
-	}
-	h1 {
-		font-size: clamp(2.8rem, 7vw, 5rem);
-		border-bottom: 3px solid var(--pigment);
-		justify-self: start;
-		padding-bottom: 6px;
-	}
-	.meta {
+	.kind {
 		color: var(--muted);
-		font-size: 1rem;
-		margin-top: -4px;
+		font-size: var(--t-xs);
 	}
-	.intro {
-		max-width: 56ch;
-		font-size: 1.2rem;
-		color: var(--strong);
+	.group h3 {
+		font: 500 1.05rem/1.2 var(--font-display);
+		color: var(--sanguine-ink);
+		margin-bottom: 4px;
 	}
-	.line {
-		max-width: 60ch;
-	}
-	.features {
-		padding-block: 72px 24px;
-	}
-	.features h2,
-	.cta h2 {
-		font-size: clamp(1.8rem, 3.6vw, 2.6rem);
-	}
-	.groups {
-		margin-top: 28px;
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-		gap: 16px;
-	}
-	.group {
-		padding: 22px;
-		background: var(--card);
-		border-top: 3px solid var(--pigment);
-		box-shadow: 0 0 0 1px color-mix(in oklab, var(--pigment) 18%, var(--faint));
-	}
-	h3 {
-		font-size: 1.35rem;
-	}
-	ul {
-		margin: 12px 0 0;
+	.group ul {
+		margin: 0;
 		padding-left: 1.1em;
 		display: grid;
-		gap: 8px;
+		gap: 4px;
+		color: var(--strong);
+		font-size: 0.95rem;
 	}
-	li::marker {
-		color: var(--pigment);
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px 24px;
 	}
-	.cta {
-		display: grid;
-		justify-items: center;
-		gap: 20px;
-		padding-block: 72px 104px;
-		text-align: center;
+	.back {
+		color: var(--strong);
 	}
 </style>

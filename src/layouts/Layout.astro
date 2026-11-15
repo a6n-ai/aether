@@ -28,7 +28,7 @@ const jsonLd = {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" transition:animate="none">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -71,9 +71,9 @@ const jsonLd = {
 	</head>
 	<body>
 		<a class="skip-link" href="#main">Skip to content</a>
-		<World transition:persist="world" />
+		<World />
 		<Nav />
-		<main id="main" tabindex="-1">
+		<main id="main" tabindex="-1" transition:animate="fade">
 			<slot />
 		</main>
 		<Footer />

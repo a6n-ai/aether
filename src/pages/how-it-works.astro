@@ -1,7 +1,8 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Figure from '../components/Figure.astro';
-import { CAPTION } from '../machines/build-process/geometry';
+import Stop from '../components/Stop.astro';
+import { STILLS } from '../data/world';
+import { FAQ } from '../data/faq';
 import { BOOK_CALL_HREF } from '../lib/cta';
 
 const STEPS = [
@@ -17,84 +18,41 @@ const STEPS = [
 	title="How it works: from first call to an app your business runs on | a6n"
 	description="Every a6n project follows the same path: a conversation, a plan, a build from parts that already work, a launch, and then we keep it running."
 >
-	<main>
-		<div class="wrap head">
-			<h1>From first call to <em>open for customers.</em></h1>
-		</div>
-		<div class="wrap">
-			<Figure figure="git-merge" fig="Plate IX" pigment="var(--violet)" like="Like a model railway: each step is a station, and the new line joins your main line when it is ready." caption={CAPTION} />
-		</div>
-		<ol class="wrap steps">
-			{
-				STEPS.map((step, i) => (
-					<li>
-						<span class="n">{String(i + 1).padStart(2, '0')}</span>
-						<h2>{step.title}</h2>
-						<p>{step.body}</p>
-					</li>
-				))
-			}
-		</ol>
-		<section class="wrap cta">
-			<h2>Ready for the first step?</h2>
-			<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
-		</section>
-	</main>
+	<div class="journey" data-journey>
+		<Stop id="road" side="right" heading="From first call to open for customers." still={STILLS.road} stillAlt="A chalk drawing of the road a build takes: two people talking, a plan on paper, boxes and a gear, the kiosk open, a month ticked off." first long>
+			<ol class="steps">
+				{STEPS.map((s) => <li><strong>{s.title}.</strong> {s.body}</li>)}
+			</ol>
+			<p><a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a></p>
+		</Stop>
+		<Stop id="questions" side="right" heading="Questions owners ask." long>
+			<dl class="notes">
+				{FAQ.map((n) => (<><dt>{n.q}</dt><dd>{n.a}</dd></>))}
+			</dl>
+		</Stop>
+	</div>
 </Layout>
 
 <style>
-	.head {
-		display: grid;
-		gap: 14px;
-		padding-block: 56px 40px;
-	}
-	h1 {
-		font-size: clamp(2.6rem, 6vw, 4.6rem);
-		max-width: 16ch;
-	}
-	h1 em {
-		color: var(--sanguine);
-	}
 	.steps {
-		list-style: none;
-		margin: 0 auto;
-		padding-block: 64px 24px;
+		margin: 0;
+		padding-left: 1.2em;
 		display: grid;
-		grid-template-columns: repeat(5, minmax(0, 1fr));
-		gap: 28px;
+		gap: 10px;
+		color: var(--strong);
 	}
-	.steps li {
+	.notes {
 		display: grid;
-		align-content: start;
-		gap: 8px;
-		border-top: 1px solid var(--faint);
-		padding-top: 16px;
+		gap: 6px;
+		margin: 0;
 	}
-	.n {
-		font: 0.75rem var(--font-mono);
+	.notes dt {
+		font: italic 400 1.1rem/1.2 var(--font-display);
 		color: var(--sanguine-ink);
 	}
-	.steps h2 {
-		font-size: 1.5rem;
-	}
-	.cta {
-		display: grid;
-		justify-items: center;
-		gap: 20px;
-		padding-block: 72px 104px;
-		text-align: center;
-	}
-	.cta h2 {
-		font-size: clamp(1.8rem, 3.6vw, 2.6rem);
-	}
-	@media (max-width: 899px) {
-		.steps {
-			grid-template-columns: 1fr 1fr;
-		}
-	}
-	@media (max-width: 520px) {
-		.steps {
-			grid-template-columns: 1fr;
-		}
+	.notes dd {
+		margin: 0 0 12px;
+		color: var(--strong);
+		font-size: 0.95rem;
 	}
 </style>

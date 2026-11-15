@@ -13,14 +13,19 @@ interface Props {
 	href?: string;
 	linkText?: string;
 	first?: boolean;
+	/** Text too long to pin: the panel scrolls with the page instead. */
+	long?: boolean;
+	/** On the home page the hero holds the page's h1. */
+	home?: boolean;
 }
-const { id, side, heading, still, stillAlt = '', href, linkText, first = false } = Astro.props;
+const { id, side, heading, still, stillAlt = '', href, linkText, first = false, long = false, home = false } = Astro.props;
 ---
 
-<section class:list={['stop', side]} data-stop={id} aria-labelledby={`stop-${id}`}>
+<section class:list={['stop', side, { long, first }]} data-stop={id} id={id} aria-labelledby={`stop-${id}`}>
 	<div class="panel">
 		{still && <Picture src={still} formats={['avif', 'webp']} widths={[480, 900]} sizes="(max-width: 767px) 100vw, 640px" alt={stillAlt} class="still" loading={first ? 'eager' : 'lazy'} />}
-		<h2 id={`stop-${id}`}>{heading}</h2>
+		{/* a page that opens on a stop (every page but home) titles itself with the first stop's heading */}
+		{first && !home ? <h1 id={`stop-${id}`}>{heading}</h1> : <h2 id={`stop-${id}`}>{heading}</h2>}
 		<slot />
 		{href && <a class="go" href={href}>{linkText}</a>}
 	</div>
@@ -41,6 +46,7 @@ const { id, side, heading, still, stillAlt = '', href, linkText, first = false }
 		font-size: var(--t-m);
 		line-height: 1.45;
 	}
+	h1,
 	h2 {
 		font-size: var(--t-xl);
 		line-height: 0.95;
@@ -84,6 +90,7 @@ const { id, side, heading, still, stillAlt = '', href, linkText, first = false }
 	:global(html.world) .still {
 		display: none;
 	}
+	:global(html.world) h1,
 	:global(html.world) h2 {
 		font-size: clamp(1.9rem, 1.2rem + 1.6vw, 3rem);
 	}
@@ -104,6 +111,19 @@ const { id, side, heading, still, stillAlt = '', href, linkText, first = false }
 	}
 	:global(html.world) .left .panel {
 		margin-left: clamp(0px, 4vw, 64px);
+	}
+	:global(html.world) .long {
+		height: auto;
+		min-height: 160svh;
+		padding-bottom: 40svh;
+	}
+	/* a page that opens on this stop: its words are there from the start, not a screen below */
+	:global(html.world) .first .panel {
+		margin-top: 16svh;
+	}
+	:global(html.world) .long .panel {
+		position: relative;
+		top: auto;
 	}
 	@media (max-width: 767px) {
 		/* phones: the place fills the top of the screen, the words ride below it */

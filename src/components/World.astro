@@ -13,12 +13,13 @@ const vit = (await getImage({ src: vitruvian, width: 800, format: 'webp', qualit
 const data = JSON.stringify({ regions: REGIONS, strokes: STROKES, stills, films, vitruvian: vit });
 ---
 
-<canvas class="world" aria-hidden="true" data-world={data}></canvas>
+<canvas class="world" aria-hidden="true" data-world={data} transition:persist="world"></canvas>
 
 <script>
 	import { createWorld } from '../scripts/world/render';
 	import { measureFps, shouldDegrade } from '../scripts/world/degrade';
 	import { getWorld, setWorld } from '../scripts/world/index';
+	import { bindJourney } from '../scripts/world/scroll';
 
 	const canvas = document.querySelector<HTMLCanvasElement>('canvas.world');
 	const root = document.documentElement;
@@ -39,6 +40,16 @@ const data = JSON.stringify({ regions: REGIONS, strokes: STROKES, stills, films,
 			measureFps(2000).then((fps) => shouldDegrade({ ...env, fps }) && flat());
 		}
 	}
+	// every page is a place: bind its stops when it arrives; arriving from another page, the camera flies there
+	let unbind: (() => void) | null = null, first = true;
+	document.addEventListener('astro:page-load', () => {
+		unbind?.();
+		unbind = null;
+		const world = getWorld(), stops = [...document.querySelectorAll<HTMLElement>('[data-stop]')];
+		if (world && stops.length) unbind = bindJourney(stops, world, first ? undefined : world.camera());
+		first = false;
+	});
+	document.addEventListener('astro:before-swap', () => { unbind?.(); unbind = null; });
 </script>
 
 <style>

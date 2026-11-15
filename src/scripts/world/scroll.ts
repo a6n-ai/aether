@@ -1,6 +1,6 @@
 // Binds a page's stops to the world: scroll position becomes the camera, arriving at a place plays its film,
 // travelling between places draws the line that joins them, and the finale inks the Vitruvian in.
-import { cameraAt, clampCam, fit, type Cam } from './camera.ts';
+import { cameraAt, clampCam, fit, flight, type Cam } from './camera.ts';
 import { boxOf, REGIONS, STOPS, STROKES } from './layout.ts';
 import type { World } from './render.ts';
 
@@ -27,7 +27,8 @@ export function keysFor(ids: string[], vw: number, vh: number): Cam[] {
 	});
 }
 
-export function bindJourney(stops: HTMLElement[], world: World): () => void {
+/** `from`: the camera to fly from (arriving from another page); without it the camera starts in place. */
+export function bindJourney(stops: HTMLElement[], world: World, from?: Cam, flyMs = 1200): () => void {
 	const ids = stops.map((s) => s.dataset.stop!);
 	const targets = ids.map((id) => STOPS.find((s) => s.id === id)!.target);
 	let keys: Cam[] = [], tops: number[] = [], heights: number[] = [];
@@ -37,19 +38,25 @@ export function bindJourney(stops: HTMLElement[], world: World): () => void {
 		heights = stops.map((s) => s.offsetHeight);
 	};
 	const arrived = new Set<number>();
+	const start = performance.now();
+	let raf = 0;
 	const tick = () => {
 		const y = scrollY + innerHeight * 0.0;
 		let i = -1;
 		for (let k = 0; k < tops.length; k++) if (y >= tops[k]) i = k;
 		const t = i < 0 ? 0 : i + Math.min(0.999, (y - tops[i]) / heights[i]);
-		world.setCamera(clampCam(cameraAt(t, keys), innerWidth, innerHeight));
+		const to = clampCam(cameraAt(t, keys), innerWidth, innerHeight);
+		const k = from ? (performance.now() - start) / flyMs : 1;
+		world.setCamera(k < 1 ? flight(from!, to, k) : to);
+		if (k < 1 && !raf) raf = requestAnimationFrame(() => { raf = 0; tick(); });
 		// the line from the place before draws as the camera travels to this one
 		for (let k = 1; k < targets.length; k++) {
 			const p = k < Math.floor(t) ? 1 : k === Math.floor(t) ? Math.min(1, (t - k) / TRAVEL) : 0;
 			for (const s of strokesBetween(targets[k - 1], targets[k])) world.setStrokeProgress(s, p);
 		}
 		// arriving: the place draws itself, once
-		if (i >= 0 && t - i >= TRAVEL && !arrived.has(i)) {
+		// a page's first place has nothing to travel from: it counts as arrived as soon as you are on it
+		if (i >= 0 && t - i >= (i === 0 ? 0 : TRAVEL) && !arrived.has(i)) {
 			arrived.add(i);
 			// places left behind finish at once, so the place you are at draws now, not after them
 			targets.forEach((tg, k) => k !== i && (k < i || arrived.has(k)) && tg !== 'whole' && regionsOf(tg).forEach((r) => world.skip(r)));
@@ -66,6 +73,7 @@ export function bindJourney(stops: HTMLElement[], world: World): () => void {
 	addEventListener('scroll', tick, { passive: true });
 	addEventListener('resize', onResize);
 	return () => {
+		cancelAnimationFrame(raf);
 		removeEventListener('scroll', tick);
 		removeEventListener('resize', onResize);
 	};

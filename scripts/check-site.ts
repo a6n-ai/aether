@@ -1,5 +1,4 @@
 import { readFileSync, existsSync, statSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 
 const failures: string[] = [];
 const check = (ok: boolean, message: string) => {
@@ -12,7 +11,6 @@ if (!existsSync(file)) {
 	process.exit(1);
 }
 const html = readFileSync(file, 'utf8');
-const posters: Record<string, string> = existsSync('public/plates/posters/manifest.json') ? JSON.parse(readFileSync('public/plates/posters/manifest.json', 'utf8')) : {};
 const markup = html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, '');
 const ariaLabels = [...markup.matchAll(/aria-label="([^"]*)"/g)].map((m) => m[1]);
 const visible = markup.replace(/<[^>]+>/g, ' ') + ' ' + ariaLabels.join(' ');
@@ -32,64 +30,39 @@ for (const page of PAGES) {
 	check(/href="mailto:hi@a6n\.ai\?subject=Book%20a%20call/.test(body), `${page}: no Book a call mailto link`);
 	check((body.match(/<h1[\s>]/g) ?? []).length === 1, `${page}: expected exactly one <h1>`);
 	check(/<html[^>]*lang="en"/.test(raw), `${page}: missing <html lang="en">`);
-	for (const fig of body.matchAll(/<figure[^>]*data-machine="([^"]+)"[\s\S]*?<\/figure>/g)) {
-		const img = fig[0].match(/<img[^>]*data-plate-img[^>]*>/)?.[0] ?? '';
-		const alt = img.match(/alt="([^"]*)"/)?.[1] ?? '';
-		check(alt.length >= 60, `${page}: plate ${fig[1]} needs a finished-plate image with a 60+ char alt`);
-		check(/loading="lazy"/.test(img), `${page}: plate ${fig[1]} image must load lazily`);
-		const file = `dist/plates/${fig[1]}.svg`;
-		check(existsSync(file) && /<style>svg\.machine\{/.test(readFileSync(file, 'utf8')), `${page}: ${file} missing or without embedded styles`);
-		const svg = existsSync(file) ? readFileSync(file, 'utf8') : '';
-		const hash = createHash('sha1').update(svg).digest('hex');
-		check(existsSync(`public/plates/posters/${fig[1]}.webp`) && posters[fig[1]] === hash, `${page}: poster for ${fig[1]} missing or out of date, run npm run posters`);
-		check(/<div[^>]*class="nav[^"]*"[^>]*hidden/.test(fig[0]), `${page}: plate ${fig[1]} step buttons must be hidden until JS can run them`);
-		check(!/data-readout[^>]*aria-live="polite"/.test(fig[0]), `${page}: plate ${fig[1]} readout must not announce during the auto tour`);
-		const items = [...fig[0].matchAll(/<li[^>]*data-step="(\d+)"[^>]*>/g)];
-		check(/aria-current="step"/.test(items.at(-1)?.[0] ?? ''), `${page}: plate ${fig[1]} static HTML must mark the last step current`);
-	}
+	// every page is a place on the one sheet: the world canvas, and its stops with real words beside them
+	check(/<canvas[^>]*class="world"/.test(raw), `${page}: missing the world canvas`);
+	check(/data-stop="[^"]+"/.test(body), `${page}: no stops`);
+	for (const img of body.matchAll(/<img[^>]*class="still"[^>]*>/g)) check((img[0].match(/alt="([^"]*)"/)?.[1] ?? '').length >= 40, `${page}: a stop's still needs a 40+ char alt`);
 	for (const phrase of ['until it arrives', 'bookings, delivery and messages are parts']) {
 		check(!text.includes(phrase), `${page}: overpromising copy: "${phrase}"`);
 	}
 }
-check(/We work mainly from Singapore and India/.test(visible), 'FAQ location answer missing');
+check(/We work mainly from Singapore and India/.test(readFileSync('dist/how-it-works/index.html', 'utf8')), 'FAQ location answer missing from how it works');
 check(/\(Ai\)ny Management System/.test(visible), 'brand line missing');
-const legend = markup.match(/<ol[^>]*class="legend[^"]*"[\s\S]*?<\/ol>/)?.[0] ?? '';
-check((legend.match(/<li[\s>]/g) ?? []).length === 6, 'anatomy legend must list the six parts of a6n');
-check(markup.includes('data-machine="system"'), 'anatomy of a6n plate missing');
+const bench = markup.match(/<section[^>]*data-stop="bench"[\s\S]*?<\/section>/)?.[0] ?? '';
+for (const part of ['website', "customers' app", 'payments', 'messages', 'staff', 'reports']) check(bench.replace(/&#39;/g, "'").includes(part), `the bench must name ${part}`);
 
 const heroImg = markup.match(/<img[^>]*fetchpriority="high"[^>]*>/)?.[0] ?? '';
 check(/alt="[^"]*Creation of Adam[^"]*"/.test(heroImg), 'hero <img> needs fetchpriority="high" and alt mentioning Creation of Adam');
 const heroPicture = markup.match(/<picture[^>]*>[\s\S]*?fetchpriority="high"[\s\S]*?<\/picture>/)?.[0] ?? '';
 check(/srcset="[^"]*\.(avif|webp)/.test(heroPicture), 'hero must be served as avif/webp');
 const avif = heroPicture.match(/<source[^>]*srcset="([^"]+)"[^>]*type="image\/avif"/)?.[1] ?? '';
-const at800 = avif.split(',').map((s) => s.trim().split(' ')).find(([, w]) => w === '800w')?.[0];
+const at800 = avif.split(',').map((s) => s.trim().split(' ')).find(([, w]) => w === '900w')?.[0];
 if (at800) {
 	const path = 'dist' + decodeURIComponent(at800.split('?')[0]);
 	const kb = existsSync(path) ? statSync(path).size / 1024 : Infinity;
-	check(kb <= 180, `hero 800w avif is ${kb.toFixed(0)} KB, limit 180`);
-} else check(false, 'hero has no 800w avif candidate');
-
-const plate = markup.match(/<figure[^>]*data-machine="workbench"[\s\S]*?<\/figure>/)?.[0] ?? '';
-check(plate !== '', 'missing workbench figure');
-const svgLabel = plate.match(/<img[^>]*data-plate-img[^>]*alt="([^"]*)"/)?.[1] ?? plate.match(/<img[^>]*alt="([^"]*)"[^>]*data-plate-img/)?.[1] ?? '';
-check(svgLabel.length >= 60, 'workbench plate image needs a 60+ char alt');
-const STEP_LABELS = ['parts that already work', 'pick what you need', 'fitted to your business', 'your app, open for customers'];
-const stepTexts = [...plate.matchAll(/<li[^>]*data-step="\d"[^>]*>([\s\S]*?)<\/li>/g)].map((m) => m[1].replace(/<[^>]+>/g, '').trim());
-check(JSON.stringify(stepTexts) === JSON.stringify(STEP_LABELS), `workbench step labels wrong: ${JSON.stringify(stepTexts)}`);
-check(
-	plate.includes("We don't start from a blank page. Your app is put together from parts already running for other businesses, then shaped around yours.") ||
-		plate.includes('We don&#39;t start from a blank page. Your app is put together from parts already running for other businesses, then shaped around yours.'),
-	'workbench caption missing',
-);
+	check(kb <= 180, `hero 900w avif is ${kb.toFixed(0)} KB, limit 180`);
+} else check(false, 'hero has no 900w avif candidate');
 
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
 check(/color-scheme:\s*light/.test(css), 'page must set color-scheme: light');
-check(/minmax\(min\(300px,\s*100%\),\s*1fr\)/.test(css), 'tracks grid must shrink below 300px on narrow phones');
 for (const client of ['TiffinGrab', 'Puchkaman', 'Xplorers', 'Copper + Cloves']) {
 	check(markup.includes(client), `missing client card: ${client}`);
 }
-const order = ['data-machine="workbench"', 'data-section="clients"', 'Tell us about your business.'].map((s) => markup.indexOf(s));
-check(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), 'clients section must sit after the workshop and before the closing call');
+const order = ['bench', 'shop', 'street', 'post', 'workshops', 'notes', 'finale'].map((id) => markup.indexOf(`data-stop="${id}"`));
+check(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), 'the home journey must run bench, shop, street, post, workshops, notes, finale');
+for (const slug of ['tiffingrab', 'puchkaman', 'xplorers', 'copper-cloves']) check(markup.includes(`href="/clients/${slug}/"`), `workshops must link to ${slug}`);
 check(markup.includes('Tell us about your business.'), 'missing closing call heading');
 
 if (failures.length) {

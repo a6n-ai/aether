@@ -59,3 +59,11 @@ export function clampCam(c: Cam, vw: number, vh: number, world: { w: number; h: 
 	const y = hh * 2 >= world.h ? world.h / 2 : Math.min(world.h - hh, Math.max(hh, c.y));
 	return x === c.x && y === c.y ? c : { x, y, z: c.z };
 }
+
+/** The camera `k` of the way (0-1, eased) through a flight from one place to another: the travel between pages. */
+export function flight(a: Cam, b: Cam, k: number): Cam {
+	if (k <= 0) return a;
+	if (k >= 1) return b;
+	const e = ease(k);
+	return { x: a.x + (b.x - a.x) * e, y: a.y + (b.y - a.y) * e, z: Math.exp(Math.log(a.z) + (Math.log(b.z) - Math.log(a.z)) * e) };
+}

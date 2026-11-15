@@ -49,3 +49,16 @@ export function scrollToY(y: number) {
 	if (lenis) lenis.scrollTo(y, { immediate: true, force: true });
 	else scrollTo(0, y);
 }
+
+/** After the router swaps a page: Lenis re-measures and takes the page's restored scroll as its own, instead of easing
+ * back to where the last page was. */
+export function syncScroll(traverse: boolean) {
+	if (!lenis) return;
+	lenis.resize();
+	// going back or forward, the router kept that entry's scroll in history.state; a new page starts at its top
+	const saved = (history.state as { scrollY?: number } | null)?.scrollY;
+	const anchor = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+	const y = traverse && typeof saved === 'number' ? saved : anchor ? anchor.getBoundingClientRect().top + window.scrollY : 0;
+	lenis.scrollTo(y, { immediate: true, force: true });
+	window.scrollTo(0, y);
+}

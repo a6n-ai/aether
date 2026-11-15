@@ -17,7 +17,7 @@ const NOTES = ['How long does it take?', 'How much does it cost?', 'I already us
 >
 	<Hero />
 	<div class="journey" data-journey>
-		<Stop id="bench" side="right" heading="Everything your business runs on, in one place." still={STILLS.bench} stillAlt="A drafting sheet: a phone, a laptop, a till and a card terminal on one bench, each cabled to one hub." first>
+		<Stop id="bench" side="right" heading="Everything your business runs on, in one place." still={STILLS.bench} stillAlt="A drafting sheet: a phone, a laptop, a till and a card terminal on one bench, each cabled to one hub." first home>
 			<p>Your website, your customers' app, payments, messages, the screen your staff use and your reports: joined into one system, shaped around how you already work.</p>
 		</Stop>
 		<Stop id="shop" side="left" heading="A team, not a vendor." still={STILLS.shop} stillAlt="A chalk drawing: a shop, our bench inside its window, a spanner fixing something on the spot, two people side by side.">
@@ -47,20 +47,6 @@ const NOTES = ['How long does it take?', 'How much does it cost?', 'I already us
 		</Stop>
 	</div>
 </Layout>
-
-<script>
-	import { bindJourney } from '../scripts/world/scroll';
-	import { getWorld } from '../scripts/world/index';
-
-	let unbind: (() => void) | null = null;
-	document.addEventListener('astro:page-load', () => {
-		unbind?.();
-		unbind = null;
-		const world = getWorld(), stops = [...document.querySelectorAll<HTMLElement>('[data-journey] [data-stop]')];
-		if (world && stops.length) unbind = bindJourney(stops, world);
-	});
-	document.addEventListener('astro:before-swap', () => { unbind?.(); unbind = null; });
-</script>
 
 <style>
 	.clients {

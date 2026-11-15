@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cameraAt, clampCam, fit, scrollForStop, stopIndexForScroll, visible, type Cam } from './camera.ts';
+import { cameraAt, clampCam, fit, flight, scrollForStop, stopIndexForScroll, visible, type Cam } from './camera.ts';
 
 const keys: Cam[] = [
 	{ x: 1000, y: 800, z: 0.5 },
@@ -77,4 +77,16 @@ test('clampCam centres the sheet when the view is bigger than it', () => {
 test('clampCam leaves a camera well inside the sheet alone', () => {
 	const cam = { x: 3000, y: 2000, z: 0.6 };
 	assert.deepEqual(clampCam(cam, 1440, 900, { w: 6400, h: 4000 }), cam);
+});
+
+test('flight starts at the camera it leaves and lands on the one it flies to', () => {
+	const a = { x: 1000, y: 800, z: 0.5 }, b = { x: 4000, y: 3000, z: 0.8 };
+	assert.deepEqual(flight(a, b, 0), a);
+	assert.deepEqual(flight(a, b, 1), b);
+});
+
+test('flight eases, passing the midpoint at half time', () => {
+	const a = { x: 0, y: 0, z: 0.5 }, b = { x: 1000, y: 0, z: 0.5 };
+	assert.ok(Math.abs(flight(a, b, 0.5).x - 500) < 1);
+	assert.ok(flight(a, b, 0.1).x < 100);
 });
