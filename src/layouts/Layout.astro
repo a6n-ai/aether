@@ -22,7 +22,7 @@ const jsonLd = {
 	alternateName: '(Ai)ny Management System',
 	url: 'https://a6n.ai',
 	email: CONTACT_EMAIL,
-	slogan: 'Built for businesses like yours.',
+	slogan: 'Take your business online, or bring AI into the system you already run.',
 	areaServed: ['Singapore', 'India', 'Canada'],
 };
 ---
@@ -54,6 +54,7 @@ const jsonLd = {
 		<meta name="twitter:description" content={description} />
 		<meta name="twitter:image" content={ogImage} />
 		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+		<slot name="head" />
 		<Font cssVariable="--font-display" preload />
 		<Font cssVariable="--font-body" preload />
 		<ClientRouter fallback="swap" />

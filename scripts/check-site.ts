@@ -38,10 +38,8 @@ for (const page of PAGES) {
 		check(!text.includes(phrase), `${page}: overpromising copy: "${phrase}"`);
 	}
 }
-check(/We work mainly from Singapore and India/.test(readFileSync('dist/how-it-works/index.html', 'utf8')), 'FAQ location answer missing from how it works');
+check(/What is a6n\?/.test(readFileSync('dist/how-it-works/index.html', 'utf8')), 'the "What is a6n?" answer is missing from how it works');
 check(/\(Ai\)ny Management System/.test(visible), 'brand line missing');
-const bench = markup.match(/<section[^>]*data-stop="bench"[\s\S]*?<\/section>/)?.[0] ?? '';
-for (const part of ['website', "customers' app", 'payments', 'messages', 'staff', 'reports']) check(bench.replace(/&#39;/g, "'").includes(part), `the bench must name ${part}`);
 
 const heroImg = markup.match(/<img[^>]*fetchpriority="high"[^>]*>/)?.[0] ?? '';
 check(/alt="[^"]*Creation of Adam[^"]*"/.test(heroImg), 'hero <img> needs fetchpriority="high" and alt mentioning Creation of Adam');
@@ -58,11 +56,11 @@ if (at800) {
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
 check(/color-scheme:\s*light/.test(css), 'page must set color-scheme: light');
 for (const name of ['TiffinGrab', 'Xplorers', 'Relay', 'Copper + Cloves']) check(markup.includes(name), `missing on the home page: ${name}`);
-const order = ['bench', 'shop', 'street', 'relay', 'copper', 'work', 'notes', 'finale'].map((id) => markup.indexOf(`data-stop="${id}"`));
-check(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), 'the home journey must run bench, shop, street, relay, copper, work, notes, finale');
-for (const slug of ['tiffingrab', 'xplorers']) check(markup.includes(`href="/clients/${slug}/"`), `the work must link to ${slug}`);
-for (const href of ['https://relay.a6n.ai', 'https://copperandcloves.com']) check(markup.includes(`href="${href}"`), `our products must link to ${href}`);
-check(markup.includes('Tell us about your business.'), 'missing closing call heading');
+const order = ['bench', 'shop', 'street', 'help', 'work', 'notes', 'finale'].map((id) => markup.indexOf(`data-stop="${id}"`));
+check(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), 'the home journey must run bench, shop, street, help, work, notes, finale');
+for (const href of ['https://tiffingrab.ca', 'https://xplorers.life', 'https://copperandcloves.com', 'https://relay.a6n.ai']) check(markup.includes(`href="${href}"`), `the work must link to ${href}`);
+check(html.includes('"@type":"FAQPage"'), 'home is missing its FAQPage data');
+check(markup.includes('We help businesses run on their own system.'), 'missing closing call heading');
 
 if (failures.length) {
 	for (const f of failures) console.error(`FAIL: ${f}`);

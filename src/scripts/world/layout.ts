@@ -25,8 +25,8 @@ export const REGIONS: Region[] = [
 	{ id: 'workshop-tiffingrab', film: 'workshop-tiffingrab', x: MX + 4760, y: MY + 2620, w: 1400 * W, h: 900 * W },
 	{ id: 'workshop-puchkaman', film: 'workshop-puchkaman', x: MX + 3700, y: MY + 2620, w: 1400 * W, h: 900 * W },
 	{ id: 'workshop-xplorers', film: 'workshop-xplorers', x: MX + 3700, y: MY + 3320, w: 1400 * W, h: 900 * W },
-	// our own products sit together: Relay on the post, Copper + Cloves just below it
-	{ id: 'workshop-copper-cloves', film: 'workshop-copper-cloves', x: MX + 5800, y: MY + 2300, w: 1400 * W, h: 900 * W },
+	// Copper + Cloves fills the fourth corner of the work's 2 x 2 block
+	{ id: 'workshop-copper-cloves', film: 'workshop-copper-cloves', x: MX + 4760, y: MY + 3320, w: 1400 * W, h: 900 * W },
 	{ id: 'road', film: 'road', x: MX + 250, y: MY + 2750, w: 1200, h: 800 },
 	{ id: 'notes', x: MX + 300, y: MY + 1450, w: 1300, h: 900 },
 	{ id: 'vitruvian', x: MX + 2700, y: MY + 1370, w: 1000, h: 1260 },
@@ -36,8 +36,8 @@ export const REGIONS: Region[] = [
 /** A few regions read as one place: the street's three shops, and the four workshops. */
 export const GROUPS: Record<string, string[]> = {
 	street: ['street-new', 'street-move', 'street-grow'],
-	// the businesses we built for (our own products are not in it)
-	work: ['workshop-tiffingrab', 'workshop-puchkaman', 'workshop-xplorers'],
+	// every business the work was delivered for
+	work: ['workshop-tiffingrab', 'workshop-puchkaman', 'workshop-xplorers', 'workshop-copper-cloves'],
 };
 
 /** The box a stop frames: a region, a group of regions, or the whole sheet. */
@@ -56,9 +56,8 @@ export const STOPS: Stop[] = [
 	{ id: 'bench', page: '/', target: 'bench', side: 'center' },
 	{ id: 'shop', page: '/', target: 'shop', side: 'center' },
 	{ id: 'street', page: '/', target: 'street', side: 'left' },
-	{ id: 'relay', page: '/', target: 'post', side: 'left' },
-	{ id: 'copper', page: '/', target: 'workshop-copper-cloves', side: 'right' },
-	{ id: 'work', page: '/', target: 'work', side: 'right' },
+	{ id: 'help', page: '/', target: 'post', side: 'center' },
+	{ id: 'work', page: '/', target: 'work', side: 'left' },
 	{ id: 'notes', page: '/', target: 'notes', side: 'right' },
 	{ id: 'finale', page: '/', target: 'whole', side: 'right' },
 	{ id: 'road', page: '/how-it-works/', target: 'road', side: 'right' },
@@ -80,4 +79,4 @@ const join = (from: string, to: string): Stroke => {
 	const mx = (ax + bx) / 2, my = (ay + by) / 2, ox = (mx - WORLD.w / 2) * 0.12, oy = (my - WORLD.h / 2) * 0.12;
 	return { from, to, d: `M${ax.toFixed(0)} ${ay.toFixed(0)} Q${(mx + ox).toFixed(0)} ${(my + oy).toFixed(0)} ${bx.toFixed(0)} ${by.toFixed(0)}` };
 };
-export const STROKES: Stroke[] = [join('bench', 'shop'), join('shop', 'street'), join('street', 'post'), join('post', 'workshop-copper-cloves'), join('workshop-copper-cloves', 'work'), join('work', 'road'), join('road', 'notes'), join('notes', 'bench')];
+export const STROKES: Stroke[] = [join('bench', 'shop'), join('shop', 'street'), join('street', 'post'), join('post', 'work'), join('work', 'road'), join('road', 'notes'), join('notes', 'bench')];

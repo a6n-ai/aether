@@ -1,98 +1,75 @@
 ---
-import { Picture } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import Stop from '../components/Stop.astro';
 import { STILLS } from '../data/world';
 import { FAQ } from '../data/faq';
 import { BOOK_CALL_HREF } from '../lib/cta';
-import relaySite from '../assets/product/relay-site.png';
-import relayPhone from '../assets/product/relay-site-phone.png';
-import copperSite from '../assets/product/copper-site.png';
-import copperPhone from '../assets/product/copper-site-phone.png';
-import tiffinSite from '../assets/product/tiffingrab-site.png';
-import xplorersSite from '../assets/product/xplorers-site.png';
 
-// Our own products: built and run by us, and any business can use them.
-const PRODUCTS = [
-	{
-		id: 'relay',
-		name: 'Relay',
-		line: 'One send, every channel. Email, texts, WhatsApp and in-app messages from one place, with every delivery on record.',
-		site: relaySite,
-		phone: relayPhone,
-		href: 'https://relay.a6n.ai',
-		alt: "Relay's front page: one send, every channel, with its console listing sent messages and their delivery.",
-	},
-	{
-		id: 'copper',
-		name: 'Copper + Cloves',
-		line: 'Our own wellness cafés in Bangalore, with meal subscriptions, run end to end on the system we build for you.',
-		site: copperSite,
-		phone: copperPhone,
-		href: 'https://copperandcloves.com',
-		alt: "Copper + Cloves' front page: wellness, made simple, over a photograph of the café.",
-	},
+const HELP = [
+	{ title: 'Start from parts that already work', body: 'A first version comes together faster than building from zero.' },
+	{ title: 'Move over with nothing lost', body: 'Your customers and records come across from paper and spreadsheets.' },
+	{ title: 'One team, start to finish', body: 'The people who build it are the ones who answer when something breaks.' },
 ];
-// Businesses we've built for, with their live sites.
+// Every business a6n runs today, each a live site.
 const WORK = [
-	{ slug: 'tiffingrab', name: 'TiffinGrab', kind: 'Meal plans, delivered, in Toronto', shot: tiffinSite, alt: "TiffinGrab's front page: home-style tiffins, delivered fresh." },
-	{ slug: 'xplorers', name: 'Xplorers', kind: "Kids' science classes in Singapore", shot: xplorersSite, alt: "Xplorers' front page: a space to be you, a place to grow." },
+	{ name: 'TiffinGrab', line: 'Meal plans ordered, paused and delivered from one system.', href: 'https://tiffingrab.ca' },
+	{ name: 'Xplorers', line: 'Class bookings, payments and rosters on one screen.', href: 'https://xplorers.life' },
+	{ name: 'Copper + Cloves', line: 'Passes, check-in, café and shop in one member app.', href: 'https://copperandcloves.com' },
+	{ name: 'Relay', line: 'Email, SMS, WhatsApp and in-app messages from one send.', href: 'https://relay.a6n.ai' },
 ];
-const shotProps = { formats: ['avif', 'webp'], widths: [480, 900, 1400], sizes: '(max-width: 767px) 92vw, 40vw', loading: 'lazy' } as const;
+const QUESTIONS = FAQ.slice(0, 9);
+const faqLd = {
+	'@context': 'https://schema.org',
+	'@type': 'FAQPage',
+	mainEntity: QUESTIONS.map((n) => ({ '@type': 'Question', name: n.q, acceptedAnswer: { '@type': 'Answer', text: n.a } })),
+};
 ---
 
 <Layout
-	title="a6n · (Ai)ny Management System: built for businesses like yours"
-	description="We build the website and app your business runs on: orders, bookings, payments and messages, all in one place. You keep doing the work you love."
+	title="a6n: a business management system, online and with AI"
+	description="a6n takes businesses online or brings AI into the systems they already run: one system for orders, bookings, payments, customers and messages."
 >
+	<script type="application/ld+json" slot="head" set:html={JSON.stringify(faqLd)} />
 	<Hero />
 	<div class="journey" data-journey>
-		<Stop id="bench" side="center" heading="One system for the everyday work of your business." still={STILLS.bench} stillAlt="A drafting sheet: a phone, a laptop, a till and a card terminal on one bench, each cabled to one hub." first home statement>
-			<p>Your website, your customers' app, payments, messages, the screen your staff use and your reports: joined into one, shaped around how you already work.</p>
-		</Stop>
-		<Stop id="shop" side="center" heading="A small team in Singapore and India, working like your own." still={STILLS.shop} stillAlt="A chalk drawing: a shop, our bench inside its window, a spanner fixing something on the spot, two people side by side." statement>
-			<p>The same people build your system and look after it, every week.</p>
-		</Stop>
+		<Stop id="bench" side="center" heading="A small engineering team building the systems businesses run on." still={STILLS.bench} stillAlt="A drafting sheet: a phone, a laptop, a till and a card terminal on one bench, each cabled to one hub." first home statement />
+		<Stop id="shop" side="center" heading="Every business should have the software and AI a big company has, set up around how it already works." still={STILLS.shop} stillAlt="A chalk drawing: a shop, our bench inside its window, a spanner fixing something on the spot, two people side by side." statement />
 		<Stop id="street" side="left" heading="We:" still={STILLS['street-new']} stillAlt="Three chalk shops on one street: a kiosk being built, old papers weighed over into an app, the kiosk a year on with a new wing." href="/how-it-works/" linkText="How a build works">
 			<ul class="we">
-				<li>Build something new: we draw your idea up and build it from parts that already work.</li>
-				<li>Move you over from paper and spreadsheets, with nothing lost.</li>
-				<li>Run and grow it: we keep watch every day and add what you need next.</li>
+				<li>Take businesses online: website, customer app, payments and a staff screen on one system.</li>
+				<li>Bring AI into the system you already have: an assistant that answers any question a customer asks about your business, and makes you readable by ChatGPT and AI search.</li>
+				<li>Run it with you: we watch it every day and add what you need next.</li>
 			</ul>
 		</Stop>
-		{
-			PRODUCTS.map((p, i) => (
-				<Stop id={p.id} side={i === 0 ? 'left' : 'right'} heading={i === 0 ? 'Our own products. Any business can use them.' : p.name} wide>
-					{i === 0 && <p class="kicker">{p.name}</p>}
-					<p>{p.line}</p>
-					<figure class="shots">
-						<Picture src={p.site} {...shotProps} alt={p.alt} class="site" />
-						<Picture src={p.phone} {...shotProps} sizes="(max-width: 767px) 30vw, 10vw" alt="" class="phone" />
-					</figure>
-					<a class="go" href={p.href}>Visit {p.name}</a>
-				</Stop>
-			))
-		}
-		<Stop id="work" side="right" heading="Work delivered for" wide>
-			<ul class="work">
+		<Stop id="help" side="center" heading="You tell us how your business works. We build the system around it." statement>
+			<ul class="cards">
 				{
-					WORK.map((w) => (
+					HELP.map((c) => (
 						<li>
-							<a href={`/clients/${w.slug}/`}>
-								<Picture src={w.shot} {...shotProps} sizes="(max-width: 767px) 92vw, 20vw" alt={w.alt} />
-								<span class="name">{w.name}</span>
-								<span class="kind">{w.kind}</span>
-							</a>
+							<h3>{c.title}</h3>
+							<p>{c.body}</p>
 						</li>
 					))
 				}
 			</ul>
 		</Stop>
-		<Stop id="notes" side="right" heading="Questions" long href="/how-it-works/#questions" linkText="All questions">
+		<Stop id="work" side="left" heading="Work delivered for">
+			<ul class="work">
+				{
+					WORK.map((w) => (
+						<li>
+							<a href={w.href}>{w.name}</a>
+							<p>{w.line}</p>
+						</li>
+					))
+				}
+			</ul>
+		</Stop>
+		<Stop id="notes" side="right" heading="Questions? Here are the answers." long href="/how-it-works/#questions" linkText="All questions">
 			<div class="faq">
 				{
-					FAQ.slice(0, 6).map((n, k) => (
+					QUESTIONS.map((n, k) => (
 						<details>
 							<summary><span class="n">{String(k + 1).padStart(2, '0')}</span>{n.q}</summary>
 							<p>{n.a}</p>
@@ -101,8 +78,8 @@ const shotProps = { formats: ['avif', 'webp'], widths: [480, 900, 1400], sizes: 
 				}
 			</div>
 		</Stop>
-		<Stop id="finale" side="right" heading="Tell us about your business." still={STILLS.whole} stillAlt="The whole sheet, complete: the bench, the shop, the street, the post, the road and the workshops drawn around Leonardo's Vitruvian Man, joined by red chalk lines.">
-			<p>One short call: no jargon, no pressure, and an honest answer about whether we can help.</p>
+		<Stop id="finale" side="right" heading="We help businesses run on their own system." still={STILLS.whole} stillAlt="The whole sheet, complete: the bench, the shop, the street, the post, the road and the workshops drawn around Leonardo's Vitruvian Man, joined by red chalk lines.">
+			<p>One short call, and an honest answer on whether a6n fits.</p>
 			<p><a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a></p>
 		</Stop>
 	</div>
@@ -120,64 +97,64 @@ const shotProps = { formats: ['avif', 'webp'], widths: [480, 900, 1400], sizes: 
 		border-top: 1px solid var(--faint);
 		color: var(--strong);
 	}
-	.kicker {
-		font: italic 400 1.2rem/1 var(--font-display);
-		color: var(--sanguine-ink);
-	}
-	.shots {
-		position: relative;
-		margin: 4px 0 8px;
-		padding-right: 18%;
-	}
-	.shots :global(img) {
-		display: block;
+	.cards {
+		list-style: none;
+		margin: 8px 0 0;
+		padding: 0;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 14px;
+		text-align: left;
 		width: 100%;
-		height: auto;
-		border-radius: 8px;
-		box-shadow: 0 14px 40px -18px color-mix(in oklab, var(--strong) 50%, transparent);
 	}
-	.shots :global(.phone) {
-		position: absolute;
-		right: 0;
-		bottom: -12px;
-		width: 24%;
-		border-radius: 14px;
+	.cards li {
+		display: grid;
+		align-content: start;
+		gap: 6px;
+		padding: 18px 20px;
+		background: color-mix(in oklab, var(--card) 86%, transparent);
+		border-radius: 6px;
+		box-shadow: 0 14px 40px -22px color-mix(in oklab, var(--strong) 40%, transparent);
+	}
+	.cards h3 {
+		font: 500 1.1rem/1.15 var(--font-display);
+		color: var(--strong);
+	}
+	.cards p {
+		font-size: 0.95rem;
+		line-height: 1.4;
 	}
 	.work {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 16px;
+	}
+	.work li {
+		display: grid;
+		gap: 2px;
+		padding: 12px 0;
+		border-top: 1px solid var(--faint);
 	}
 	.work a {
-		display: grid;
-		gap: 6px;
+		justify-self: start;
 		color: var(--strong);
+		font: 500 1.2rem/1.2 var(--font-display);
 		text-decoration: none;
-	}
-	.work :global(img) {
-		width: 100%;
-		height: auto;
-		border-radius: 6px;
-		box-shadow: 0 10px 30px -16px color-mix(in oklab, var(--strong) 50%, transparent);
-		transition: translate 300ms var(--ease);
+		background: linear-gradient(color-mix(in oklab, var(--sanguine) 55%, transparent) 0 0) left 100% / 0 2px no-repeat;
+		transition: background-size 420ms var(--ease);
 	}
 	@media (hover: hover) {
-		.work a:hover :global(img) {
-			translate: 0 -4px;
+		.work a:hover {
+			background-size: 100% 2px;
 		}
 	}
-	.work a:focus-visible :global(img) {
-		translate: 0 -4px;
+	.work a:focus-visible {
+		background-size: 100% 2px;
 	}
-	.work .name {
-		font: 500 1.15rem/1.1 var(--font-display);
-	}
-	.work .kind {
-		color: var(--muted);
-		font-size: var(--t-xs);
+	.work p {
+		font-size: 0.95rem;
+		color: var(--text);
 	}
 	.faq details {
 		border-top: 1px solid var(--faint);
@@ -208,8 +185,12 @@ const shotProps = { formats: ['avif', 'webp'], widths: [480, 900, 1400], sizes: 
 		color: var(--text);
 	}
 	@media (max-width: 767px) {
-		.work {
+		.cards {
 			grid-template-columns: minmax(0, 1fr);
+			gap: 8px;
+		}
+		.cards li {
+			padding: 12px 14px;
 		}
 	}
 </style>

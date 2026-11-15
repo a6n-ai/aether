@@ -171,6 +171,10 @@ const words = heading.split(' ');
 		max-width: min(46ch, 44vw);
 		top: calc(var(--nav-h) + 16px);
 	}
+	/* a statement with cards is taller, so it gets more scroll to stay pinned under its place */
+	:global(html.world) .statement:has(.cards) {
+		height: 200svh;
+	}
 	/* a page that opens on this stop: its words are there from the start, not a screen below */
 	:global(html.world) .first .panel {
 		margin-top: 16svh;
@@ -199,6 +203,12 @@ const words = heading.split(' ');
 			max-height: none;
 			overflow: visible;
 			background: radial-gradient(70% 70% at 50% 50%, color-mix(in oklab, var(--card) 80%, transparent), transparent 80%);
+		}
+		/* a statement with cards under it is too tall to pin on a phone: it scrolls past under the place */
+		:global(html.world) .statement:has(.cards) .panel {
+			position: relative;
+			top: auto;
+			padding-inline: 4px;
 		}
 		:global(html.world) .wide {
 			height: auto;
