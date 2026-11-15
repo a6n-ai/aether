@@ -90,3 +90,10 @@ test('flight eases, passing the midpoint at half time', () => {
 	assert.ok(Math.abs(flight(a, b, 0.5).x - 500) < 1);
 	assert.ok(flight(a, b, 0.1).x < 100);
 });
+
+test('fit for a statement frames the region above the words, in the top part of the screen', () => {
+	const cam = fit(r, 1440, 900, 'center');
+	const screenY = 900 / 2 + (r.y + r.h / 2 - cam.y) * cam.z;
+	assert.ok(screenY < 900 * 0.4);
+	assert.ok(cam.z * r.h <= 900 * 0.45);
+});

@@ -4,7 +4,7 @@
 /** The world point at the centre of the viewport, and the zoom (screen px per world unit). */
 export type Cam = { x: number; y: number; z: number };
 export type Box = { x: number; y: number; w: number; h: number };
-export type Side = 'left' | 'right' | 'below';
+export type Side = 'left' | 'right' | 'below' | 'center';
 
 /** Each stop takes 1.6 viewport heights of scroll: 0.6 travelling in, then 1.0 dwelling. */
 export const STOP_VH = 1.6;
@@ -16,12 +16,17 @@ const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2); /
  * width on the side away from the panel (8% margins); on phones it fills the width less 16px gutters
  * and sits in the top of the screen, with the panel below.
  */
-export function fit(r: Box | 'whole', vw: number, vh: number, side: Side, world: { w: number; h: number } = { w: 7200, h: 4600 }): Cam {
+export function fit(r: Box | 'whole', vw: number, vh: number, side: Side, world: { w: number; h: number } = { w: 8000, h: 5000 }): Cam {
 	if (r === 'whole') {
 		const z = Math.min(vw / world.w, vh / world.h) * 0.94;
 		return { x: world.w / 2, y: world.h / 2, z };
 	}
 	const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+	if (side === 'center') {
+		// a statement: the drawing sits in the top part of the screen, centred, with the words beneath it
+		const z = Math.min((vw * 0.62) / r.w, (vh * 0.42) / r.h);
+		return { x: cx, y: cy + (vh * 0.5 - vh * 0.3) / z, z };
+	}
 	if (side === 'below') {
 		const z = (vw - 32) / r.w;
 		// the region's centre sits at 34% of the screen height, leaving the lower part for the panel
@@ -53,7 +58,7 @@ export function visible(r: Box, cam: Cam, vw: number, vh: number, margin = 0.25)
 }
 
 /** Keeps the view inside the sheet: never past an edge while the view is smaller than the sheet, centred when it is not. */
-export function clampCam(c: Cam, vw: number, vh: number, world: { w: number; h: number } = { w: 7200, h: 4600 }): Cam {
+export function clampCam(c: Cam, vw: number, vh: number, world: { w: number; h: number } = { w: 8000, h: 5000 }): Cam {
 	const hw = vw / 2 / c.z, hh = vh / 2 / c.z;
 	const x = hw * 2 >= world.w ? world.w / 2 : Math.min(world.w - hw, Math.max(hw, c.x));
 	const y = hh * 2 >= world.h ? world.h / 2 : Math.min(world.h - hh, Math.max(hh, c.y));

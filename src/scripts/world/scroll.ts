@@ -1,15 +1,12 @@
 // Binds a page's stops to the world: scroll position becomes the camera, arriving at a place plays its film,
 // travelling between places draws the line that joins them, and the finale inks the Vitruvian in.
 import { cameraAt, clampCam, fit, flight, type Cam } from './camera.ts';
-import { boxOf, REGIONS, STOPS, STROKES } from './layout.ts';
+import { boxOf, GROUPS, REGIONS, STOPS, STROKES, WORLD } from './layout.ts';
 import type { World } from './render.ts';
 
 const TRAVEL = 0.375;
-const GROUP_IDS: Record<string, string[]> = {
-	street: ['street-new', 'street-move', 'street-grow'],
-	workshops: ['workshop-tiffingrab', 'workshop-puchkaman', 'workshop-xplorers', 'workshop-copper-cloves'],
-};
-const regionsOf = (target: string) => (GROUP_IDS[target] ?? [target]).filter((id) => REGIONS.some((r) => r.id === id && r.film));
+
+const regionsOf = (target: string) => (GROUPS[target] ?? [target]).filter((id) => REGIONS.some((r) => r.id === id && r.film));
 const strokesBetween = (from: string, to: string): string[] => {
 	const id = (s: { from: string; to: string }) => `${s.from}>${s.to}`;
 	const direct = STROKES.find((s) => s.from === from && s.to === to);
@@ -23,7 +20,7 @@ export function keysFor(ids: string[], vw: number, vh: number): Cam[] {
 	return ids.map((id) => {
 		const stop = STOPS.find((s) => s.id === id)!;
 		const side = vw < 768 ? 'below' : stop.side;
-		return stop.target === 'whole' ? fit('whole', vw, vh, side) : fit(boxOf(stop.target)!, vw, vh, side);
+		return stop.target === 'whole' ? fit('whole', vw, vh, side, WORLD) : fit(boxOf(stop.target)!, vw, vh, side, WORLD);
 	});
 }
 
@@ -38,6 +35,7 @@ export function bindJourney(stops: HTMLElement[], world: World, from?: Cam, flyM
 		heights = stops.map((s) => s.offsetHeight);
 	};
 	const arrived = new Set<number>();
+	const words = stops.map((s) => [...s.querySelectorAll<HTMLElement>('[data-words] .w')]);
 	const start = performance.now();
 	let raf = 0;
 	const tick = () => {
@@ -45,7 +43,7 @@ export function bindJourney(stops: HTMLElement[], world: World, from?: Cam, flyM
 		let i = -1;
 		for (let k = 0; k < tops.length; k++) if (y >= tops[k]) i = k;
 		const t = i < 0 ? 0 : i + Math.min(0.999, (y - tops[i]) / heights[i]);
-		const to = clampCam(cameraAt(t, keys), innerWidth, innerHeight);
+		const to = clampCam(cameraAt(t, keys), innerWidth, innerHeight, WORLD);
 		const k = from ? (performance.now() - start) / flyMs : 1;
 		world.setCamera(k < 1 ? flight(from!, to, k) : to);
 		if (k < 1 && !raf) raf = requestAnimationFrame(() => { raf = 0; tick(); });
@@ -64,6 +62,14 @@ export function bindJourney(stops: HTMLElement[], world: World, from?: Cam, flyM
 			// a group's places draw quicker, one after another, so arriving at the street or the workshops stays brisk
 			else { const rs = regionsOf(targets[i]); rs.forEach((r) => world.playRegion(r, rs.length > 1 ? 3 : 1.5)); }
 		}
+		// a statement's words ink in, left to right, over the first part of its stop
+		stops.forEach((el, k) => {
+			const ws = words[k];
+			if (!ws.length) return;
+			const p = k < i ? 1 : k > i ? 0 : Math.min(1, Math.max(0, (t - k) / 0.7));
+			const lit = Math.round(p * ws.length);
+			ws.forEach((w, n) => w.classList.toggle('on', n < lit));
+		});
 		// the finale: every place drawn, the Vitruvian inking in over its dwell
 		if (i >= 0 && targets[i] === 'whole') world.revealVitruvian(Math.max(0, Math.min(1, (t - i - TRAVEL) / 0.3)));
 	};

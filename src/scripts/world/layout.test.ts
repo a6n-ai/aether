@@ -23,8 +23,14 @@ test('the Vitruvian is at the centre of the sheet', () => {
 	assert.ok(Math.abs(v.x + v.w / 2 - WORLD.w / 2) < 200 && Math.abs(v.y + v.h / 2 - WORLD.h / 2) < 200);
 });
 
-test('the home journey runs bench, shop, street, post, workshops, notes, whole', () => {
-	assert.deepEqual(STOPS.filter((s) => s.page === '/').map((s) => s.target), ['bench', 'shop', 'street', 'post', 'workshops', 'notes', 'whole']);
+test('the home journey runs bench, shop, street, our two products, the work, notes, whole', () => {
+	assert.deepEqual(STOPS.filter((s) => s.page === '/').map((s) => s.target), ['bench', 'shop', 'street', 'post', 'workshop-copper-cloves', 'work', 'notes', 'whole']);
+});
+
+test('the work is the client workshops, not our own products', () => {
+	const work = boxOf('work')!, copper = boxOf('workshop-copper-cloves')!;
+	const inside = copper.x >= work.x && copper.x + copper.w <= work.x + work.w && copper.y >= work.y && copper.y + copper.h <= work.y + work.h;
+	assert.equal(inside, false);
 });
 
 test('every stroke joins two things that exist', () => {

@@ -57,12 +57,11 @@ if (at800) {
 
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
 check(/color-scheme:\s*light/.test(css), 'page must set color-scheme: light');
-for (const client of ['TiffinGrab', 'Puchkaman', 'Xplorers', 'Copper + Cloves']) {
-	check(markup.includes(client), `missing client card: ${client}`);
-}
-const order = ['bench', 'shop', 'street', 'post', 'workshops', 'notes', 'finale'].map((id) => markup.indexOf(`data-stop="${id}"`));
-check(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), 'the home journey must run bench, shop, street, post, workshops, notes, finale');
-for (const slug of ['tiffingrab', 'puchkaman', 'xplorers', 'copper-cloves']) check(markup.includes(`href="/clients/${slug}/"`), `workshops must link to ${slug}`);
+for (const name of ['TiffinGrab', 'Xplorers', 'Relay', 'Copper + Cloves']) check(markup.includes(name), `missing on the home page: ${name}`);
+const order = ['bench', 'shop', 'street', 'relay', 'copper', 'work', 'notes', 'finale'].map((id) => markup.indexOf(`data-stop="${id}"`));
+check(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), 'the home journey must run bench, shop, street, relay, copper, work, notes, finale');
+for (const slug of ['tiffingrab', 'xplorers']) check(markup.includes(`href="/clients/${slug}/"`), `the work must link to ${slug}`);
+for (const href of ['https://relay.a6n.ai', 'https://copperandcloves.com']) check(markup.includes(`href="${href}"`), `our products must link to ${href}`);
 check(markup.includes('Tell us about your business.'), 'missing closing call heading');
 
 if (failures.length) {

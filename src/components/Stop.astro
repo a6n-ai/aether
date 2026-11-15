@@ -6,7 +6,7 @@ import type { ImageMetadata } from 'astro';
 
 interface Props {
 	id: string;
-	side: 'left' | 'right';
+	side: 'left' | 'right' | 'center';
 	heading: string;
 	still?: ImageMetadata;
 	stillAlt?: string;
@@ -17,15 +17,30 @@ interface Props {
 	long?: boolean;
 	/** On the home page the hero holds the page's h1. */
 	home?: boolean;
+	/** One big sentence, centred under the drawing, its words inking in as you scroll. */
+	statement?: boolean;
+	/** A wider panel, for a product with its screens. */
+	wide?: boolean;
 }
-const { id, side, heading, still, stillAlt = '', href, linkText, first = false, long = false, home = false } = Astro.props;
+const { id, side, heading, still, stillAlt = '', href, linkText, first = false, long = false, home = false, statement = false, wide = false } = Astro.props;
+const words = heading.split(' ');
 ---
 
-<section class:list={['stop', side, { long, first }]} data-stop={id} id={id} aria-labelledby={`stop-${id}`}>
+<section class:list={['stop', side, { long, first, statement, wide }]} data-stop={id} id={id} aria-labelledby={`stop-${id}`}>
 	<div class="panel">
 		{still && <Picture src={still} formats={['avif', 'webp']} widths={[480, 900]} sizes="(max-width: 767px) 100vw, 640px" alt={stillAlt} class="still" loading={first ? 'eager' : 'lazy'} />}
 		{/* a page that opens on a stop (every page but home) titles itself with the first stop's heading */}
-		{first && !home ? <h1 id={`stop-${id}`}>{heading}</h1> : <h2 id={`stop-${id}`}>{heading}</h2>}
+		{
+			statement ? (
+				<h2 id={`stop-${id}`} class="said" data-words>
+					{words.map((w) => <span class="w">{w} </span>)}
+				</h2>
+			) : first && !home ? (
+				<h1 id={`stop-${id}`}>{heading}</h1>
+			) : (
+				<h2 id={`stop-${id}`}>{heading}</h2>
+			)
+		}
 		<slot />
 		{href && <a class="go" href={href}>{linkText}</a>}
 	</div>
@@ -118,6 +133,44 @@ const { id, side, heading, still, stillAlt = '', href, linkText, first = false, 
 		min-height: 160svh;
 		padding-bottom: 40svh;
 	}
+	/* A statement: one sentence, big and centred under the drawing, inking in word by word (scroll.ts). */
+	.said .w {
+		transition: color 380ms var(--ease);
+	}
+	:global(html.world) .statement .panel {
+		top: 56svh;
+		margin-inline: auto;
+		max-width: min(980px, 86vw);
+		text-align: center;
+		justify-items: center;
+		background: radial-gradient(60% 70% at 50% 50%, color-mix(in oklab, var(--card) 70%, transparent), transparent 75%);
+		box-shadow: none;
+		-webkit-backdrop-filter: none;
+		backdrop-filter: none;
+		padding: 24px 48px 32px;
+	}
+	:global(html.world) .statement :global(p) {
+		max-width: 56ch;
+	}
+	:global(html.world) .statement .said {
+		font-size: clamp(2rem, 1rem + 2.6vw, 3.6rem);
+		line-height: 1.06;
+		max-width: 22ch;
+	}
+	:global(html.world) .statement .said .w {
+		color: color-mix(in oklab, var(--strong) 26%, transparent);
+	}
+	:global(html.world) .statement .said .w:global(.on) {
+		color: var(--strong);
+	}
+	:global(html.world) .statement :global(p) {
+		color: var(--text);
+	}
+	/* a product with its screens is tall: pin it under the nav so all of it stays in view */
+	:global(html.world) .wide .panel {
+		max-width: min(46ch, 44vw);
+		top: calc(var(--nav-h) + 16px);
+	}
 	/* a page that opens on this stop: its words are there from the start, not a screen below */
 	:global(html.world) .first .panel {
 		margin-top: 16svh;
@@ -139,6 +192,24 @@ const { id, side, heading, still, stillAlt = '', href, linkText, first = false, 
 			max-height: 40svh;
 			overflow: auto;
 			padding: 18px 20px;
+		}
+		/* a statement is never cut short, and a product's screens are never hidden in a scroll box */
+		:global(html.world) .statement .panel {
+			top: 46svh;
+			max-height: none;
+			overflow: visible;
+			background: radial-gradient(70% 70% at 50% 50%, color-mix(in oklab, var(--card) 80%, transparent), transparent 80%);
+		}
+		:global(html.world) .wide {
+			height: auto;
+			min-height: 160svh;
+			padding-bottom: 30svh;
+		}
+		:global(html.world) .wide .panel {
+			position: relative;
+			top: auto;
+			max-height: none;
+			overflow: visible;
 		}
 	}
 </style>

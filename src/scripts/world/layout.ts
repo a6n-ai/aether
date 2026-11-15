@@ -1,11 +1,11 @@
-// The a6n world: one sheet, 7200 x 4600 world units, laid out as a walk around its centre (see
+// The a6n world: one sheet, 8000 x 5000 world units, laid out as a walk around its centre (see
 // docs/superpowers/specs/2026-11-15-one-sheet-design.md). Pure numbers: the stills are attached in
 // src/data/world.ts, which Astro can import and these tests cannot.
 import type { Box, Side } from './camera.ts';
 
 // a margin all round, so no place sits against an edge where keeping the view on the sheet would push it off-centre
-export const WORLD = { w: 7200, h: 4600 };
-const MX = 400, MY = 300;
+export const WORLD = { w: 8000, h: 5000 };
+const MX = 800, MY = 500;
 
 /** A drawn place on the sheet. `film` is its id under public/world/ (also its still's name); none for an area with no art. */
 export type Region = Box & { id: string; film?: string };
@@ -25,7 +25,8 @@ export const REGIONS: Region[] = [
 	{ id: 'workshop-tiffingrab', film: 'workshop-tiffingrab', x: MX + 4760, y: MY + 2620, w: 1400 * W, h: 900 * W },
 	{ id: 'workshop-puchkaman', film: 'workshop-puchkaman', x: MX + 3700, y: MY + 2620, w: 1400 * W, h: 900 * W },
 	{ id: 'workshop-xplorers', film: 'workshop-xplorers', x: MX + 3700, y: MY + 3320, w: 1400 * W, h: 900 * W },
-	{ id: 'workshop-copper-cloves', film: 'workshop-copper-cloves', x: MX + 4760, y: MY + 3320, w: 1400 * W, h: 900 * W },
+	// our own products sit together: Relay on the post, Copper + Cloves just below it
+	{ id: 'workshop-copper-cloves', film: 'workshop-copper-cloves', x: MX + 5800, y: MY + 2300, w: 1400 * W, h: 900 * W },
 	{ id: 'road', film: 'road', x: MX + 250, y: MY + 2750, w: 1200, h: 800 },
 	{ id: 'notes', x: MX + 300, y: MY + 1450, w: 1300, h: 900 },
 	{ id: 'vitruvian', x: MX + 2700, y: MY + 1370, w: 1000, h: 1260 },
@@ -33,9 +34,10 @@ export const REGIONS: Region[] = [
 ];
 
 /** A few regions read as one place: the street's three shops, and the four workshops. */
-const GROUPS: Record<string, string[]> = {
+export const GROUPS: Record<string, string[]> = {
 	street: ['street-new', 'street-move', 'street-grow'],
-	workshops: ['workshop-tiffingrab', 'workshop-puchkaman', 'workshop-xplorers', 'workshop-copper-cloves'],
+	// the businesses we built for (our own products are not in it)
+	work: ['workshop-tiffingrab', 'workshop-puchkaman', 'workshop-xplorers'],
 };
 
 /** The box a stop frames: a region, a group of regions, or the whole sheet. */
@@ -51,11 +53,12 @@ export function boxOf(target: string): Box | null {
 
 export type Stop = { id: string; page: string; target: string; side: Exclude<Side, 'below'> };
 export const STOPS: Stop[] = [
-	{ id: 'bench', page: '/', target: 'bench', side: 'right' },
-	{ id: 'shop', page: '/', target: 'shop', side: 'left' },
+	{ id: 'bench', page: '/', target: 'bench', side: 'center' },
+	{ id: 'shop', page: '/', target: 'shop', side: 'center' },
 	{ id: 'street', page: '/', target: 'street', side: 'left' },
-	{ id: 'post', page: '/', target: 'post', side: 'left' },
-	{ id: 'workshops', page: '/', target: 'workshops', side: 'right' },
+	{ id: 'relay', page: '/', target: 'post', side: 'left' },
+	{ id: 'copper', page: '/', target: 'workshop-copper-cloves', side: 'right' },
+	{ id: 'work', page: '/', target: 'work', side: 'right' },
 	{ id: 'notes', page: '/', target: 'notes', side: 'right' },
 	{ id: 'finale', page: '/', target: 'whole', side: 'right' },
 	{ id: 'road', page: '/how-it-works/', target: 'road', side: 'right' },
@@ -77,4 +80,4 @@ const join = (from: string, to: string): Stroke => {
 	const mx = (ax + bx) / 2, my = (ay + by) / 2, ox = (mx - WORLD.w / 2) * 0.12, oy = (my - WORLD.h / 2) * 0.12;
 	return { from, to, d: `M${ax.toFixed(0)} ${ay.toFixed(0)} Q${(mx + ox).toFixed(0)} ${(my + oy).toFixed(0)} ${bx.toFixed(0)} ${by.toFixed(0)}` };
 };
-export const STROKES: Stroke[] = [join('bench', 'shop'), join('shop', 'street'), join('street', 'post'), join('post', 'workshops'), join('workshops', 'road'), join('road', 'notes'), join('notes', 'bench')];
+export const STROKES: Stroke[] = [join('bench', 'shop'), join('shop', 'street'), join('street', 'post'), join('post', 'workshop-copper-cloves'), join('workshop-copper-cloves', 'work'), join('work', 'road'), join('road', 'notes'), join('notes', 'bench')];
