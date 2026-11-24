@@ -8,6 +8,10 @@ export const GLYPH: Record<string, string> = {A:'0111010001100011111110001100011
   0:'01110100011001110101110011000101110',1:'00100011000010000100001000010001110',2:'01110100010000100010001000100011111',3:'11111000100010000010000011000101110',4:'00010001100101010010111110001000010',
   5:'11111100001111000001000011000101110',6:'00110010001000011110100011000101110',7:'11111000010001000100010000100001000',8:'01110100011000101110100011000101110',9:'01110100011000101111000010001001100'};
 
+// lit cells of a GLYPH key as [col, row] on its 5 x 7 dot grid (build-time markup for the floor page)
+export const glyphCells = (key: string): [number, number][] =>
+  [...GLYPH[key]].flatMap((bit, k) => (bit === '1' ? [[k % 5, Math.floor(k / 5)] as [number, number]] : []));
+
 // each repo's initial in the hero's dot type
 export function repoGlyphs(root: ParentNode = document) {
   root.querySelectorAll<HTMLElement>('.repo [data-l]').forEach((t) => {

@@ -1,17 +1,23 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import type { Cond } from './dom';
+import { $, type Cond } from './dom';
 import { initTheme } from './theme';
-import { createRoutes } from './routes';
-import { runParts } from './parts';
-import { runIndexRows } from './indexrows';
-import { createClose } from './close';
+import { createSketch } from './sketch';
+import { runWinch, runTour } from './floor';
+import { createCabinet } from './cabinet';
 
 gsap.registerPlugin(ScrollTrigger);
 
 initTheme();
-const routes = createRoutes();
-const close = createClose();
+const winch = createSketch($<HTMLCanvasElement>('.winch-canvas'), '/art/leo-winch.webp');
+$('.toggle').addEventListener('click', () => winch.refresh());
+const cabinet = createCabinet();
+
+// the winch is independent of width, so it gets its own context: a resize never redraws it
+gsap.matchMedia().add({ motion: '(prefers-reduced-motion: no-preference)', still: '(prefers-reduced-motion: reduce)' }, (ctx) => {
+  const cleanup = runWinch(ctx.conditions as Cond, winch);
+  return () => cleanup();
+});
 
 gsap.matchMedia().add({
   motion: '(prefers-reduced-motion: no-preference)',
@@ -19,7 +25,6 @@ gsap.matchMedia().add({
   wide: '(min-width: 821px)',
 }, (ctx) => {
   const c = ctx.conditions as Cond;
-  const cleanups: (void | (() => void))[] = [close.run(c), runParts(c), runIndexRows(c)];
-  routes.run(c);
+  const cleanups: (void | (() => void))[] = [runTour(c), cabinet.run(c)];
   return () => cleanups.forEach(fn => fn && fn());
 });

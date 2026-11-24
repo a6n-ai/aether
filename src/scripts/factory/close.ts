@@ -1,49 +1,22 @@
 import { gsap } from 'gsap';
 import type { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { $, type Cond } from './dom';
+import { createSketch } from './sketch';
 
-// Closing: Leonardo's hand study draws itself. The art is one PNG: R = ink strength, G = when the pixel appears (1..255).
-// Scrolling in draws most of it; the visitor's sentence finishes the sketch.
+// Closing: Leonardo's hand study draws itself. Scrolling in draws most of it; the visitor's sentence finishes the sketch.
 export function createClose() {
   const need = $<HTMLTextAreaElement>('#need'), sent = $('.sent'), canvas = $<HTMLCanvasElement>('.sketch-canvas');
-  const ctx = canvas.getContext('2d')!;
-  const W = canvas.width, H = canvas.height;
-  let ink: Uint8ClampedArray | null = null, when: Uint8ClampedArray | null = null, out: ImageData | null = null;
+  const sketch = createSketch(canvas, '/art/leo-hands.webp');
   const state = { scroll: 0, typed: 0, done: 0 };
-  let shown = -1;
-
-  const paint = () => {
-    if (!ink || !when || !out) return;
-    const t = Math.min(1, state.scroll * .8 + state.typed * .2 + state.done) * 255;
-    if (Math.abs(t - shown) < .5) return;
-    shown = t;
-    const [r, g, b] = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim().match(/\w\w/g)!.map(h => parseInt(h, 16));
-    const px = out.data;
-    for (let i = 0, j = 0; i < ink.length; i++, j += 4) {
-      const a = when[i] && when[i] <= t ? Math.min(255, ink[i] * 2) : 0;
-      px[j] = r; px[j + 1] = g; px[j + 2] = b; px[j + 3] = a;
-    }
-    ctx.putImageData(out, 0, 0);
-  };
+  const paint = () => sketch.setProgress(state.scroll * .8 + state.typed * .2 + state.done);
 
   // load the art only when the section is close
-  const load = () => {
-    const img = new Image();
-    img.onload = () => {
-      const off = document.createElement('canvas'); off.width = W; off.height = H;
-      const o = off.getContext('2d', { willReadFrequently: true })!; o.drawImage(img, 0, 0);
-      const d = o.getImageData(0, 0, W, H).data;
-      ink = new Uint8ClampedArray(W * H); when = new Uint8ClampedArray(W * H);
-      for (let i = 0; i < W * H; i++) { ink[i] = d[i * 4]; when[i] = d[i * 4 + 1]; }
-      out = ctx.createImageData(W, H); shown = -1; paint();
-    };
-    img.src = '/art/leo-hands.webp';
-  };
+  const load = () => sketch.load();
   const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); load(); } }, { rootMargin: '800px 0px' });
   io.observe(canvas);
 
   need.addEventListener('input', () => { gsap.to(state, { typed: Math.min(1, need.value.trim().length / 40), duration: .6, ease: 'power2.out', onUpdate: paint }); });
-  $('.toggle')?.addEventListener('click', () => { shown = -1; paint(); });
+  $('.toggle')?.addEventListener('click', () => sketch.refresh());
 
   // list the error in aria-describedby only while the field is invalid, so it isn't read out from page load
   const describe = (input: HTMLInputElement) => {

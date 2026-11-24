@@ -1,24 +1,20 @@
 ---
 import Factory from '../layouts/Factory.astro';
-import Routes from '../components/factory/Routes.astro';
-import Parts from '../components/factory/Parts.astro';
-import Index from '../components/factory/Index.astro';
-import Close from '../components/factory/Close.astro';
+import FloorHero from '../components/factory/floor/FloorHero.astro';
+import FloorTour from '../components/factory/floor/FloorTour.astro';
+import PartsStore from '../components/factory/floor/PartsStore.astro';
+import FloorClose from '../components/factory/floor/FloorClose.astro';
 ---
 
 <Factory
 	title="The factory | a6n"
-	description="How a6n builds custom software: the parts we start from, how they connect to your business, and what every system gets."
+	description="Walk the a6n factory floor: nine rooms from one sentence about your business to software your team runs every day."
 	current="factory"
 >
-	<header class="page-head">
-		<h1>The factory</h1>
-		<p>Every system we build starts from parts that already run, then gets shaped around how your business works.</p>
-	</header>
-	<Routes />
-	<Parts />
-	<Index />
-	<Close />
+	<FloorHero />
+	<FloorTour />
+	<PartsStore />
+	<FloorClose />
 </Factory>
 
 <script>

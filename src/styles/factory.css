@@ -407,3 +407,75 @@ footer a { text-decoration:none; } footer a:hover { color:var(--ink); }
 
 /* the LIVE stamp: plain coral is too faint on vellum (2.6:1); a deeper coral keeps the colour and passes */
 [data-theme="light"] .stamp { color:#b8381b; border-color:#b8381b; }
+
+/* factory page */
+.floor-hero { display:grid; gap:48px; align-items:center; padding:14vh var(--pad) 8vh; }
+@media (min-width:821px) { .floor-hero { grid-template-columns:minmax(0,1fr) minmax(0,1.05fr); gap:64px; } }
+.floor-hero h1 { margin-top:18px; font-size:clamp(44px,6vw,96px); line-height:.95; letter-spacing:-.05em; font-weight:600; }
+.floor-hero-copy > p:last-child { margin-top:24px; font-size:clamp(18px,1.8vw,24px); line-height:1.4; color:var(--soft); max-width:36ch; }
+.floor-winch { margin:0; min-width:0; }
+.floor-winch canvas { display:block; width:100%; height:auto; aspect-ratio:1300/920; }
+.floor-winch figcaption { margin-top:12px; font-size:14px; line-height:1.45; color:var(--soft); max-width:60ch; }
+
+.floor-tour { --cell:560px; padding-bottom:12vh; }
+.floor-tour-head { padding:12vh var(--pad) 4vh; }
+.floor-tour-head h2, .floor-parts h2, .floor-close h2 { margin-top:16px; font-size:clamp(40px,4.6vw,72px); line-height:1; letter-spacing:-.04em; font-weight:600; }
+.floor-stage { position:relative; padding:0 var(--pad); }
+.floor-track { display:block; }
+.floor-plan { display:none; }
+.floor-ticket { width:max-content; max-width:100%; margin:0 0 28px 44px; padding:12px 18px; background:var(--card); border:1.5px solid var(--ink); border-radius:6px; font-size:17px; line-height:1.35; color:var(--ink); }
+.floor-ticket span { display:block; font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--soft); }
+.floor-rooms { position:relative; list-style:none; margin:0; padding:0 0 0 44px; display:grid; gap:28px; }
+.floor-rooms::before { content:""; position:absolute; left:15px; top:0; bottom:0; width:3px; background:var(--ink); }
+.floor-panel { position:relative; background:var(--card); border:1.5px solid var(--ink); border-left:8px solid var(--c); border-radius:14px; padding:22px 24px; }
+.floor-panel h3 { margin-top:12px; font-size:28px; line-height:1.1; letter-spacing:-.02em; font-weight:600; }
+.floor-panel p { margin-top:10px; font-size:17px; line-height:1.45; color:var(--soft); }
+.floor-panel .floor-out { color:var(--ink); font-weight:600; }
+.floor-out b { color:var(--hot); }
+.floor-panel-num { display:block; width:72px; height:auto; }
+.floor-panel-num .floor-dot { fill:var(--c); }
+.floor-plan .floor-grid-line { fill:none; stroke:var(--line); stroke-width:1; }
+.floor-belt { fill:none; stroke:var(--ink); stroke-width:2; }
+.floor-roller { fill:var(--paper); stroke:var(--ink); stroke-width:2; }
+.floor-cell .floor-wall { fill:none; stroke:var(--dim); stroke-width:1.5; stroke-dasharray:6 8; }
+.floor-cell .floor-outline { fill:none; stroke:var(--ink); stroke-width:3; }
+.floor-tint { fill:var(--c); opacity:0; }
+.floor-dot { fill:var(--dim); }
+.floor-label { font:700 16px var(--font-factory),sans-serif; font-variant:small-caps; letter-spacing:.12em; fill:var(--ink); }
+
+/* pinned desktop walk: rooms in a row, the track slides, the ticket rides the belt */
+.floor-tour[data-pin] { height:100svh; display:grid; grid-template-rows:auto minmax(0,1fr); padding-bottom:0; overflow:hidden; }
+.floor-tour[data-pin] .floor-tour-head { padding:9vh var(--pad) 3vh; }
+.floor-tour[data-pin] .floor-stage { padding:0; overflow:hidden; height:100%; }
+.floor-tour[data-pin] .floor-track { position:relative; width:max-content; display:grid; grid-template-columns:repeat(9,var(--cell)); grid-template-rows:auto auto; padding-inline:calc(50% - var(--cell) / 2); }
+.floor-tour[data-pin] .floor-plan { display:block; grid-column:1 / -1; grid-row:1; width:100%; height:auto; }
+.floor-tour[data-pin] .floor-rooms { grid-column:1 / -1; grid-row:2; display:grid; grid-template-columns:subgrid; gap:0; padding:0; }
+.floor-tour[data-pin] .floor-rooms::before { display:none; }
+.floor-tour[data-pin] .floor-room { min-width:0; }
+.floor-tour[data-pin] .floor-panel { width:440px; margin:28px auto 0; padding:22px 24px; }
+.floor-tour[data-pin] .floor-panel-num { display:none; }
+.floor-tour[data-pin] .floor-room:not(.is-on) .floor-panel { opacity:0; }
+.floor-tour[data-pin] .floor-cell { opacity:.3; }
+.floor-tour[data-pin] .floor-cell.is-on { opacity:1; }
+.floor-tour[data-pin] .floor-outline { stroke-dasharray:1; stroke-dashoffset:1; }
+.floor-tour[data-pin] .floor-cell.is-on .floor-dot { fill:var(--c); }
+.floor-tour[data-pin] .floor-ticket { position:absolute; left:50%; top:249px; translate:-50% -50%; margin:0; z-index:2; width:auto; }
+
+/* parts store: a cabinet of drawers */
+.floor-parts { padding:12vh var(--pad); }
+.floor-parts-lead { margin-top:24px; max-width:40ch; font-size:clamp(18px,1.8vw,22px); line-height:1.4; color:var(--soft); }
+.floor-cabinet { list-style:none; margin:56px 0 0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+@media (min-width:821px) { .floor-cabinet { grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; } }
+.floor-drawer { min-width:0; align-self:start; padding:10px; background:var(--card); border:1.5px solid var(--ink); border-radius:14px; }
+.floor-face { display:flex; flex-direction:column; align-items:flex-start; gap:14px; width:100%; min-height:44px; padding:16px; background:var(--paper); color:var(--ink); border:1px solid var(--line); border-radius:10px; cursor:pointer; font:600 17px/1.2 var(--font-factory),sans-serif; text-align:left; overflow-wrap:anywhere; }
+.floor-face:hover, .floor-face[aria-expanded="true"] { border-color:var(--ink); }
+.floor-tag { display:block; width:64px; height:auto; }
+.floor-tag rect { fill:var(--ink); }
+.floor-line { margin:12px 4px 4px; font-size:16px; line-height:1.45; color:var(--soft); }
+
+/* closing */
+.floor-close { padding:12vh var(--pad) 14vh; border-top:1px solid var(--line); }
+.floor-close > p { margin-top:24px; max-width:36ch; font-size:clamp(18px,1.8vw,24px); line-height:1.4; color:var(--soft); }
+.floor-close-actions { margin-top:36px; display:flex; flex-wrap:wrap; align-items:center; gap:16px 32px; }
+.floor-quiet { padding:8px 0; font-weight:700; font-size:18px; color:var(--ink); text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:6px; }
+.floor-quiet:hover { color:var(--hot); }

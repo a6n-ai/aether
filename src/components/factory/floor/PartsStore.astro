@@ -1,0 +1,37 @@
+---
+import { glyphCells } from '../../../scripts/factory/glyphs';
+
+const parts = [
+	{ code: 'SI', name: 'Sign-in', line: 'Accounts for your team and customers, with the right people seeing the right things.' },
+	{ code: 'TR', name: 'Teams and roles', line: 'Who can see and change what, set per person.' },
+	{ code: 'DB', name: 'Dashboards', line: 'One screen with the numbers you check every day.' },
+	{ code: 'RP', name: 'Reports', line: 'Summaries that write themselves on a schedule.' },
+	{ code: 'NT', name: 'Notifications', line: 'Email and in-app messages when something needs attention.' },
+	{ code: 'SR', name: 'Search', line: 'Find any customer, order or note in a second.' },
+	{ code: 'AI', name: 'AI assistant', line: 'Answers questions from your own data, in your words.' },
+	{ code: 'CN', name: 'Connections', line: 'Your existing tools and accounts, linked in.' },
+	{ code: 'MA', name: 'Mobile app', line: "Your system in your customers' and team's pockets." },
+	{ code: 'DI', name: 'Data import', line: 'Your history brought over from the tools you use today.' },
+	{ code: 'CP', name: 'Customer portal', line: 'Where your customers sign in to see and manage their own things.' },
+	{ code: 'WS', name: 'Website', line: 'A fast public site that shares its data with the rest of the system.' },
+];
+const tag = (code: string) => [...code].flatMap((ch, k) => glyphCells(ch).map(([c, r]) => ({ x: k * 68 + c * 12, y: r * 12 })));
+---
+<section class="floor-parts" id="parts" aria-labelledby="parts-h">
+	<p class="kicker">Parts store</p>
+	<h2 id="parts-h">Proven parts, in the drawers.</h2>
+	<p class="floor-parts-lead">Every part here already runs inside a live business. Open a drawer to see what it does.</p>
+	<ul class="floor-cabinet">
+		{parts.map((p, i) => (
+			<li class="floor-drawer">
+				<button class="floor-face" type="button" aria-expanded="false" aria-controls={`part-${i}`}>
+					<svg class="floor-tag" viewBox="0 0 126 82" aria-hidden="true" focusable="false">
+						{tag(p.code).map(d => <rect x={d.x} y={d.y} width="10" height="10" rx="2.4"/>)}
+					</svg>
+					<span class="floor-name">{p.name}</span>
+				</button>
+				<p class="floor-line" id={`part-${i}`} hidden>{p.line}</p>
+			</li>
+		))}
+	</ul>
+</section>

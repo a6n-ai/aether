@@ -1,0 +1,65 @@
+---
+import { glyphCells } from '../../../scripts/factory/glyphs';
+
+// geometry in SVG units, which are px: CELL is --cell in factory.css, the track slides in whole cells
+const CELL = 560, ROOM_W = 440, ROOM_H = 180, TOP = 40, BELT = 249, PLAN_W = CELL * 9;
+const rooms = [
+	{ name: 'Intake', body: 'A short call about how your business works today and where it gets stuck.', out: 'Your need, written in one sentence.', c: 'var(--lilac)' },
+	{ name: 'Drafting', body: 'We map the system on one page: what it does, who uses it and what it connects to.', out: 'A plan you sign off before anything is built.', c: 'var(--cobalt)' },
+	{ name: 'Parts store', body: 'We pick the proven parts your system needs from the ones already running in other businesses.', out: 'Most of your system, already working.', c: 'var(--butter)' },
+	{ name: 'Assembly', body: 'We fit those parts to your business and build only what is new.', out: 'Your system, taking shape.', c: 'var(--coral)' },
+	{ name: 'AI cell', body: 'AI goes inside: it answers questions from your own data and takes the routine work.', out: 'An assistant that knows your business.', c: 'var(--coral)' },
+	{ name: 'Wiring', body: 'Your tools, data and accounts get connected, and your history comes with you.', out: 'One system instead of many.', c: 'var(--teal)' },
+	{ name: 'Quality bench', body: 'Your team tries it on real work before anyone else sees it.', out: 'Fixes before launch, not after.', c: 'var(--lilac)' },
+	{ name: 'Dispatch', body: 'Switched on for your team and your customers.', out: 'Live software.', c: 'var(--cobalt)' },
+	{ name: 'Maintenance', body: 'The same team keeps it running and adds what you need next.', out: 'A system that grows with you.', c: 'var(--butter)' },
+].map((r, i) => ({ ...r, num: String(i + 1).padStart(2, '0'), x: i * CELL + (CELL - ROOM_W) / 2 }));
+
+const dots = (text: string, x0: number, y0: number) =>
+	[...text].flatMap((ch, k) => glyphCells(ch).map(([c, r]) => ({ x: x0 + k * 68 + c * 12, y: y0 + r * 12 })));
+const rollers = Array.from({ length: PLAN_W / 56 }, (_, k) => 28 + k * 56);
+---
+<section class="floor-tour" id="tour" aria-labelledby="tour-h">
+	<div class="floor-tour-head">
+		<p class="kicker">The floor</p>
+		<h2 id="tour-h">Nine rooms, one line.</h2>
+	</div>
+	<div class="floor-stage">
+		<p class="floor-ticket"><span>Your need</span>One sentence about your business.</p>
+		<div class="floor-track">
+			<svg class="floor-plan" viewBox={`0 0 ${PLAN_W} 300`} aria-hidden="true" focusable="false">
+				<defs>
+					<pattern id="floor-grid" width="40" height="40" patternUnits="userSpaceOnUse"><path class="floor-grid-line" d="M40 0H0V40"/></pattern>
+				</defs>
+				<rect width={PLAN_W} height="300" fill="url(#floor-grid)"/>
+				<path class="floor-belt" d={`M0 ${BELT - 9}H${PLAN_W}M0 ${BELT + 9}H${PLAN_W}`}/>
+				{rollers.map(x => <circle class="floor-roller" cx={x} cy={BELT} r="6"/>)}
+				{rooms.map((r) => (
+					<g class="floor-cell" style={`--c:${r.c}`}>
+						<rect class="floor-tint" x={r.x} y={TOP} width={ROOM_W} height={ROOM_H}/>
+						<rect class="floor-wall" x={r.x + 8} y={TOP + 8} width={ROOM_W - 16} height={ROOM_H - 16} rx="6"/>
+						<path class="floor-outline" pathLength="1" d={`M${r.x} ${TOP}H${r.x + ROOM_W}V${TOP + ROOM_H}H${r.x}Z`}/>
+						<g transform={`translate(${r.x + 28} ${TOP + 26})`}>
+							{dots(r.num, 0, 0).map(d => <rect class="floor-dot" x={d.x} y={d.y} width="10" height="10" rx="2.4"/>)}
+						</g>
+					</g>
+				))}
+				{rooms.map((r) => <text class="floor-label" x={r.x + ROOM_W / 2} y={TOP - 14} text-anchor="middle">{r.name}</text>)}
+			</svg>
+			<ol class="floor-rooms">
+				{rooms.map((r) => (
+					<li class="floor-room" style={`--c:${r.c}`}>
+						<div class="floor-panel">
+							<svg class="floor-panel-num" viewBox="0 0 126 82" aria-hidden="true" focusable="false">
+								{dots(r.num, 0, 0).map(d => <rect class="floor-dot" x={d.x} y={d.y} width="10" height="10" rx="2.4"/>)}
+							</svg>
+							<h3>{r.name}</h3>
+							<p>{r.body}</p>
+							<p class="floor-out"><b>You get:</b> {r.out}</p>
+						</div>
+					</li>
+				))}
+			</ol>
+		</div>
+	</div>
+</section>

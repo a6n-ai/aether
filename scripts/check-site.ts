@@ -40,7 +40,7 @@ for (const page of PAGES) {
 }
 check(/What is a6n\?/.test(readFileSync('dist/how-it-works/index.html', 'utf8')), 'the "What is a6n?" answer is missing from how it works');
 const mainNav = markup.match(/<nav class="nav"[\s\S]*?<\/nav>/)?.[0] ?? '';
-for (const href of ['/factory', '/how-it-works', '/what-we-make', '/showcase']) check(mainNav.includes(`href="${href}"`), `nav on index must link ${href}`);
+for (const href of ['/factory', '/how-it-works', '/what-we-make', '/open-source']) check(mainNav.includes(`href="${href}"`), `nav on index must link ${href}`);
 // home: the software factory page
 check(/\(Ai\)ny Management System[\s\S]{0,40}software factory/.test(visible), 'brand line missing');
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
@@ -57,9 +57,9 @@ check(existsSync('public/art/leo-hands.webp') && statSync('public/art/leo-hands.
 check(existsSync('public/art/hands.bin') && statSync('public/art/hands.bin').size < 250 * 1024, 'hands drawing data missing or over 250 KB');
 const homeJs = [...html.matchAll(/src="(\/_astro\/[^"]+\.js)"/g)].reduce((n, m) => n + statSync('dist' + m[1]).size, 0);
 check(homeJs < 200 * 1024, `home entry scripts are ${(homeJs / 1024).toFixed(0)} KB raw, limit 200 KB (keep big data in lazy chunks)`);
-const showcase = existsSync('dist/showcase/index.html') ? readFileSync('dist/showcase/index.html', 'utf8') : '';
+const showcase = existsSync('dist/open-source/index.html') ? readFileSync('dist/open-source/index.html', 'utf8') : '';
 for (const repo of ['https://github.com/a6n-ai/monarch', 'https://github.com/a6n-ai/inscribe', 'https://github.com/a6n-ai/relay', 'https://github.com/a6n-ai/rays', 'https://github.com/a6n-ai/realm', 'https://github.com/a6n-ai/Copper-Cloves']) check(showcase.includes(`href="${repo}"`), `showcase must link ${repo}`);
-check(/Quarry/.test(showcase) && !showcase.includes('github.com/a6n-ai/quarry'), 'showcase must list Quarry without a link (private repo)');
+check(/Quarry/.test(showcase) && !showcase.includes('github.com/a6n-ai/quarry'), 'open source page must list Quarry without a link (private repo)');
 
 if (failures.length) {
 	for (const f of failures) console.error(`FAIL: ${f}`);
