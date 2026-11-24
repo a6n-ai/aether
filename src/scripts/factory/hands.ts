@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import data from '../../data/hands.json';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion, type Cond } from './dom';
 
 // One scroll value (p, 0..1) drives the scene, in the order an engraver and a machine would work:
@@ -9,7 +9,6 @@ import { motion, type Cond } from './dom';
 // Ink is baked per hatch pass and per limb part (arm / hand) at the size of the drawing, then drawn with
 // the limb's transform each frame. Everything is computed in crop space (the fresco crop's pixel grid).
 type Hand = { w: number; h: number; split: number; hatch: number[][]; contour: number[][]; dots: number[][] };  // hatch: [x,y,width,dir]; contour: [x,y,side]
-const D = data as Hand;
 const ANG = [-.3, .55, 1.2];
 const DIRS = ANG.map(a => [Math.cos(a), Math.sin(a)]);
 
@@ -34,7 +33,7 @@ const rot = (x: number, y: number, c: { x: number; y: number }, a: number) => {
   return [c.x + dx * cs - dy * sn, c.y + dx * sn + dy * cs];
 };
 
-export function createHands() {
+function handsWith(D: Hand) {
   const section = document.querySelector<HTMLElement>('.hands');
   const canvas = document.querySelector<HTMLCanvasElement>('.hands-canvas');
   if (!section || !canvas) return { run: (_c: Cond) => () => {} };
@@ -228,6 +227,22 @@ export function createHands() {
         .to(state, { p: 1, ease: 'none', duration: 1 }, 0);
       const io = new IntersectionObserver(([e]) => setLive(e.isIntersecting)); io.observe(canvas);
       return () => { setLive(false); io.disconnect(); ro.disconnect(); tl.scrollTrigger?.kill(); tl.kill(); toggle?.removeEventListener('click', onTheme); };
+    },
+  };
+}
+
+// The drawing data (~280 KB) loads as its own chunk, in parallel with the page, instead of inside the main script.
+// Once it lands the pinned scene is built and ScrollTrigger re-measures the page.
+export function createHands() {
+  return {
+    run(c: Cond) {
+      let stop = () => {}, dead = false;
+      import('../../data/hands.json').then(m => {
+        if (dead) return;
+        stop = handsWith(m.default as Hand).run(c);
+        ScrollTrigger.refresh();
+      });
+      return () => { dead = true; stop(); };
     },
   };
 }

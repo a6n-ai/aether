@@ -1,6 +1,7 @@
 # Leonardo, "A study of a woman's hands" (c.1490, Royal Collection RCIN 912558, public domain via Wikimedia Commons)
 # -> stroke points for the closing section. Local darkness (blur minus pixel) picks out silverpoint lines from toned paper.
 # usage: python3 leo-strokes.py <source.jpg> <out.png>   (R = ink strength, G = reveal time 1..255)
+# then:  cwebp -lossless -z 9 -exact <out.png> -o public/art/leo-hands.webp   (lossless: the channels are data)
 import sys, subprocess, random
 src, out_json = sys.argv[1:3]
 W, H = 1100, 1592

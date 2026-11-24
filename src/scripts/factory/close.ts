@@ -37,7 +37,7 @@ export function createClose() {
       for (let i = 0; i < W * H; i++) { ink[i] = d[i * 4]; when[i] = d[i * 4 + 1]; }
       out = ctx.createImageData(W, H); shown = -1; paint();
     };
-    img.src = '/art/leo-hands.png';
+    img.src = '/art/leo-hands.webp';
   };
   const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { io.disconnect(); load(); } }, { rootMargin: '800px 0px' });
   io.observe(canvas);

@@ -51,7 +51,9 @@ check(sections.every((i, n) => i > 0 && (n === 0 || i > sections[n - 1])), 'home
 check(markup.includes('Tell us what<br>you need.'), 'missing closing call heading');
 check(/Creation of Adam[\s\S]*Public domain/.test(visible), 'hands section must credit Michelangelo, The Creation of Adam');
 check(/A study of a woman's hands[\s\S]*Public domain/.test(visible), 'closing sketch must credit Leonardo');
-check(existsSync('public/art/leo-hands.png') && statSync('public/art/leo-hands.png').size < 500 * 1024, 'closing sketch art missing or over 500 KB');
+check(existsSync('public/art/leo-hands.webp') && statSync('public/art/leo-hands.webp').size < 400 * 1024, 'closing sketch art missing or over 400 KB');
+const homeJs = [...html.matchAll(/src="(\/_astro\/[^"]+\.js)"/g)].reduce((n, m) => n + statSync('dist' + m[1]).size, 0);
+check(homeJs < 200 * 1024, `home entry scripts are ${(homeJs / 1024).toFixed(0)} KB raw, limit 200 KB (keep big data in lazy chunks)`);
 const showcase = existsSync('dist/showcase/index.html') ? readFileSync('dist/showcase/index.html', 'utf8') : '';
 for (const repo of ['monarch', 'inscribe', 'relay', 'rays']) check(showcase.includes(`href="https://github.com/a6n-ai/${repo}"`), `showcase must link ${repo}`);
 
