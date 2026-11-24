@@ -62,6 +62,8 @@ export function runTour(c: Cond) {
     scrollTrigger: {
       trigger: tour, start: 'top top', end: () => '+=' + Math.round(last * cell() * 1.1),
       pin: true, scrub: 1, invalidateOnRefresh: true,
+      // each room comes to rest centred under the ticket, never half between two
+      snap: { snapTo: 1 / last, duration: { min: .2, max: .5 }, delay: .08, ease: 'power2.inOut' },
       onUpdate: (self) => show(Math.round(self.progress * last)),
     },
   });

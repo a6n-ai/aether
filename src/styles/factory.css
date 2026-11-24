@@ -451,15 +451,16 @@ footer a { text-decoration:none; } footer a:hover { color:var(--ink); }
 .floor-tour[data-pin] .floor-plan { display:block; grid-column:1 / -1; grid-row:1; width:100%; height:auto; }
 .floor-tour[data-pin] .floor-rooms { grid-column:1 / -1; grid-row:2; display:grid; grid-template-columns:subgrid; gap:0; padding:0; }
 .floor-tour[data-pin] .floor-rooms::before { display:none; }
-.floor-tour[data-pin] .floor-room { min-width:0; }
-.floor-tour[data-pin] .floor-panel { width:440px; margin:28px auto 0; padding:22px 24px; }
+.floor-tour[data-pin] .floor-room { min-width:0; display:flex; }
+.floor-tour[data-pin] .floor-panel { width:440px; margin:28px auto 0; padding:22px 24px; box-sizing:border-box; }
 .floor-tour[data-pin] .floor-panel-num { display:none; }
 .floor-tour[data-pin] .floor-room:not(.is-on) .floor-panel { opacity:0; }
 .floor-tour[data-pin] .floor-cell { opacity:.3; }
 .floor-tour[data-pin] .floor-cell.is-on { opacity:1; }
 .floor-tour[data-pin] .floor-outline { stroke-dasharray:1; stroke-dashoffset:1; }
 .floor-tour[data-pin] .floor-cell.is-on .floor-dot { fill:var(--c); }
-.floor-tour[data-pin] .floor-ticket { position:absolute; left:50%; top:249px; translate:-50% -50%; margin:0; z-index:2; width:auto; }
+.floor-tour[data-pin] .floor-ticket { position:absolute; left:50%; top:262px; translate:-50% -50%; margin:0; z-index:2; width:auto; padding:7px 14px; font-size:15px; white-space:nowrap; }
+.floor-tour[data-pin] .floor-ticket span { display:inline; margin-right:10px; font-size:12px; }
 
 /* parts store: a cabinet of drawers */
 .floor-parts { padding:12vh var(--pad); }

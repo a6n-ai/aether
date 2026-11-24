@@ -2,7 +2,7 @@
 import { glyphCells } from '../../../scripts/factory/glyphs';
 
 // geometry in SVG units, which are px: CELL is --cell in factory.css, the track slides in whole cells
-const CELL = 560, ROOM_W = 440, ROOM_H = 180, TOP = 40, BELT = 249, PLAN_W = CELL * 9;
+const CELL = 560, ROOM_W = 440, ROOM_H = 164, TOP = 40, BELT = 262, PLAN_W = CELL * 9;
 const rooms = [
 	{ name: 'Intake', body: 'A short call about how your business works today and where it gets stuck.', out: 'Your need, written in one sentence.', c: 'var(--lilac)' },
 	{ name: 'Drafting', body: 'We map the system on one page: what it does, who uses it and what it connects to.', out: 'A plan you sign off before anything is built.', c: 'var(--cobalt)' },
@@ -39,7 +39,7 @@ const rollers = Array.from({ length: PLAN_W / 56 }, (_, k) => 28 + k * 56);
 						<rect class="floor-tint" x={r.x} y={TOP} width={ROOM_W} height={ROOM_H}/>
 						<rect class="floor-wall" x={r.x + 8} y={TOP + 8} width={ROOM_W - 16} height={ROOM_H - 16} rx="6"/>
 						<path class="floor-outline" pathLength="1" d={`M${r.x} ${TOP}H${r.x + ROOM_W}V${TOP + ROOM_H}H${r.x}Z`}/>
-						<g transform={`translate(${r.x + 28} ${TOP + 26})`}>
+						<g transform={`translate(${r.x + (ROOM_W - 126) / 2} ${TOP + (ROOM_H - 82) / 2})`}>
 							{dots(r.num, 0, 0).map(d => <rect class="floor-dot" x={d.x} y={d.y} width="10" height="10" rx="2.4"/>)}
 						</g>
 					</g>
