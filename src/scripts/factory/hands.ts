@@ -1,6 +1,7 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { motion, type Cond } from './dom';
+import { decodeHands, type Hand } from './hands-data';
 
 // One scroll value (p, 0..1) drives the scene, in the order an engraver and a machine would work:
 //  1. a pen traces Adam's outline, 2. hatching builds tone in three passes, 3. the AI hand streams in as dots,
@@ -8,7 +9,6 @@ import { motion, type Cond } from './dom';
 //  a ripple through the dots, a current up Adam's arm, 6. dots pour through the fingertips and become strokes.
 // Ink is baked per hatch pass and per limb part (arm / hand) at the size of the drawing, then drawn with
 // the limb's transform each frame. Everything is computed in crop space (the fresco crop's pixel grid).
-type Hand = { w: number; h: number; split: number; hatch: number[][]; contour: number[][]; dots: number[][] };  // hatch: [x,y,width,dir]; contour: [x,y,side]
 const ANG = [-.3, .55, 1.2];
 const DIRS = ANG.map(a => [Math.cos(a), Math.sin(a)]);
 
@@ -223,7 +223,7 @@ function handsWith(D: Hand) {
       const onTheme = () => { size(); draw(); };
       toggle?.addEventListener('click', onTheme);
       if (c.still) { state.p = 1; draw(); return () => { ro.disconnect(); toggle?.removeEventListener('click', onTheme); }; }
-      const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: 'top top', end: c.wide ? '+=2200' : '+=1500', pin: true, scrub: .8, invalidateOnRefresh: true } })
+      const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: 'top top', end: c.wide ? '+=2200' : '+=1500', pin: true, scrub: .8, invalidateOnRefresh: true, refreshPriority: 1 } })
         .to(state, { p: 1, ease: 'none', duration: 1 }, 0);
       const io = new IntersectionObserver(([e]) => setLive(e.isIntersecting)); io.observe(canvas);
       return () => { setLive(false); io.disconnect(); ro.disconnect(); tl.scrollTrigger?.kill(); tl.kill(); toggle?.removeEventListener('click', onTheme); };
@@ -231,15 +231,16 @@ function handsWith(D: Hand) {
   };
 }
 
-// The drawing data (~280 KB) loads as its own chunk, in parallel with the page, instead of inside the main script.
-// Once it lands the pinned scene is built and ScrollTrigger re-measures the page.
+// The drawing data loads as a small binary file (public/art/hands.bin, packed by scripts/art/pack-hands.ts),
+// in parallel with the page. Once it lands the pinned scene is built and ScrollTrigger re-measures the page.
 export function createHands() {
   return {
     run(c: Cond) {
       let stop = () => {}, dead = false;
-      import('../../data/hands.json').then(m => {
+      fetch('/art/hands.bin').then(r => r.arrayBuffer()).then(buf => {
         if (dead) return;
-        stop = handsWith(m.default as Hand).run(c);
+        stop = handsWith(decodeHands(buf)).run(c);
+        ScrollTrigger.sort();      // this pin is created after the sections below it; refreshPriority puts it first
         ScrollTrigger.refresh();
       });
       return () => { dead = true; stop(); };

@@ -52,6 +52,7 @@ check(markup.includes('Tell us what<br>you need.'), 'missing closing call headin
 check(/Creation of Adam[\s\S]*Public domain/.test(visible), 'hands section must credit Michelangelo, The Creation of Adam');
 check(/A study of a woman's hands[\s\S]*Public domain/.test(visible), 'closing sketch must credit Leonardo');
 check(existsSync('public/art/leo-hands.webp') && statSync('public/art/leo-hands.webp').size < 400 * 1024, 'closing sketch art missing or over 400 KB');
+check(existsSync('public/art/hands.bin') && statSync('public/art/hands.bin').size < 250 * 1024, 'hands drawing data missing or over 250 KB');
 const homeJs = [...html.matchAll(/src="(\/_astro\/[^"]+\.js)"/g)].reduce((n, m) => n + statSync('dist' + m[1]).size, 0);
 check(homeJs < 200 * 1024, `home entry scripts are ${(homeJs / 1024).toFixed(0)} KB raw, limit 200 KB (keep big data in lazy chunks)`);
 const showcase = existsSync('dist/showcase/index.html') ? readFileSync('dist/showcase/index.html', 'utf8') : '';
