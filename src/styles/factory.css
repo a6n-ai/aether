@@ -117,7 +117,8 @@ a { color:inherit; }
 /* 2 statement: one giant line slides left while pinned (default: wrapped, no pin) */
 .statement { padding:18vh var(--pad) 16vh; }
 .statement h2 { font-size:clamp(46px,9vw,136px); font-weight:600; line-height:1.1; letter-spacing:-.05em; }
-.pill { position:relative; isolation:isolate; display:inline-block; font-style:normal; white-space:nowrap; color:#0c0e14; padding:0 .16em .04em; border-radius:.2em; }
+.pill { position:relative; isolation:isolate; display:inline-block; font-style:normal; white-space:nowrap; color:var(--ink); color:color-mix(in srgb, #0c0e14 calc(var(--k,1) * 100%), var(--ink)); padding:0 .16em .04em; border-radius:.2em; }
+/* the word is dark on its chip and page ink while the chip is out (--k 0), so it never vanishes on the dark theme */
 .pill::before { content:""; position:absolute; inset:0; z-index:-1; border-radius:inherit; background:var(--c); opacity:var(--k,1); }
 .shape { display:inline-block; width:.5em; height:.5em; margin:0 .3em; vertical-align:-.02em; overflow:visible; }
 .statement .body { display:grid; grid-template-columns:4fr 5fr; gap:60px; margin-top:12vh; padding-top:30px; border-top:1px solid var(--line); }
