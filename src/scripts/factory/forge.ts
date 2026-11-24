@@ -73,6 +73,12 @@ export function createForge() {
   const reset = (instant?: boolean) => { clearUI(); show('SOFTWARE|FACTORY', 'Software factory', instant); };
   let sized = false;
   new ResizeObserver(() => { if (!sized) { sized = true; return; } size(); build(current, true); }).observe(forge);
+  // the letters sit between the heading and the dock; when those change size (web font arriving, wrapping), the parts move to fit
+  let headSeen = 0;
+  const refit = () => { size(); build(current, false); };
+  const headRO = new ResizeObserver(() => { if (headSeen++ < 2) return; refit(); });
+  ['.hero-head', '.hero .dock'].forEach(q => { const el = document.querySelector(q); if (el) headRO.observe(el); });
+  document.fonts?.ready.then(refit);
   readPal(); size();
 
   const run = (c: Cond) => {
