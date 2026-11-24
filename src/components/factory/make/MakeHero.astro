@@ -1,0 +1,27 @@
+---
+import type { Client } from '../../../data/clients';
+
+interface Props {
+	clients: Client[];
+}
+const { clients } = Astro.props;
+---
+<section class="make-hero" aria-labelledby="make-h">
+	<p class="kicker"><b>What we make</b></p>
+	<h1 id="make-h">Systems running for real businesses.</h1>
+	<p class="make-hero-line">Each one started as a sentence from an owner. Here is what came off the line.</p>
+	<nav class="make-index" aria-label="Spec sheets">
+		<ol>
+			{clients.map((c, i) => (
+				<li>
+					<a href={`#${c.slug}`}>
+						<span class="make-no">{String(i + 1).padStart(2, '0')}</span>
+						<span class="make-index-name">{c.name}</span>
+						<span class="make-index-kind">{c.kind}</span>
+						<span class="make-index-where">{c.where}</span>
+					</a>
+				</li>
+			))}
+		</ol>
+	</nav>
+</section>

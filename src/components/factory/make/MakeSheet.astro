@@ -1,0 +1,145 @@
+---
+import type { Client } from '../../../data/clients';
+
+interface Props {
+	client: Client;
+	n: number;
+	total: number;
+	accent: string;
+}
+const { client, n, total, accent } = Astro.props;
+
+// SVG text does not wrap, so the lines are broken here
+const wrap = (text: string, max: number) => {
+	const lines: string[] = [];
+	let line = '';
+	for (const word of text.split(' ')) {
+		const next = line ? `${line} ${word}` : word;
+		if (next.length > max && line) {
+			lines.push(line);
+			line = word;
+		} else {
+			line = next;
+		}
+	}
+	if (line) lines.push(line);
+	return lines;
+};
+
+const WIDE = { w: 560, h: 400, cx: 205, cw: 150, cy: 160, ch: 80, lw: 150, right: 410 };
+const NARROW = { w: 280, cx: 50, cw: 180, ch: 72 };
+const gid = `grid-${client.slug}`;
+const core = wrap(client.name, 12);
+
+// wide: groups alternate sides, each side spreads its labels evenly down the sheet
+const wideGroups = client.features.map((f, i) => {
+	const right = i % 2 === 0;
+	const onSide = client.features.filter((_, k) => (k % 2 === 0) === right).length;
+	const y = (WIDE.h * (Math.floor(i / 2) + 1)) / (onSide + 1);
+	const lines = wrap(f.title, 15);
+	const h = Math.max(56, lines.length * 20 + 16);
+	const cy = Math.min(Math.max(y, WIDE.cy + 14), WIDE.cy + WIDE.ch - 14);
+	return {
+		lines,
+		x: right ? WIDE.right : 0,
+		y,
+		h,
+		top: y - h / 2,
+		leader: right ? `M${WIDE.cx + WIDE.cw} ${cy} L${WIDE.right} ${y}` : `M${WIDE.cx} ${cy} L${WIDE.lw} ${y}`,
+	};
+});
+
+// phones: labels stacked under the centre box, one spine from it
+let ny = NARROW.ch + 26;
+const narrowGroups = client.features.map((f) => {
+	const lines = wrap(f.title, 26);
+	const h = lines.length * 20 + 16;
+	const top = ny;
+	ny += h + 14;
+	return { lines, top, h };
+});
+const narrowH = ny - 14;
+const narrowX = NARROW.cx + NARROW.cw / 2;
+---
+<section class="make-sheet" id={client.slug} aria-labelledby={`${client.slug}-h`} style={`--c:${accent}`}>
+	<div class="make-sheet-body">
+		<div class="make-figure">
+			<svg class="make-diagram make-diagram-wide" viewBox={`0 0 ${WIDE.w} ${WIDE.h}`} aria-hidden="true" focusable="false">
+				<defs>
+					<pattern id={`${gid}-w`} width="26" height="26" patternUnits="userSpaceOnUse"><path class="make-grid-line" d="M26 0H0V26" /></pattern>
+				</defs>
+				<rect width={WIDE.w} height={WIDE.h} fill={`url(#${gid}-w)`} />
+				{wideGroups.map((g) => <path class="make-leader" pathLength="1" d={g.leader} />)}
+				<rect class="make-core-box" x={WIDE.cx} y={WIDE.cy} width={WIDE.cw} height={WIDE.ch} />
+				<rect class="make-tag" x={WIDE.cx} y={WIDE.cy} width={WIDE.cw} height="6" />
+				<text class="make-core-text" text-anchor="middle">
+					{core.map((line, i) => (
+						<tspan x={WIDE.cx + WIDE.cw / 2} y={WIDE.cy + WIDE.ch / 2 - (core.length * 22) / 2 + 15 + i * 22}>{line}</tspan>
+					))}
+				</text>
+				{wideGroups.map((g) => (
+					<g class="make-label">
+						<rect class="make-box" x={g.x} y={g.top} width={WIDE.lw} height={g.h} />
+						<rect class="make-tag" x={g.x} y={g.top} width="8" height={g.h} />
+						<text class="make-label-text">
+							{g.lines.map((line, li) => (
+								<tspan x={g.x + 20} y={g.y - (g.lines.length * 20) / 2 + 15 + li * 20}>{line}</tspan>
+							))}
+						</text>
+					</g>
+				))}
+			</svg>
+			<svg class="make-diagram make-diagram-narrow" viewBox={`0 0 ${NARROW.w} ${narrowH}`} aria-hidden="true" focusable="false">
+				<defs>
+					<pattern id={`${gid}-n`} width="26" height="26" patternUnits="userSpaceOnUse"><path class="make-grid-line" d="M26 0H0V26" /></pattern>
+				</defs>
+				<rect width={NARROW.w} height={narrowH} fill={`url(#${gid}-n)`} />
+				{narrowGroups.map((g) => <path class="make-leader" d={`M${narrowX} ${NARROW.ch} V${g.top}`} />)}
+				<rect class="make-core-box" x={NARROW.cx} y="0" width={NARROW.cw} height={NARROW.ch} />
+				<rect class="make-tag" x={NARROW.cx} y="0" width={NARROW.cw} height="6" />
+				<text class="make-core-text" text-anchor="middle">
+					{core.map((line, i) => (
+						<tspan x={narrowX} y={NARROW.ch / 2 - (core.length * 22) / 2 + 15 + i * 22}>{line}</tspan>
+					))}
+				</text>
+				{narrowGroups.map((g) => (
+					<g class="make-label">
+						<rect class="make-box" x="14" y={g.top} width="252" height={g.h} />
+						<rect class="make-tag" x="14" y={g.top} width="6" height={g.h} />
+						<text class="make-label-text">
+							{g.lines.map((line, li) => (
+								<tspan x="36" y={g.top + 23 + li * 20}>{line}</tspan>
+							))}
+						</text>
+					</g>
+				))}
+			</svg>
+		</div>
+		<div class="make-spec">
+			<h2 id={`${client.slug}-h`}>{client.name}</h2>
+			<p class="make-kind">{client.kind}</p>
+			<p class="make-where">{client.where}</p>
+			<p class="make-intro">{client.intro}</p>
+			<div class="make-groups">
+				{client.features.map((f) => (
+					<div class="make-group">
+						<span class="make-hit" aria-hidden="true" />
+						<h3>{f.title}</h3>
+						<ul>
+							{f.items.map((item) => <li>{item}</li>)}
+						</ul>
+					</div>
+				))}
+			</div>
+			<p class="make-links">
+				<a href={`/clients/${client.slug}`}>See the case <span aria-hidden="true">&rarr;</span></a>
+				{client.url && <a href={client.url} target="_blank" rel="noopener">See it live <span aria-hidden="true">↗</span></a>}
+			</p>
+		</div>
+	</div>
+	<div class="make-title">
+		<p class="make-title-name">{client.name}</p>
+		<p>Sheet {n} of {total}</p>
+		<p>a6n factory</p>
+	</div>
+</section>
