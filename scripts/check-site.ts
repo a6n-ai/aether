@@ -42,6 +42,7 @@ for (const page of PAGES) {
 }
 check(/What is a6n\?/.test(readFileSync('dist/how-it-works/index.html', 'utf8')), 'the "What is a6n?" answer is missing from how it works');
 // home: the software factory page
+check(/\(Ai\)ny Management System[\s\S]{0,40}software factory/.test(visible), 'brand line missing');
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
 check(/color-scheme:\s*light/.test(css), 'page must set color-scheme: light');
 check(/<h1[^>]*>[\s\S]*software factory[\s\S]*<\/h1>/i.test(markup), 'home h1 must name the software factory');
