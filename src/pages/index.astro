@@ -1,196 +1,31 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Hero from '../components/Hero.astro';
-import Stop from '../components/Stop.astro';
-import { STILLS } from '../data/world';
-import { FAQ } from '../data/faq';
-import { BOOK_CALL_HREF } from '../lib/cta';
-
-const HELP = [
-	{ title: 'Start from parts that already work', body: 'A first version comes together faster than building from zero.' },
-	{ title: 'Move over with nothing lost', body: 'Your customers and records come across from paper and spreadsheets.' },
-	{ title: 'One team, start to finish', body: 'The people who build it are the ones who answer when something breaks.' },
-];
-// Every business a6n runs today, each a live site.
-const WORK = [
-	{ name: 'TiffinGrab', line: 'Meal plans ordered, paused and delivered from one system.', href: 'https://tiffingrab.ca' },
-	{ name: 'Xplorers', line: 'Class bookings, payments and rosters on one screen.', href: 'https://xplorers.life' },
-	{ name: 'Copper + Cloves', line: 'Passes, check-in, café and shop in one member app.', href: 'https://copperandcloves.com' },
-	{ name: 'Relay', line: 'Email, SMS, WhatsApp and in-app messages from one send.', href: 'https://relay.a6n.ai' },
-];
-const QUESTIONS = FAQ.slice(0, 9);
-const faqLd = {
-	'@context': 'https://schema.org',
-	'@type': 'FAQPage',
-	mainEntity: QUESTIONS.map((n) => ({ '@type': 'Question', name: n.q, acceptedAnswer: { '@type': 'Answer', text: n.a } })),
-};
+import Factory from '../layouts/Factory.astro';
+import Hero from '../components/factory/Hero.astro';
+import Hands from '../components/factory/Hands.astro';
+import Routes from '../components/factory/Routes.astro';
+import Statement from '../components/factory/Statement.astro';
+import Parts from '../components/factory/Parts.astro';
+import Index from '../components/factory/Index.astro';
+import WorkOrder from '../components/factory/WorkOrder.astro';
+import OutputLog from '../components/factory/OutputLog.astro';
+import Close from '../components/factory/Close.astro';
 ---
 
-<Layout
-	title="a6n: a business management system, online and with AI"
-	description="a6n takes businesses online or brings AI into the systems they already run: one system for orders, bookings, payments, customers and messages."
+<Factory
+	title="a6n | The AI software factory for growing businesses"
+	description="a6n plans, builds and runs custom AI software for growing businesses, made around how you work and connected to the tools you already use."
 >
-	<script type="application/ld+json" slot="head" set:html={JSON.stringify(faqLd)} />
 	<Hero />
-	<div class="journey" data-journey>
-		<Stop id="bench" side="center" heading="A small engineering team building the systems businesses run on." still={STILLS.bench} stillAlt="A drafting sheet: a phone, a laptop, a till and a card terminal on one bench, each cabled to one hub." first home statement />
-		<Stop id="shop" side="center" heading="Every business should have the software and AI a big company has, set up around how it already works." still={STILLS.shop} stillAlt="A chalk drawing: a shop, our bench inside its window, a spanner fixing something on the spot, two people side by side." statement />
-		<Stop id="street" side="left" heading="We:" still={STILLS['street-new']} stillAlt="Three chalk shops on one street: a kiosk being built, old papers weighed over into an app, the kiosk a year on with a new wing." href="/how-it-works/" linkText="How a build works">
-			<ul class="we">
-				<li>Take businesses online: website, customer app, payments and a staff screen on one system.</li>
-				<li>Bring AI into the system you already have: an assistant that answers any question a customer asks about your business, and makes you readable by ChatGPT and AI search.</li>
-				<li>Run it with you: we watch it every day and add what you need next.</li>
-			</ul>
-		</Stop>
-		<Stop id="help" side="center" heading="You tell us how your business works. We build the system around it." statement>
-			<ul class="cards">
-				{
-					HELP.map((c) => (
-						<li>
-							<h3>{c.title}</h3>
-							<p>{c.body}</p>
-						</li>
-					))
-				}
-			</ul>
-		</Stop>
-		<Stop id="work" side="left" heading="Work delivered for">
-			<ul class="work">
-				{
-					WORK.map((w) => (
-						<li>
-							<a href={w.href}>{w.name}</a>
-							<p>{w.line}</p>
-						</li>
-					))
-				}
-			</ul>
-		</Stop>
-		<Stop id="notes" side="right" heading="Questions? Here are the answers." long href="/how-it-works/#questions" linkText="All questions">
-			<div class="faq">
-				{
-					QUESTIONS.map((n, k) => (
-						<details>
-							<summary><span class="n">{String(k + 1).padStart(2, '0')}</span>{n.q}</summary>
-							<p>{n.a}</p>
-						</details>
-					))
-				}
-			</div>
-		</Stop>
-		<Stop id="finale" side="right" heading="We help businesses run on their own system." still={STILLS.whole} stillAlt="The whole sheet, complete: the bench, the shop, the street, the post, the road and the workshops drawn around Leonardo's Vitruvian Man, joined by red chalk lines.">
-			<p>One short call, and an honest answer on whether a6n fits.</p>
-			<p><a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a></p>
-		</Stop>
-	</div>
-</Layout>
+	<Hands />
+	<Routes />
+	<Statement />
+	<Parts />
+	<Index />
+	<WorkOrder />
+	<OutputLog />
+	<Close />
+</Factory>
 
-<style>
-	.we {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-	}
-	.we li {
-		padding: 14px 0;
-		border-top: 1px solid var(--faint);
-		color: var(--strong);
-	}
-	.cards {
-		list-style: none;
-		margin: 8px 0 0;
-		padding: 0;
-		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
-		gap: 14px;
-		text-align: left;
-		width: 100%;
-	}
-	.cards li {
-		display: grid;
-		align-content: start;
-		gap: 6px;
-		padding: 18px 20px;
-		background: color-mix(in oklab, var(--card) 86%, transparent);
-		border-radius: 6px;
-		box-shadow: 0 14px 40px -22px color-mix(in oklab, var(--strong) 40%, transparent);
-	}
-	.cards h3 {
-		font: 500 1.1rem/1.15 var(--font-display);
-		color: var(--strong);
-	}
-	.cards p {
-		font-size: 0.95rem;
-		line-height: 1.4;
-	}
-	.work {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		display: grid;
-	}
-	.work li {
-		display: grid;
-		gap: 2px;
-		padding: 12px 0;
-		border-top: 1px solid var(--faint);
-	}
-	.work a {
-		justify-self: start;
-		color: var(--strong);
-		font: 500 1.2rem/1.2 var(--font-display);
-		text-decoration: none;
-		background: linear-gradient(color-mix(in oklab, var(--sanguine) 55%, transparent) 0 0) left 100% / 0 2px no-repeat;
-		transition: background-size 420ms var(--ease);
-	}
-	@media (hover: hover) {
-		.work a:hover {
-			background-size: 100% 2px;
-		}
-	}
-	.work a:focus-visible {
-		background-size: 100% 2px;
-	}
-	.work p {
-		font-size: 0.95rem;
-		color: var(--text);
-	}
-	.faq details {
-		border-top: 1px solid var(--faint);
-		padding: 12px 0;
-	}
-	.faq summary {
-		cursor: pointer;
-		list-style: none;
-		display: flex;
-		gap: 14px;
-		color: var(--strong);
-	}
-	.faq summary::-webkit-details-marker {
-		display: none;
-	}
-	.faq summary:focus-visible {
-		outline: 2px solid var(--sanguine);
-		outline-offset: 2px;
-	}
-	.faq .n {
-		color: var(--muted);
-		font-size: var(--t-xs);
-		padding-top: 3px;
-	}
-	.faq details p {
-		margin: 8px 0 0 30px;
-		font-size: 0.95rem;
-		color: var(--text);
-	}
-	@media (max-width: 767px) {
-		.cards {
-			grid-template-columns: minmax(0, 1fr);
-			gap: 8px;
-		}
-		.cards li {
-			padding: 12px 14px;
-		}
-	}
-</style>
+<script>
+	import '../scripts/factory/home';
+</script>

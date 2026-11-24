@@ -31,36 +31,28 @@ for (const page of PAGES) {
 	check((body.match(/<h1[\s>]/g) ?? []).length === 1, `${page}: expected exactly one <h1>`);
 	check(/<html[^>]*lang="en"/.test(raw), `${page}: missing <html lang="en">`);
 	// every page is a place on the one sheet: the world canvas, and its stops with real words beside them
-	check(/<canvas[^>]*class="world"/.test(raw), `${page}: missing the world canvas`);
-	check(/data-stop="[^"]+"/.test(body), `${page}: no stops`);
+	if (page !== 'index.html') {
+		check(/<canvas[^>]*class="world"/.test(raw), `${page}: missing the world canvas`);
+		check(/data-stop="[^"]+"/.test(body), `${page}: no stops`);
+	}
 	for (const img of body.matchAll(/<img[^>]*class="still"[^>]*>/g)) check((img[0].match(/alt="([^"]*)"/)?.[1] ?? '').length >= 40, `${page}: a stop's still needs a 40+ char alt`);
 	for (const phrase of ['until it arrives', 'bookings, delivery and messages are parts']) {
 		check(!text.includes(phrase), `${page}: overpromising copy: "${phrase}"`);
 	}
 }
 check(/What is a6n\?/.test(readFileSync('dist/how-it-works/index.html', 'utf8')), 'the "What is a6n?" answer is missing from how it works');
-check(/\(Ai\)ny Management System/.test(visible), 'brand line missing');
-
-const heroImg = markup.match(/<img[^>]*fetchpriority="high"[^>]*>/)?.[0] ?? '';
-check(/alt="[^"]*Creation of Adam[^"]*"/.test(heroImg), 'hero <img> needs fetchpriority="high" and alt mentioning Creation of Adam');
-const heroPicture = markup.match(/<picture[^>]*>[\s\S]*?fetchpriority="high"[\s\S]*?<\/picture>/)?.[0] ?? '';
-check(/srcset="[^"]*\.(avif|webp)/.test(heroPicture), 'hero must be served as avif/webp');
-const avif = heroPicture.match(/<source[^>]*srcset="([^"]+)"[^>]*type="image\/avif"/)?.[1] ?? '';
-const at800 = avif.split(',').map((s) => s.trim().split(' ')).find(([, w]) => w === '900w')?.[0];
-if (at800) {
-	const path = 'dist' + decodeURIComponent(at800.split('?')[0]);
-	const kb = existsSync(path) ? statSync(path).size / 1024 : Infinity;
-	check(kb <= 180, `hero 900w avif is ${kb.toFixed(0)} KB, limit 180`);
-} else check(false, 'hero has no 900w avif candidate');
-
+// home: the software factory page
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
 check(/color-scheme:\s*light/.test(css), 'page must set color-scheme: light');
-for (const name of ['TiffinGrab', 'Xplorers', 'Relay', 'Copper + Cloves']) check(markup.includes(name), `missing on the home page: ${name}`);
-const order = ['bench', 'shop', 'street', 'help', 'work', 'notes', 'finale'].map((id) => markup.indexOf(`data-stop="${id}"`));
-check(order.every((i, n) => i > 0 && (n === 0 || i > order[n - 1])), 'the home journey must run bench, shop, street, help, work, notes, finale');
-for (const href of ['https://tiffingrab.ca', 'https://xplorers.life', 'https://copperandcloves.com', 'https://relay.a6n.ai']) check(markup.includes(`href="${href}"`), `the work must link to ${href}`);
-check(html.includes('"@type":"FAQPage"'), 'home is missing its FAQPage data');
-check(markup.includes('We help businesses run on their own system.'), 'missing closing call heading');
+check(/<h1[^>]*>[\s\S]*software factory[\s\S]*<\/h1>/i.test(markup), 'home h1 must name the software factory');
+const sections = ['class="hero', 'class="hands', 'id="hub"', 'id="parts"', 'id="how"', 'id="log"', 'id="talk"'].map((m) => markup.indexOf(m));
+check(sections.every((i, n) => i > 0 && (n === 0 || i > sections[n - 1])), 'home must run hero, hands, routes, parts, how it works, output log, closing');
+check(markup.includes('Tell us what<br>you need.'), 'missing closing call heading');
+check(/Creation of Adam[\s\S]*Public domain/.test(visible), 'hands section must credit Michelangelo, The Creation of Adam');
+check(/A study of a woman's hands[\s\S]*Public domain/.test(visible), 'closing sketch must credit Leonardo');
+check(existsSync('public/art/leo-hands.png') && statSync('public/art/leo-hands.png').size < 500 * 1024, 'closing sketch art missing or over 500 KB');
+const showcase = existsSync('dist/showcase/index.html') ? readFileSync('dist/showcase/index.html', 'utf8') : '';
+for (const repo of ['monarch', 'inscribe', 'relay', 'rays']) check(showcase.includes(`href="https://github.com/a6n-ai/${repo}"`), `showcase must link ${repo}`);
 
 if (failures.length) {
 	for (const f of failures) console.error(`FAIL: ${f}`);

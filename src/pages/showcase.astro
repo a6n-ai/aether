@@ -1,0 +1,16 @@
+---
+import Factory from '../layouts/Factory.astro';
+import Repos from '../components/factory/Repos.astro';
+---
+
+<Factory
+	title="Showcase | a6n"
+	description="Open source tools from the a6n software factory: Monarch, Inscribe, Relay and Rays."
+	current="showcase"
+>
+	<Repos />
+</Factory>
+
+<script>
+	import '../scripts/factory/showcase';
+</script>

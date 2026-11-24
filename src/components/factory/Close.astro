@@ -1,0 +1,22 @@
+---
+import { BOOK_CALL_HREF, CONTACT_EMAIL } from '../../lib/cta';
+---
+<!-- 7 CLOSING: a Leonardo hand study draws itself as you arrive; your sentence finishes the sketch -->
+<section class="close" id="talk" aria-labelledby="cl-h">
+  <figure class="sketch">
+    <canvas class="sketch-canvas" width="1100" height="1592" role="img" aria-label="Leonardo da Vinci's study of a woman's hands, drawing itself line by line."></canvas>
+    <figcaption>Leonardo da Vinci, <i>A study of a woman's hands</i>, about 1490. Royal Collection. Public domain.</figcaption>
+  </figure>
+  <div class="close-copy">
+    <p class="kicker"><b>Start with a sketch</b></p>
+    <h2 id="cl-h">Tell us what<br>you need.</h2>
+    <p class="close-lead">Leonardo started every masterpiece as a sketch. Your system starts with one sentence. Write it here and watch it finish the drawing.</p>
+    <form class="form" novalidate>
+      <label for="need">Describe it in one sentence.</label>
+      <textarea id="need" name="need" maxlength="90" placeholder="We need a way to…"></textarea>
+      <div class="row"><input type="email" name="email" placeholder="Your email" aria-label="Your email" autocomplete="email" required><button class="go" type="submit">Send it to the factory</button></div>
+      <p class="sent" role="status" aria-live="polite"></p>
+    </form>
+    <p class="close-alt">Rather talk it through? <a href={BOOK_CALL_HREF}>Book a call</a> or write to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+  </div>
+</section>

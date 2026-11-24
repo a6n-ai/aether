@@ -1,0 +1,68 @@
+---
+const bars = [2, 4, 3, 5, 4, 6, 5, 7, 6, 8];
+const sq = bars.flatMap((h, i) => Array.from({ length: h }, (_, j) => ({ x: 20 + i * 28, y: 180 - (j + 1) * 18, top: j === h - 1 })));
+const arch = Array.from({ length: 9 }, (_, i) => { const a = Math.PI + (i / 8) * Math.PI; return { x: 50 + 16 * Math.cos(a), y: 40 + 16 * Math.sin(a) }; }).concat([{ x: 34, y: 46 }, { x: 66, y: 46 }]);
+const body = Array.from({ length: 35 }, (_, k) => ({ x: 27 + (k % 7) * 8, y: 56 + Math.floor(k / 7) * 8, key: (k % 7 === 3 && (k / 7 | 0) > 0 && (k / 7 | 0) < 3) }));
+const rep = [26, 22, 28, 14].flatMap((n, r) => Array.from({ length: n }, (_, i) => ({ x: 16 + i * 6, y: 40 + r * 14 })));
+const nodes = [[18, 20], [82, 24], [20, 80], [82, 78]];
+---
+<!-- 3 PARTS BENTO -->
+<section class="parts" id="parts" aria-labelledby="pt-h">
+  <div class="head">
+    <div>
+      <p class="kicker"><b>Proven parts</b></p>
+      <h2 id="pt-h">Your system, assembled from parts that already work.</h2>
+    </div>
+    <p>Every part on this bench already runs inside a live business. We pick the ones you need, shape them to fit, and build only what is new.</p>
+  </div>
+  <ul class="bento" role="list">
+    <li class="tile t-ai" data-scene="ai" style="--c:var(--coral)">
+      <div class="scene"><svg viewBox="0 0 300 200" aria-hidden="true">
+        <g class="b"><rect x="16" y="14" width="150" height="40" rx="12" class="o"/><line x1="32" y1="34" x2="148" y2="34" class="dl"/></g>
+        <g class="b"><rect x="120" y="64" width="164" height="50" rx="12" class="f"/><line x1="136" y1="80" x2="264" y2="80" class="dl p"/><line x1="136" y1="98" x2="222" y2="98" class="dl p"/></g>
+        <g class="b"><rect x="16" y="124" width="112" height="36" rx="12" class="o"/><line x1="32" y1="142" x2="110" y2="142" class="dl"/></g>
+        <g class="ty"><rect x="120" y="168" width="64" height="26" rx="13" class="o"/><circle class="td" cx="140" cy="181" r="4"/><circle class="td" cx="152" cy="181" r="4"/><circle class="td" cx="164" cy="181" r="4"/></g>
+      </svg></div>
+      <h3>AI assistant</h3>
+    </li>
+    <li class="tile t-si" data-scene="sign" style="--c:var(--lilac)">
+      <div class="scene"><svg viewBox="0 0 100 110" aria-hidden="true">
+        <g class="sh">{arch.map(d => <circle cx={d.x} cy={d.y} r="3" />)}</g>
+        <g class="pb">{body.map(d => <circle cx={d.x} cy={d.y} r="3" class={d.key ? 'kh' : 'fc'} />)}</g>
+      </svg></div>
+      <h3>Sign-in</h3>
+    </li>
+    <li class="tile t-nt" data-scene="notif" style="--c:var(--cobalt)">
+      <div class="scene"><svg viewBox="0 0 200 100" aria-hidden="true">
+        <g class="card"><rect x="26" y="6" width="148" height="34" rx="8" class="o2"/></g>
+        <g class="card"><rect x="18" y="22" width="164" height="38" rx="8" class="o2"/><rect x="28" y="32" width="12" height="12" rx="3" class="f"/><line x1="50" y1="38" x2="150" y2="38" class="dl"/></g>
+        <g class="card fr"><rect x="10" y="40" width="180" height="48" rx="8" class="o2"/><rect x="22" y="52" width="14" height="14" rx="3" class="f"/><line x1="48" y1="56" x2="150" y2="56" class="dl"/><line x1="48" y1="72" x2="112" y2="72" class="dl"/><circle class="badge" cx="176" cy="46" r="6"/></g>
+      </svg></div>
+      <h3>Notifications</h3>
+    </li>
+    <li class="tile t-db" data-scene="dash" style="--c:var(--cobalt)">
+      <div class="scene"><svg viewBox="0 0 300 200" aria-hidden="true">
+        <line x1="12" y1="184" x2="292" y2="184" class="ax"/>
+        {sq.map(d => <rect x={d.x} y={d.y} width="16" height="16" rx="3" class={d.top ? 'sq top' : 'sq'} />)}
+      </svg></div>
+      <h3>Dashboards</h3>
+    </li>
+    <li class="tile t-rp" data-scene="report" style="--c:var(--butter)">
+      <div class="scene"><svg viewBox="0 0 200 100" aria-hidden="true">
+        <rect class="hd" x="16" y="12" width="64" height="12" rx="6"/>
+        {rep.map(d => <circle class="rd" cx={d.x} cy={d.y} r="1.9" />)}
+        <rect class="cur" x="100" y="76" width="3" height="12" rx="1.5"/>
+      </svg></div>
+      <h3>Reports that write themselves</h3>
+    </li>
+    <li class="tile t-in" data-scene="integ" style="--c:var(--teal)">
+      <div class="scene"><svg viewBox="0 0 100 100" aria-hidden="true">
+        {nodes.map(n => <line class="ln" x1="50" y1="50" x2={n[0]} y2={n[1]} pathLength="1" />)}
+        {nodes.map(n => <circle class="nd" cx={n[0]} cy={n[1]} r="7" />)}
+        <circle class="hub" cx="50" cy="50" r="11" />
+        <circle class="pk" cx="50" cy="50" r="3" />
+      </svg></div>
+      <h3>Integrations</h3>
+    </li>
+  </ul>
+</section>

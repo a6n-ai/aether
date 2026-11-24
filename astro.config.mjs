@@ -22,5 +22,13 @@ export default defineConfig({
 			styles: ['normal'],
 			fallbacks: ['system-ui', 'sans-serif'],
 		},
+		{
+			provider: fontProviders.google(),
+			name: 'Figtree',
+			cssVariable: '--font-factory',
+			weights: [500, 600, 700],
+			styles: ['normal'],
+			fallbacks: ['system-ui', 'sans-serif'],
+		},
 	],
 });
