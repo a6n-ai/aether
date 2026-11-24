@@ -15,8 +15,6 @@ export function createForge() {
   const pickColor = () => Math.random() < .8 ? 0 : 1 + Math.floor(Math.random() * 5);
   const size = () => { const r = forge.getBoundingClientRect(), d = Math.min(devicePixelRatio, 2); W = r.width; H = r.height; forge.width = W * d; forge.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
   const targetsFor = (word: string) => {
-    // narrow screens: the home word stacks into four short lines so its squares can grow
-    if (W < 600 && word === 'SOFTWARE|FACTORY') word = 'SOFT|WARE|FACT|ORY';
     const lines = word.split('|'), cols = Math.max(...lines.map(l => l.length * 6 - 1)), rows = lines.length * 7 + (lines.length - 1) * 2;
     const fr = forge.getBoundingClientRect(), gap = Math.max(24, H * .04);
     const padX = Math.min(100, W * .069), top = $('.hero-head').getBoundingClientRect().bottom - fr.top + gap, bottom = $('.hero .dock').getBoundingClientRect().top - fr.top - gap;
@@ -111,20 +109,27 @@ export function createForge() {
     forge.addEventListener('pointerleave', onLeave);
     tiles.length = 0; reset(false);
     gsap.ticker.add(draw);
-    gsap.from('.hero-head > *, .forge-status, .needs > *:not([hidden])', { y: 20, opacity: 0, duration: .7, stagger: .05, ease: 'expo.out', delay: .3 });
+    gsap.from('.hero-head > *:not(h1), .forge-status, .needs > *:not([hidden])', { y: 20, opacity: 0, duration: .7, stagger: .05, ease: 'expo.out', delay: .3 });
+    // the living motion (a part swapping now and then, the demo) waits for the visitor's first scroll, touch,
+    // pointer or key, so an untouched page settles once the headline is built (Lighthouse Speed Index)
     const idle: gsap.core.Tween = gsap.delayedCall(.16, function blink() {           // the system keeps running: a part swaps now and then
       const t = tiles[Math.floor(Math.random() * tiles.length)];
       if (t && t.on && !motion.paused) gsap.timeline().to(t, { s: .35, duration: .18, ease: 'power2.in', onComplete: () => { t.c = pickColor(); } }).to(t, { s: 1, duration: .45, ease: 'back.out(3)' });
       idle.restart(true);
-    });
+    }).pause();
     // nobody has touched it yet: the factory demonstrates once per need, lighting the button it uses
     let di = 0;
     const runDemo = () => { if (userTook || !live || motion.paused) return demo!.restart(true); pick(chips[di++ % chips.length], true); demo = gsap.delayedCall(HOLD + 2.5, runDemo); };
-    demo = gsap.delayedCall(4.2, runDemo);
-    ScrollTrigger.create({ trigger: '.hero', start: 'top bottom', end: 'bottom top', onToggle: s => { live = s.isActive; s.isActive ? idle.resume() : idle.pause(); } });
+    demo = gsap.delayedCall(4.2, runDemo).pause();
+    let woke = false;
+    const wake = () => { if (woke) return; woke = true; stopWake(); if (live) idle.resume(); demo!.restart(true); };
+    const wakeOn = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
+    const stopWake = () => wakeOn.forEach(e => removeEventListener(e, wake));
+    wakeOn.forEach(e => addEventListener(e, wake, { passive: true }));
+    ScrollTrigger.create({ trigger: '.hero', start: 'top bottom', end: 'bottom top', onToggle: s => { live = s.isActive; s.isActive && woke ? idle.resume() : idle.pause(); } });
     gsap.from('.hint', { opacity: 0, x: 20, duration: .6, ease: 'expo.out', delay: 2.4 });
     forge.addEventListener('pointerenter', () => gsap.to('.hint', { opacity: 0, duration: .4 }), { once: true });
-    return () => { forge.removeEventListener('pointermove', onMove); forge.removeEventListener('pointerleave', onLeave); gsap.ticker.remove(draw); };
+    return () => { stopWake(); idle.kill(); demo?.kill(); forge.removeEventListener('pointermove', onMove); forge.removeEventListener('pointerleave', onLeave); gsap.ticker.remove(draw); };
   };
 
   return { readPal, run };

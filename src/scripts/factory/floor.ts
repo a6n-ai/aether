@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { $, $$, type Cond } from './dom';
+import { $, $$, afterLoad, type Cond } from './dom';
 import type { Sketch } from './sketch';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 export function runWinch(c: Cond, sk: Sketch) {
   const st = { p: 0 };
   let tw: gsap.core.Tween | undefined, alive = true;
-  sk.load().then(() => {
+  afterLoad(sk.load).then(() => {
     if (!alive) return;
     if (c.still) return sk.setProgress(1);
     tw = gsap.to(st, { p: 1, duration: 2.5, ease: 'power1.inOut', onUpdate: () => sk.setProgress(st.p) });

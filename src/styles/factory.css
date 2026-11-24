@@ -23,7 +23,7 @@ a { color:inherit; }
 
 /* top */
 .bar { display:flex; justify-content:center; align-items:center; gap:10px; height:50px; font-size:15px; font-weight:500; color:#0c0e14; background:var(--butter); }
-.bar a { font-weight:700; }
+.bar a { font-weight:700; padding:12px 0; }
 .nav { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:28px; margin:0 40px; height:76px; border-bottom:1px solid var(--line); font-size:18px; font-weight:600; background:var(--paper); transition:background-color .4s; }
 .nav .logo { display:inline-flex; align-items:center; gap:10px; font-size:30px; font-weight:700; letter-spacing:-.05em; margin-right:16px; text-decoration:none; }
 .nav .logo .logo-mark { width:30px; height:30px; transition:rotate .6s var(--ease); }
@@ -36,6 +36,16 @@ a { color:inherit; }
 .toggle { width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:none; color:var(--ink); cursor:pointer; display:grid; place-items:center; transition:rotate .5s var(--ease); }
 .toggle:hover { rotate:40deg; }
 .toggle svg { width:20px; height:20px; }
+/* phones: the page links move into a popover menu (Escape, outside tap and focus come from the platform) */
+.menu-btn { display:none; width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:none; color:var(--ink); cursor:pointer; place-items:center; }
+.menu-btn svg { width:20px; height:20px; }
+.menu { position:fixed; inset:68px 12px auto auto; margin:0; width:min(280px, calc(100vw - 24px)); padding:10px; border:1.5px solid var(--ink); border-radius:16px; background:var(--paper); color:var(--ink); box-shadow:0 18px 40px rgb(0 0 0 / .18); }
+.menu:popover-open { display:grid; gap:2px; }
+.menu a:not(.go) { padding:12px 14px; border-radius:10px; font-size:18px; font-weight:600; text-decoration:none; color:var(--ink); }
+.menu a:not(.go):hover, .menu a:not(.go):focus-visible, .menu a[aria-current="page"] { background:color-mix(in srgb, var(--ink) 8%, transparent); }
+.menu .go { margin-top:8px; justify-content:center; padding:13px 18px; font-size:16px; }
+.menu-btn { anchor-name:--menu; }
+@supports (position-anchor: --menu) { .menu { position-anchor:--menu; inset:auto; top:calc(anchor(bottom) + 10px); right:anchor(right); } }
 [data-theme="dark"] .sun, [data-theme="light"] .moon { display:none; }
 
 /* 1 hero: the forge. the headline is built from parts, live */
@@ -283,10 +293,12 @@ a { color:inherit; }
 footer { display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; padding:34px var(--pad); border-top:1px solid var(--line); font-size:15px; color:var(--soft); }
 footer nav { display:flex; gap:22px; }
 footer a { text-decoration:none; } footer a:hover { color:var(--ink); }
+@media (max-width:820px) { footer nav { display:grid; grid-template-columns:repeat(3,auto); justify-content:start; gap:4px 22px; } footer nav a { padding:10px 0; white-space:nowrap; } }
 
 @media (max-width:820px) {
-  .nav { margin:0 18px; } .nav .links, .nav .go { display:none; }
-  .bar { font-size:13px; }
+  .nav { margin:0 18px; } .nav .links, .nav .right > .go { display:none; } .menu-btn { display:grid; }
+  .bar { font-size:13px; height:auto; min-height:44px; padding:4px 16px; flex-wrap:wrap; column-gap:8px; row-gap:0; text-align:center; } .bar a { padding:4px 0; }
+  .motion-btn { white-space:nowrap; padding:8px 12px; font-size:13px; } .nav .right { gap:8px; }
   .hero { height:calc(100svh - 126px); min-height:640px; padding:3vh var(--pad) 3vh; }
   .hero-head { flex-direction:column; gap:12px; } .hero h1 { font-size:24px; } .hero-head p { font-size:16px; }
   .status-row { flex-wrap:wrap; gap:8px 12px; } .hint { display:none; } .status-row .chip.back { white-space:nowrap; }
@@ -308,7 +320,7 @@ footer a { text-decoration:none; } footer a:hover { color:var(--ink); }
   .index header { flex-direction:column; align-items:start; gap:16px; }
   .index li a { grid-template-columns:1fr; gap:8px; padding:26px var(--pad); } .index .pic { width:34px; margin-bottom:6px; }
   .order { grid-template-columns:1fr; gap:40px; } .order .stick { position:static; }
-  .sheet { padding:24px 16px 24px 76px; } .rail { left:12px; width:52px; } .rail::before { top:66px; } .tk { width:52px; font-size:11px; } .stamp { font-size:28px; top:62px; right:18px; }
+  .sheet { padding:24px 16px 24px 76px; } .rail { left:12px; width:52px; } .rail::before { top:66px; } .tk { width:52px; font-size:12px; } .stamp { font-size:28px; top:62px; right:18px; }
   .log header { flex-direction:column; align-items:start; gap:14px; }
   .log thead { display:none; } .log tr { display:grid; grid-template-columns:1fr auto; gap:6px 16px; padding:20px 0; border-bottom:1px solid var(--line); }
   .log td { border:0; padding:0; width:auto !important; } .log td:first-child { grid-column:1 / -1; font-size:16px; } .log td.ar { display:none; }
@@ -549,3 +561,20 @@ footer a { text-decoration:none; } footer a:hover { color:var(--ink); }
   .make-group ul { font-size:16px; }
 }
 
+
+/* one rule for section dividers on every page: each top-level section after the first opens with a hairline */
+main > * + section, main > * + .pin-spacer > section { border-top:1px solid var(--line); }
+@media (max-width:820px) {
+  /* phones: sections were padded in vh for tall desktop screens, leaving ~230px of blank between them */
+  main > section[class]:not(.hands), main > .pin-spacer > section[class]:not(.hands) { padding-top:64px; padding-bottom:64px; }
+}
+/* What every system gets: on touch screens the rows read as tappable cards, with a colour edge and an arrow */
+.index li a::after { content:"\2192"; position:absolute; right:var(--pad); top:50%; translate:0 -50%; font-size:26px; font-weight:600; opacity:0; transition:opacity .25s, translate .4s var(--ease); }
+.index li:hover a::after, .index li:focus-within a::after { opacity:1; translate:6px -50%; }
+@media (hover:none), (max-width:820px) {
+  .index li { border-left:6px solid var(--c); }
+  .index li a { padding-right:calc(var(--pad) + 36px); }
+  .index li a::after { opacity:.55; top:30px; translate:0 0; }
+  .index li:active::before { translate:0 0; }
+  .index li:active a { color:#0c0e14; }
+}

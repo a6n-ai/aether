@@ -25,26 +25,38 @@ export function runOutputLog(c: Cond) {
   $$('.log tbody tr').forEach(tr => {
     const q = $('.q', tr), real = $('.real', tr), ship = $('.ship', tr), pips = $$('.dots i', tr);
     const text = q.textContent!;
-    q.textContent = '';
-    const chars: HTMLElement[] = [];
-    text.split(' ').forEach((w, i, a) => {
-      const ws = document.createElement('span'); ws.className = 'w';
-      for (const ch of w) { const s = document.createElement('span'); s.textContent = ch; ws.append(s); chars.push(s); }
-      q.append(ws); if (i < a.length - 1) q.append(' ');
-    });
-    const svg = dotName(real.textContent!); ship.append(svg);
-    const dots = $$('rect', svg);
-    gsap.set(chars, { opacity: 0 }); gsap.set(real, { opacity: 0 }); gsap.set(pips, { opacity: 0 });
-    let prev: HTMLElement | undefined;
-    const mark = (ch?: HTMLElement) => { prev?.classList.remove('cur'); ch?.classList.add('cur'); prev = ch; };
-    const t = gsap.timeline({ paused: true });
-    chars.forEach((ch, i) => t.set(ch, { opacity: 1 }, i * .025).call(mark, [ch], i * .025));
-    t.call(mark, [undefined], '+=.35')
-      .from(dots, { opacity: 0, scale: 0, transformOrigin: '50% 50%', duration: .25, ease: 'back.out(3)', stagger: { each: .004, from: 'random' } })
-      .to(svg, { opacity: 0, duration: .3 }, '+=.2').to(real, { opacity: 1, duration: .3 }, '<')
-      .fromTo(pips, { scale: 0 }, { scale: 1, opacity: 1, duration: .3, ease: 'back.out(3)', stagger: .08 }, '<');
-    ScrollTrigger.create({ trigger: tr, start: 'top 88%', once: true, onEnter: () => t.play() });
-    undo.push(() => { q.textContent = text; svg.remove(); });
+    // building the timeline costs ~50 ms a row on a phone (one tween per letter, a bbox per dot),
+    // so each row is built just before it comes on screen, not at page start
+    let t: gsap.core.Timeline | undefined, svg: SVGSVGElement | undefined;
+    const build = () => {
+      if (t) return t;
+      q.textContent = '';
+      const chars: HTMLElement[] = [];
+      text.split(' ').forEach((w, i, a) => {
+        const ws = document.createElement('span'); ws.className = 'w';
+        for (const ch of w) { const s = document.createElement('span'); s.textContent = ch; ws.append(s); chars.push(s); }
+        q.append(ws); if (i < a.length - 1) q.append(' ');
+      });
+      svg = dotName(real.textContent!); ship.append(svg);
+      const dots = $$('rect', svg);
+      gsap.set(chars, { opacity: 0 }); gsap.set(real, { opacity: 0 }); gsap.set(pips, { opacity: 0 });
+      let prev: HTMLElement | undefined;
+      const mark = (ch?: HTMLElement) => { prev?.classList.remove('cur'); ch?.classList.add('cur'); prev = ch; };
+      const tl = gsap.timeline({ paused: true });
+      chars.forEach((ch, i) => tl.set(ch, { opacity: 1 }, i * .025).call(mark, [ch], i * .025));
+      tl.call(mark, [undefined], '+=.35')
+        .from(dots, { opacity: 0, scale: 0, transformOrigin: '50% 50%', duration: .25, ease: 'back.out(3)', stagger: { each: .004, from: 'random' } }, .1)
+      .to({}, { duration: .2 })
+        .to(svg, { opacity: 0, duration: .3 }, '+=.2').to(real, { opacity: 1, duration: .3 }, '<')
+        .fromTo(pips, { scale: 0 }, { scale: 1, opacity: 1, duration: .3, ease: 'back.out(3)', stagger: .08 }, '<');
+      return (t = tl);
+    };
+    const prep = ScrollTrigger.create({ trigger: tr, start: 'top bottom+=300', once: true, onEnter: build });
+    const go = ScrollTrigger.create({ trigger: tr, start: 'top 88%', once: true, onEnter: () => build().play() });
+    undo.push(
+      () => { prep.kill(); go.kill(); },
+      () => { t?.kill(); q.textContent = text; svg?.remove(); },
+    );
   });
   return () => undo.forEach(f => f());
 }

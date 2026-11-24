@@ -33,9 +33,22 @@ gsap.matchMedia().add({
   toggle.addEventListener('click', forge.readPal);
   cleanups.push(() => toggle.removeEventListener('click', forge.readPal));
   cleanups.push(forge.run(c));
-  cleanups.push(hands.run(c));
-  routes.run(c);
-  cleanups.push(runStatement(c), runParts(c), runIndexRows(c), runWorkOrder(c), runOutputLog(c));
-  if (c.motion) $$('.repo', open).forEach((rp, i) => gsap.from($$('rect', rp), { scale: 0, transformOrigin: 'center', opacity: 0, duration: .4, delay: i * .12, stagger: { each: .02, from: 'random' }, ease: 'back.out(3)', scrollTrigger: { trigger: rp, start: 'top 85%', once: true } }));
-  return () => cleanups.forEach(fn => fn && fn());
+  // the hero runs now; each section below the fold is built in its own task after the first paint,
+  // so no single start-up task blocks the phone's main thread (was one 276 ms task at 4x CPU)
+  const later: (() => void | (() => void))[] = [
+    () => hands.run(c),
+    () => { routes.run(c); },
+    () => runStatement(c), () => runParts(c), () => runIndexRows(c), () => runWorkOrder(c), () => runOutputLog(c),
+    () => { if (c.motion) $$('.repo', open).forEach((rp, i) => gsap.from($$('rect', rp), { scale: 0, transformOrigin: 'center', opacity: 0, duration: .4, delay: i * .12, stagger: { each: .02, from: 'random' }, ease: 'back.out(3)', scrollTrigger: { trigger: rp, start: 'top 85%', once: true } })); },
+  ];
+  let alive = true, timer = 0;
+  const step = () => {
+    if (!alive) return;
+    const job = later.shift();
+    if (job) { ctx.add(() => cleanups.push(job())); timer = window.setTimeout(step, 0); return; }
+    // triggers were made out of page order; put them back in order before measuring
+    ScrollTrigger.sort(); ScrollTrigger.refresh();
+  };
+  requestAnimationFrame(() => { timer = window.setTimeout(step, 0); });
+  return () => { alive = false; clearTimeout(timer); cleanups.forEach(fn => fn && fn()); };
 });

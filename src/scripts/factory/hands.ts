@@ -1,6 +1,5 @@
 import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { motion, type Cond } from './dom';
+import { motion, afterLoad, type Cond } from './dom';
 import { decodeHands, type Hand } from './hands-data';
 
 // One scroll value (p, 0..1) drives the scene, in the order an engraver and a machine would work:
@@ -33,7 +32,7 @@ const rot = (x: number, y: number, c: { x: number; y: number }, a: number) => {
   return [c.x + dx * cs - dy * sn, c.y + dx * sn + dy * cs];
 };
 
-function handsWith(D: Hand) {
+function handsWith(D: Hand, state: { p: number; t: number }) {
   const section = document.querySelector<HTMLElement>('.hands');
   const canvas = document.querySelector<HTMLCanvasElement>('.hands-canvas');
   if (!section || !canvas) return { run: (_c: Cond) => () => {} };
@@ -42,7 +41,6 @@ function handsWith(D: Hand) {
   const layers = [0, 1].map(() => ANG.map(() => document.createElement('canvas')));
   const outline = [document.createElement('canvas'), document.createElement('canvas')];
   let W = 0, H = 0, dpr = 1, s = 1, ox = 0, oy = 0, ink = '#0c0e14';
-  const state = { p: 0, t: 0 };
 
   const rnd = gsap.utils.random;
   const clamp = gsap.utils.clamp(0, 1);
@@ -60,18 +58,28 @@ function handsWith(D: Hand) {
   });
 
   // bake in crop space at screen resolution
+  // one hatch pass per task (then the outline), so baking never blocks the main thread for long
+  let bakeId = 0;
   const bake = () => {
+    const id = ++bakeId;
     const bw = Math.ceil(D.w * s * dpr), bh = Math.ceil(D.h * s * dpr);
     const all = [...layers.flat(), ...outline];
     for (const c of all) { c.width = bw; c.height = bh; }
     const g = all.map(c => { const x = c.getContext('2d')!; x.setTransform(s * dpr, 0, 0, s * dpr, 0, 0); x.fillStyle = ink; x.strokeStyle = ink; x.lineCap = 'round'; return x; });
     const L = (part: number, k: number) => g[part * 3 + k];
-    for (const [x, y, w, k] of D.hatch) {
-      const c = L(x >= H_WRIST.x ? 1 : 0, k); c.globalAlpha = fade(x); c.lineWidth = Math.max(.5 / s, w * .9);
-      const [dx, dy] = DIRS[k]; c.beginPath(); c.moveTo(x, y); c.lineTo(x + dx * 1.8, y + dy * 1.8); c.stroke();
-    }
-    const o = [g[6], g[7]];
-    for (const [x, y, side] of D.contour) if (side === 1) { const c = o[x < A_WRIST.x ? 1 : 0]; c.globalAlpha = fade(x) * .55; c.fillRect(x, y, .9, .9); }
+    const passes = ANG.map((_, pass) => () => {
+      for (const [x, y, w, k] of D.hatch) {
+        if (k !== pass) continue;
+        const c = L(x >= H_WRIST.x ? 1 : 0, k); c.globalAlpha = fade(x); c.lineWidth = Math.max(.5 / s, w * .9);
+        const [dx, dy] = DIRS[k]; c.beginPath(); c.moveTo(x, y); c.lineTo(x + dx * 1.8, y + dy * 1.8); c.stroke();
+      }
+    });
+    passes.push(() => {
+      const o = [g[6], g[7]];
+      for (const [x, y, side] of D.contour) if (side === 1) { const c = o[x < A_WRIST.x ? 1 : 0]; c.globalAlpha = fade(x) * .55; c.fillRect(x, y, .9, .9); }
+    });
+    const next = () => { if (id !== bakeId) return; passes.shift()!(); draw(); if (passes.length) setTimeout(next, 0); };
+    next();
   };
   const size = () => {
     const r = canvas.getBoundingClientRect(); dpr = Math.min(devicePixelRatio, 2);
@@ -218,32 +226,34 @@ function handsWith(D: Hand) {
   return {
     run(c: Cond) {
       size(); draw();
-      const ro = new ResizeObserver(() => { size(); draw(); }); ro.observe(canvas);
+      // a ResizeObserver fires once on observe; re-baking then would draw the whole engraving a second time
+      let seen = `${canvas.clientWidth}x${canvas.clientHeight}`;
+      const ro = new ResizeObserver(() => { const k = `${canvas.clientWidth}x${canvas.clientHeight}`; if (k === seen) return; seen = k; size(); draw(); }); ro.observe(canvas);
       const toggle = document.querySelector('.toggle');
       const onTheme = () => { size(); draw(); };
       toggle?.addEventListener('click', onTheme);
       if (c.still) { state.p = 1; draw(); return () => { ro.disconnect(); toggle?.removeEventListener('click', onTheme); }; }
-      const tl = gsap.timeline({ scrollTrigger: { trigger: section, start: 'top top', end: c.wide ? '+=2200' : '+=1500', pin: true, scrub: .8, invalidateOnRefresh: true, refreshPriority: 1 } })
-        .to(state, { p: 1, ease: 'none', duration: 1 }, 0);
       const io = new IntersectionObserver(([e]) => setLive(e.isIntersecting)); io.observe(canvas);
-      return () => { setLive(false); io.disconnect(); ro.disconnect(); tl.scrollTrigger?.kill(); tl.kill(); toggle?.removeEventListener('click', onTheme); };
+      return () => { setLive(false); io.disconnect(); ro.disconnect(); toggle?.removeEventListener('click', onTheme); };
     },
   };
 }
 
 // The drawing data loads as a small binary file (public/art/hands.bin, packed by scripts/art/pack-hands.ts),
-// in parallel with the page. Once it lands the pinned scene is built and ScrollTrigger re-measures the page.
+// after the page has loaded. The pin is made first; the drawing fills in when the data lands.
 export function createHands() {
   return {
     run(c: Cond) {
       let stop = () => {}, dead = false;
-      fetch('/art/hands.bin').then(r => r.arrayBuffer()).then(buf => {
-        if (dead) return;
-        stop = handsWith(decodeHands(buf)).run(c);
-        ScrollTrigger.sort();      // this pin is created after the sections below it; refreshPriority puts it first
-        ScrollTrigger.refresh();
+      const state = { p: 0, t: 0 };
+      // the pin exists from the start, so the page is measured once and nothing re-measures when the data lands
+      const section = document.querySelector<HTMLElement>('.hands');
+      const tl = c.still || !section ? undefined : gsap.timeline({ scrollTrigger: { trigger: section, start: 'top top', end: c.wide ? '+=2200' : '+=1500', pin: true, scrub: .8, invalidateOnRefresh: true, refreshPriority: 1 } })
+        .to(state, { p: 1, ease: 'none', duration: 1 }, 0);
+      afterLoad(() => fetch('/art/hands.bin').then(r => r.arrayBuffer())).then(buf => {
+        if (!dead) stop = handsWith(decodeHands(buf), state).run(c);
       });
-      return () => { dead = true; stop(); };
+      return () => { dead = true; stop(); tl?.scrollTrigger?.kill(); tl?.kill(); };
     },
   };
 }

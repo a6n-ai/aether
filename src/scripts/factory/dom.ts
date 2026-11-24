@@ -12,3 +12,9 @@ export const motion = {
   on(fn: Sub) { subs.add(fn); },
   set(v: boolean) { this.paused = v; subs.forEach(f => f(v)); },
 };
+
+// big art (drawings, the hands data) waits for the page's own load so it never competes with the CSS, font and headline
+export const afterLoad = <T>(fn: () => T | Promise<T>) => new Promise<T>((done) => {
+  const go = () => Promise.resolve(fn()).then(done);
+  if (document.readyState === 'complete') go(); else addEventListener('load', go, { once: true });
+});
