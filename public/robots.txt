@@ -1,3 +1,6 @@
 User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=no
 Allow: /
+
 Sitemap: https://a6n.ai/sitemap-index.xml
+Agentmap: https://a6n.ai/.well-known/ai-catalog.json

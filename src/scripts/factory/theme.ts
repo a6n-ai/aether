@@ -1,8 +1,10 @@
 import { gsap } from 'gsap';
 import { $, motion } from './dom';
+import { registerAgentTools } from './agent';
 
 export function initTheme() {
   initMenu();
+  registerAgentTools();
   const toggle = $<HTMLButtonElement>('.toggle');
   const syncToggle = () => {
     const dark = document.documentElement.dataset.theme === 'dark';

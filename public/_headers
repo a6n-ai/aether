@@ -10,3 +10,13 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
+  Link: </llms.txt>; rel="describedby"; type="text/markdown", </.well-known/ai-catalog.json>; rel="ai-catalog"; type="application/json", </.well-known/agent-skills/index.json>; rel="describedby"; type="application/json", </sitemap-index.xml>; rel="sitemap"; type="application/xml"
+  Vary: Accept
+
+# Agent discovery files are public and readable from any origin.
+/.well-known/*
+  Access-Control-Allow-Origin: *
+
+/llms.txt
+  Content-Type: text/markdown; charset=utf-8
+  Access-Control-Allow-Origin: *

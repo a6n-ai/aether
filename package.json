@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node scripts/agent-files.ts",
     "preview": "astro preview",
     "astro": "astro",
     "check:site": "node scripts/check-site.ts",
