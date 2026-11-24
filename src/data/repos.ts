@@ -7,6 +7,7 @@ export interface Repo {
 	repo: string | null;
 	site: string | null;
 	soon?: boolean;
+	runs?: { name: string; href: string }[];
 }
 
 export const REPOS: Repo[] = [
@@ -39,6 +40,19 @@ export const REPOS: Repo[] = [
 		site: 'https://rays.a6n.ai',
 	},
 	{
+		name: 'Realm',
+		letter: 'R',
+		colour: '--teal',
+		description: 'One codebase for many client apps: subscriptions, deliveries, payments and a staff CRM, one app per business.',
+		tags: ['AGPL-3.0', 'TypeScript'],
+		repo: 'https://github.com/a6n-ai/realm',
+		site: null,
+		runs: [
+			{ name: 'TiffinGrab', href: '/clients/tiffingrab' },
+			{ name: 'Xplorers', href: '/clients/xplorers' },
+		],
+	},
+	{
 		name: 'Monarch',
 		letter: 'M',
 		colour: '--teal',
@@ -55,5 +69,15 @@ export const REPOS: Repo[] = [
 		tags: ['AGPL-3.0', 'TypeScript'],
 		repo: 'https://github.com/a6n-ai/relay',
 		site: null,
+	},
+	{
+		name: 'Copper + Cloves',
+		letter: 'C',
+		colour: '--coral',
+		description: 'The app behind The Studio by Copper + Cloves, a wellness studio in India: classes, passes, café orders and the members\' portal.',
+		tags: ['BSD-3-Clause', 'TypeScript'],
+		repo: 'https://github.com/a6n-ai/Copper-Cloves',
+		site: null,
+		runs: [{ name: 'Copper + Cloves', href: '/clients/copper-cloves' }],
 	},
 ];

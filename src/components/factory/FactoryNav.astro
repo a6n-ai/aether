@@ -1,13 +1,19 @@
 ---
 import Mark from '../Mark.astro';
 interface Props {
-	current?: 'home' | 'showcase' | 'how' | 'client';
+	current?: 'home' | 'factory' | 'how' | 'make' | 'showcase' | 'client';
 }
 const { current = 'home' } = Astro.props;
+const links = [
+	{ key: 'factory', href: '/factory', label: 'Factory' },
+	{ key: 'how', href: '/how-it-works', label: 'How it works' },
+	{ key: 'make', href: '/what-we-make', label: 'What we make' },
+	{ key: 'showcase', href: '/showcase', label: 'Showcase' },
+];
 ---
 <nav class="nav" aria-label="Main">
   <a class="logo" href="/" aria-label="a6n home"><Mark class="logo-mark" /><span>a6n</span></a>
-  <span class="links"><a href="/#parts">Factory</a><a href="/how-it-works" aria-current={current === 'how' ? 'page' : undefined}>How it works</a><a href="/#log">What we make</a><a href="/showcase" aria-current={current === 'showcase' ? 'page' : undefined} style={current === 'showcase' ? 'color:var(--ink)' : undefined}>Showcase</a></span>
+  <span class="links">{links.map((l) => <a href={l.href} aria-current={current === l.key ? 'page' : undefined}>{l.label}</a>)}</span>
   <span class="right">
     <button class="motion-btn" type="button">Pause motion</button>
     <button class="toggle" aria-label="Light theme on. Switch to dark" aria-pressed="false">

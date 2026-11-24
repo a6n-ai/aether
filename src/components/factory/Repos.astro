@@ -12,7 +12,7 @@ const Heading = heading;
 <ul class="repos">
   {items.map((r) => (
     <li class="repo" style={`--c:var(${r.colour})`}>
-      {r.repo && !r.site ? (
+      {r.repo && !r.site && !r.runs ? (
         <a class="repo-tile" href={r.repo} data-l={r.letter}>
           <span class="glyph"></span>
           <div>
@@ -21,25 +21,17 @@ const Heading = heading;
             <div class="tags">{r.tags.map((t) => <span>{t}</span>)}</div>
           </div>
         </a>
-      ) : r.site ? (
-        <article class="repo-tile" data-l={r.letter}>
-          <span class="glyph"></span>
-          <div>
-            <Heading>{r.repo ? <a href={r.repo}>{r.name}</a> : r.name} <span class="arr" aria-hidden="true">&#8599;</span></Heading>
-            <p>{r.description}</p>
-            <div class="tags">
-              {r.tags.map((t) => <span>{t}</span>)}
-              <a class="site" href={r.site}>Website <span aria-hidden="true">&#8599;</span></a>
-            </div>
-          </div>
-        </article>
       ) : (
         <article class="repo-tile" data-l={r.letter}>
           <span class="glyph"></span>
           <div>
-            <Heading>{r.name}{r.soon && <span class="soon">Coming soon</span>}</Heading>
+            <Heading>{r.repo ? <a href={r.repo}>{r.name}</a> : r.name}{r.soon && <span class="soon">Coming soon</span>}{r.repo && <span class="arr" aria-hidden="true">&#8599;</span>}</Heading>
             <p>{r.description}</p>
-            <div class="tags">{r.tags.map((t) => <span>{t}</span>)}</div>
+            <div class="tags">
+              {r.tags.map((t) => <span>{t}</span>)}
+              {r.site && <a class="site" href={r.site}>Website <span aria-hidden="true">&#8599;</span></a>}
+            </div>
+            {r.runs && <p class="runs">Runs: {r.runs.map((x, i) => <>{i > 0 && ', '}<a href={x.href}>{x.name}</a></>)}</p>}
           </div>
         </article>
       )}

@@ -13,7 +13,7 @@ const dots = (l: string) => [...GLYPH[l]].flatMap((v, k) => v === '1' ? [{ x: (k
   <header><h2 id="ix-h">What every system gets.</h2><p>Four things come standard, whatever we build for you.</p></header>
   <ul>
     {rows.map(r => (
-      <li style={`--c:var(--${r.c})`}><a href="/#how"><span class="pic" aria-hidden="true"><svg viewBox="0 0 58 82">{dots(r.l).map(d => <rect x={d.x} y={d.y} width="10" height="10" rx="2.4" />)}</svg></span><span class="no">{r.no}</span><span class="nm">{r.nm}</span><span class="ds">{r.ds}</span></a></li>
+      <li style={`--c:var(--${r.c})`}><a href="/how-it-works"><span class="pic" aria-hidden="true"><svg viewBox="0 0 58 82">{dots(r.l).map(d => <rect x={d.x} y={d.y} width="10" height="10" rx="2.4" />)}</svg></span><span class="no">{r.no}</span><span class="nm">{r.nm}</span><span class="ds">{r.ds}</span></a></li>
     ))}
   </ul>
 </section>

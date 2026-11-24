@@ -1,0 +1,46 @@
+---
+import Factory from '../layouts/Factory.astro';
+import OutputLog from '../components/factory/OutputLog.astro';
+import OpenSource from '../components/factory/OpenSource.astro';
+import Close from '../components/factory/Close.astro';
+import { CLIENTS } from '../data/clients';
+
+const live = CLIENTS.filter((c) => !c.archived);
+const ACCENTS = ['--coral', '--teal', '--cobalt', '--lilac'];
+---
+
+<Factory
+	title="What we make | a6n"
+	description="Software a6n has built for growing businesses: client work, open source tools and examples of what comes off the line."
+	current="make"
+>
+	<header class="page-head">
+		<h1>What we make</h1>
+		<p>Software for real businesses, the open source we give away, and examples of what comes off the line.</p>
+	</header>
+	<OutputLog />
+	<section class="work" aria-labelledby="work-h">
+		<header>
+			<div><p class="kicker"><b>Client work</b></p><h2 id="work-h">Systems running for our clients.</h2></div>
+			<p>Each one is live. Open a case to see what it does and who uses it.</p>
+		</header>
+		<ul class="work-list">
+			{live.map((c, i) => (
+				<li class="work-card" style={`--c:var(${ACCENTS[i % ACCENTS.length]})`}>
+					<a href={`/clients/${c.slug}`}>
+						<span class="work-kind">{c.kind}</span>
+						<h3>{c.name}</h3>
+						<p>{c.line}</p>
+						<span class="work-link">See the case <span aria-hidden="true">&rarr;</span></span>
+					</a>
+				</li>
+			))}
+		</ul>
+	</section>
+	<OpenSource />
+	<Close />
+</Factory>
+
+<script>
+	import '../scripts/factory/page-make';
+</script>
