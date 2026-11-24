@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { $$, type Cond } from './dom';
+import { $$, motion, type Cond } from './dom';
 
 type Scene = (q: (s: string) => SVGElement[]) => [gsap.core.Timeline, gsap.core.Timeline];
 const tl = (v: gsap.TimelineVars = {}) => gsap.timeline({ paused: true, ...v });
@@ -47,7 +47,8 @@ export function runParts(c: Cond) {
     const mk = scenes[tile.dataset.scene!];
     const [intro, idle] = mk(s => $$<SVGElement>(s, tile));
     let on = false, done = false;
-    const sync = () => (on && done ? idle.play() : idle.pause());
+    const sync = () => (on && done && !motion.paused ? idle.play() : idle.pause());
+    motion.on(sync);
     intro.eventCallback('onComplete', () => { done = true; sync(); });
     ScrollTrigger.create({ trigger: tile, start: 'top 85%', once: true, onEnter: () => intro.play() });
     ScrollTrigger.create({ trigger: tile, start: 'top bottom', end: 'bottom top', onToggle: s => { on = s.isActive; sync(); } });

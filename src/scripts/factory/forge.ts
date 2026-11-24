@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { $, $$, type Cond } from './dom';
+import { $, $$, type Cond, motion } from './dom';
 import { GLYPH } from './glyphs';
 
 type Tile = { x: number; y: number; s: number; c: number; ox: number; oy: number; on: boolean };
@@ -36,7 +36,7 @@ export function createForge() {
       tiles.push(from && !first ? { x: from.x, y: from.y, s: 0, c: pickColor(), ox: 0, oy: 0, on: false }
                                 : { x: -40 - Math.random() * W * .3, y: beltY, s: .7, c: pickColor(), ox: 0, oy: 0, on: false });
     }
-    const pool = [...tiles].sort((a, b) => (+b.on - +a.on) || a.x - b.x || a.y - b.y).slice(0, T.length).sort((a, b) => a.x - b.x || a.y - b.y);
+    const pool = tiles.toSorted((a, b) => (+b.on - +a.on) || a.x - b.x || a.y - b.y).slice(0, T.length).toSorted((a, b) => a.x - b.x || a.y - b.y);
     const spare = tiles.filter(t => !pool.includes(t));
     tiles.forEach(t => gsap.killTweensOf(t));
     if (instant) { pool.forEach((t, i) => Object.assign(t, { x: T[i].x, y: T[i].y, s: 1, on: true })); spare.forEach(t => { t.on = false; }); return; }
@@ -112,12 +112,12 @@ export function createForge() {
     gsap.from('.hero-head > *, .forge-status, .needs > *:not([hidden])', { y: 20, opacity: 0, duration: .7, stagger: .05, ease: 'expo.out', delay: .3 });
     const idle: gsap.core.Tween = gsap.delayedCall(.16, function blink() {           // the system keeps running: a part swaps now and then
       const t = tiles[Math.floor(Math.random() * tiles.length)];
-      if (t && t.on) gsap.timeline().to(t, { s: .35, duration: .18, ease: 'power2.in', onComplete: () => { t.c = pickColor(); } }).to(t, { s: 1, duration: .45, ease: 'back.out(3)' });
+      if (t && t.on && !motion.paused) gsap.timeline().to(t, { s: .35, duration: .18, ease: 'power2.in', onComplete: () => { t.c = pickColor(); } }).to(t, { s: 1, duration: .45, ease: 'back.out(3)' });
       idle.restart(true);
     });
     // nobody has touched it yet: the factory demonstrates once per need, lighting the button it uses
     let di = 0;
-    const runDemo = () => { if (userTook || !live) return demo!.restart(true); pick(chips[di++ % chips.length], true); demo = gsap.delayedCall(HOLD + 2.5, runDemo); };
+    const runDemo = () => { if (userTook || !live || motion.paused) return demo!.restart(true); pick(chips[di++ % chips.length], true); demo = gsap.delayedCall(HOLD + 2.5, runDemo); };
     demo = gsap.delayedCall(4.2, runDemo);
     ScrollTrigger.create({ trigger: '.hero', start: 'top bottom', end: 'bottom top', onToggle: s => { live = s.isActive; s.isActive ? idle.resume() : idle.pause(); } });
     gsap.from('.hint', { opacity: 0, x: 20, duration: .6, ease: 'expo.out', delay: 2.4 });

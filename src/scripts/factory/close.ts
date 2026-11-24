@@ -45,10 +45,23 @@ export function createClose() {
   need.addEventListener('input', () => { gsap.to(state, { typed: Math.min(1, need.value.trim().length / 40), duration: .6, ease: 'power2.out', onUpdate: paint }); });
   $('.toggle')?.addEventListener('click', () => { shown = -1; paint(); });
 
+  // list the error in aria-describedby only while the field is invalid, so it isn't read out from page load
+  const describe = (input: HTMLInputElement) => {
+    const bad = !input.checkValidity(), id = input.dataset.error!;
+    input.setAttribute('aria-invalid', String(bad));
+    if (bad) input.setAttribute('aria-describedby', id); else input.removeAttribute('aria-describedby');
+    input.classList.toggle('is-invalid', bad);   // runs only after blur or submit, so this is 'after interaction'
+  };
+  const emailEl = $<HTMLInputElement>('#email');
+  emailEl.addEventListener('blur', () => describe(emailEl));
+  emailEl.addEventListener('input', () => { if (emailEl.getAttribute('aria-invalid') === 'true') describe(emailEl); });
+
   const run = (c: Cond) => {
     const formSubmit = (e: Event) => {
       e.preventDefault();
       if (!need.value.trim()) { need.focus(); sent.textContent = 'Add a sentence about what you need first.'; return; }
+      const email = $<HTMLInputElement>('#email');
+      if (!email.checkValidity()) { email.classList.add('is-invalid'); describe(email); email.focus(); return; }
       sent.textContent = 'Sketch finished. This preview does not send anything yet.';
       gsap.to(state, { done: 1, duration: c.still ? 0 : 1.2, ease: 'power2.inOut', onUpdate: paint });
     };

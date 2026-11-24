@@ -30,6 +30,7 @@ const jsonLd = {
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#efe7d6" />
+		<meta name="color-scheme" content="light" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -53,6 +54,7 @@ const jsonLd = {
 		<Font cssVariable="--font-factory" preload />
 		<script is:inline>
 			const saved = localStorage.getItem('a6n-theme-v2');
+			if (saved) document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', saved);
 			if (saved) document.documentElement.dataset.theme = saved;
 		</script>
 	</head>

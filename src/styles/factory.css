@@ -6,7 +6,7 @@
 [data-theme="light"] { color-scheme:light; --paper:#efe7d6; --ink:#0c0e14; --line:#dbcfb6; --dim:#b3a78c; --soft:#4d4637; --card:#e6dcc5; --hot:#2f4cf0; }
 * { box-sizing:border-box; margin:0; }
 html { background:var(--paper); }
-body { background:var(--paper); color:var(--ink); font-family:var(--font-factory),system-ui,sans-serif; overflow-x:hidden; transition:background-color .4s, color .4s; }
+body { background:var(--paper); color:var(--ink); font-family:var(--font-factory),system-ui,sans-serif; overflow-x:hidden; transition:background-color .4s, color .4s; font-size-adjust:from-font; }
 a { color:inherit; }
 :focus-visible { outline:3px solid var(--cobalt); outline-offset:3px; border-radius:6px; }
 .skip { position:absolute; left:12px; top:-60px; z-index:99; background:var(--ink); color:var(--paper); padding:10px 16px; border-radius:8px; font-weight:700; }
@@ -288,3 +288,17 @@ footer a { text-decoration:none; } footer a:hover { color:var(--ink); }
 .close-alt { margin-top:22px; font-size:17px; color:var(--soft); }
 .close-alt a { color:var(--ink); font-weight:600; text-decoration:underline; text-underline-offset:3px; }
 .close-alt a:hover { color:var(--hot); }
+
+/* pause control for looping motion; hidden when the system already asks for reduced motion */
+.motion-btn { border:1px solid var(--line); background:none; color:var(--ink); border-radius:99px; padding:8px 14px; font:600 14px var(--font-factory),sans-serif; cursor:pointer; transition:border-color .2s, background-color .2s; }
+.motion-btn:hover, .motion-btn:focus-visible { border-color:var(--ink); }
+@media (prefers-reduced-motion: reduce) { .motion-btn { display:none; } }
+
+/* email: errors show only after the visitor has used the field */
+.close .field { display:flex; flex-direction:column; flex:1; min-width:220px; }
+.close .field label { margin-bottom:4px; }
+.close .error-msg { display:none; margin-top:6px; font-size:15px; font-weight:600; color:#b3361b; }
+.close input:is(:user-invalid, .is-invalid) { border-bottom-color:#b3361b; }
+.close .form:has(input:is(:user-invalid, .is-invalid)) .error-msg { display:block; }
+[data-theme="dark"] .close .error-msg { color:#ff8a6b; }
+[data-theme="dark"] .close input:is(:user-invalid, .is-invalid) { border-bottom-color:#ff8a6b; }

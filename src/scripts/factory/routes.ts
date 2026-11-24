@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { $, $$, type Cond } from './dom';
+import { $, $$, type Cond, motion } from './dom';
 
 // routes: each part leaves from its own spot and curves into the business
 export function createRoutes() {
@@ -90,7 +90,10 @@ export function createRoutes() {
         .fromTo(coreName, { yPercent: 30, opacity: 0 }, { yPercent: 0, opacity: 1, duration: .45, ease: 'back.out(2.4)' });
       cycle.restart(true);
     }).pause();
-    ScrollTrigger.create({ trigger: hub, start: 'top bottom', end: 'bottom top', onToggle: s => { [flow, cycle].forEach(t => s.isActive ? t.resume() : t.pause()); } });
+    let seen = false;
+    const syncFlow = () => [flow, cycle].forEach(t => (seen && !motion.paused ? t.resume() : t.pause()));
+    ScrollTrigger.create({ trigger: hub, start: 'top bottom', end: 'bottom top', onToggle: s => { seen = s.isActive; syncFlow(); } });
+    motion.on(syncFlow);
   };
 
   return { run };

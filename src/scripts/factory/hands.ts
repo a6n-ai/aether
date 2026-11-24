@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import data from '../../data/hands.json';
-import type { Cond } from './dom';
+import { motion, type Cond } from './dom';
 
 // One scroll value (p, 0..1) drives the scene, in the order an engraver and a machine would work:
 //  1. a pen traces Adam's outline, 2. hatching builds tone in three passes, 3. the AI hand streams in as dots,
@@ -209,7 +209,7 @@ export function createHands() {
   };
 
   // breathing idle: a slow sway while the section is on screen
-  const tick = (time: number) => { state.t = time; draw(); };
+  const tick = (time: number) => { if (!motion.paused) state.t = time; draw(); };
   let live = false;
   const setLive = (v: boolean) => { if (v === live) return; live = v; v ? gsap.ticker.add(tick) : gsap.ticker.remove(tick); };
 

@@ -14,7 +14,8 @@ import { BOOK_CALL_HREF, CONTACT_EMAIL } from '../../lib/cta';
     <form class="form" novalidate>
       <label for="need">Describe it in one sentence.</label>
       <textarea id="need" name="need" maxlength="90" placeholder="We need a way to…"></textarea>
-      <div class="row"><input type="email" name="email" placeholder="Your email" aria-label="Your email" autocomplete="email" required><button class="go" type="submit">Send it to the factory</button></div>
+      <div class="row"><span class="field"><label for="email">Your email</label><input id="email" type="email" name="email" placeholder="you@business.com" autocomplete="email" required data-error="email-error"></span><button class="go" type="submit">Send it to the factory</button></div>
+      <p class="error-msg" id="email-error">Enter an email address like you@business.com.</p>
       <p class="sent" role="status" aria-live="polite"></p>
     </form>
     <p class="close-alt">Rather talk it through? <a href={BOOK_CALL_HREF}>Book a call</a> or write to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
