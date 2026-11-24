@@ -213,22 +213,33 @@ a { color:inherit; }
 /* 6b open source: parts from the factory floor, in the open */
 .oss { padding:14vh var(--pad); border-top:1px solid var(--line); }
 .oss header { display:grid; grid-template-columns:1fr 380px; gap:60px; align-items:end; margin-bottom:50px; }
-.oss h2 { margin-top:14px; font-size:clamp(38px,4.4vw,68px); line-height:1; letter-spacing:-.04em; font-weight:600; }
+.oss > header h2 { margin-top:14px; font-size:clamp(38px,4.4vw,68px); line-height:1; letter-spacing:-.04em; font-weight:600; }
 .oss header p { font-size:18px; line-height:1.5; color:var(--soft); }
 .repos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:18px; overflow:hidden; list-style:none; padding:0; }
 .repo { background:var(--paper); transition:background-color .4s; }
-.repo a { position:relative; display:grid; grid-template-columns:96px 1fr; gap:28px; padding:34px; text-decoration:none; height:100%; isolation:isolate; overflow:hidden; }
-.repo a::before { content:""; position:absolute; inset:-20px 0; z-index:-1; background:color-mix(in srgb,var(--c) 22%,var(--paper)); translate:0 -101%; transition:translate .5s var(--ease); }
-.repo a:hover::before, .repo a:focus-visible::before { translate:0 0; }
+.repo .repo-tile { position:relative; display:grid; grid-template-columns:96px 1fr; gap:28px; padding:34px; text-decoration:none; color:inherit; height:100%; isolation:isolate; overflow:hidden; }
+.repo .repo-tile::before { content:""; position:absolute; inset:-20px 0; z-index:-1; background:color-mix(in srgb,var(--c) 22%,var(--paper)); translate:0 -101%; transition:translate .5s var(--ease); }
+.repo:hover .repo-tile::before, .repo:focus-within .repo-tile::before { translate:0 0; }
+.repo a:focus-visible { outline:2px solid var(--ink); outline-offset:3px; border-radius:4px; }
 .repo svg { width:96px; height:auto; }
 .repo svg rect { fill:var(--ink); }
 .repo svg rect.k { fill:var(--c); }
-.repo h3 { font-size:30px; font-weight:700; letter-spacing:-.03em; display:flex; align-items:center; gap:10px; }
-.repo h3 .arr { font-size:22px; transition:translate .4s var(--ease); }
-.repo a:hover .arr, .repo a:focus-visible .arr { translate:6px -6px; }
+.repo h2, .repo h3 { font-size:30px; font-weight:700; letter-spacing:-.03em; display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+.repo h2 a, .repo h3 a {  color:inherit; text-decoration:none; }
+.repo h2 .arr { font-size:22px; transition:translate .4s var(--ease); }
+.repo:hover .arr, .repo:focus-within .arr { translate:6px -6px; }
 .repo p { margin-top:8px; font-size:17px; line-height:1.5; color:var(--soft); }
-.repo .tags { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
+.repo .tags { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; align-items:center; }
 .repo .tags span { font-size:13px; font-weight:700; padding:4px 10px; border-radius:99px; border:1px solid var(--line); }
+.repo .soon { font-size:13px; font-weight:700; letter-spacing:0; padding:4px 10px; border-radius:99px; border:1px solid var(--soft); color:var(--soft); }
+.repo .site { font-size:13px; font-weight:700; padding:4px 10px; border-radius:99px; border:1px solid var(--ink); color:var(--ink); text-decoration:none; }
+.repo .site:hover { background:var(--ink); color:var(--paper); }
+.oss-home .repos { grid-template-columns:1fr; }
+.oss-home .oss-more { margin-top:36px; font-size:18px; font-weight:700; }
+.oss-home .oss-more a { color:var(--ink); text-underline-offset:4px; }
+@media (min-width:1101px) { .oss-home .repos { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+/* an odd count in two columns: the last tile takes the whole row instead of leaving a hole */
+.repos:not(.oss-home .repos) > .repo:last-child:nth-child(odd) { grid-column:1 / -1; }
 
 /* 7 closing ticket */
 .close { display:grid; grid-template-columns:minmax(0,5fr) minmax(0,6fr); gap:clamp(40px,6vw,110px); align-items:center; padding:14vh var(--pad) 12vh; border-top:1px solid var(--line); }
@@ -278,7 +289,7 @@ footer a { text-decoration:none; } footer a:hover { color:var(--ink); }
   .log header { flex-direction:column; align-items:start; gap:14px; }
   .log thead { display:none; } .log tr { display:grid; grid-template-columns:1fr auto; gap:6px 16px; padding:20px 0; border-bottom:1px solid var(--line); }
   .log td { border:0; padding:0; width:auto !important; } .log td:first-child { grid-column:1 / -1; font-size:16px; } .log td.ar { display:none; }
-  .oss header { grid-template-columns:1fr; gap:16px; } .repos { grid-template-columns:1fr; } .repo a { grid-template-columns:64px 1fr; gap:18px; padding:24px 20px; } .repo svg { width:64px; } .repo h3 { font-size:24px; }
+  .oss header { grid-template-columns:1fr; gap:16px; } .repos { grid-template-columns:1fr; } .repo .repo-tile { grid-template-columns:64px 1fr; gap:18px; padding:24px 20px; } .repo svg { width:64px; } .repo h2, .repo h3 { font-size:24px; }
   .close { grid-template-columns:1fr; } .sketch-canvas { max-height:60vh; margin:0 auto; }
 }
 

@@ -1,14 +1,19 @@
 ---
 import Factory from '../layouts/Factory.astro';
 import Repos from '../components/factory/Repos.astro';
+import { REPOS } from '../data/repos';
 ---
 
 <Factory
 	title="Showcase | a6n"
-	description="Open source tools from the a6n software factory: Monarch, Inscribe, Relay and Rays."
+	description="Open source tools from the a6n software factory: Quarry, Inscribe, Rays, Monarch and Relay."
 	current="showcase"
 >
-	<Repos />
+	<section class="oss" aria-labelledby="os-h" style="border-top:0">
+		<header><div><p class="kicker"><b>Showcase</b></p><h1 id="os-h" style="margin-top:14px;font-size:clamp(44px,6vw,96px);line-height:.95;letter-spacing:-.05em;font-weight:600">Open from the<br>factory floor.</h1></div>
+			<p>Some of what we build to run the factory we give away. The code is public and anyone can use it.</p></header>
+		<Repos items={REPOS} />
+	</section>
 </Factory>
 
 <script>

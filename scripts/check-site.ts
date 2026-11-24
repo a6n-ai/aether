@@ -44,8 +44,10 @@ check(/\(Ai\)ny Management System[\s\S]{0,40}software factory/.test(visible), 'b
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;
 check(/color-scheme:\s*light/.test(css), 'page must set color-scheme: light');
 check(/<h1[^>]*>[\s\S]*software factory[\s\S]*<\/h1>/i.test(markup), 'home h1 must name the software factory');
-const sections = ['class="hero', 'class="hands', 'id="hub"', 'id="parts"', 'id="how"', 'id="log"', 'id="talk"'].map((m) => markup.indexOf(m));
-check(sections.every((i, n) => i > 0 && (n === 0 || i > sections[n - 1])), 'home must run hero, hands, routes, parts, how it works, output log, closing');
+const sections = ['class="hero', 'class="hands', 'id="hub"', 'id="parts"', 'id="how"', 'id="log"', 'id="open"', 'id="talk"'].map((m) => markup.indexOf(m));
+check(sections.every((i, n) => i > 0 && (n === 0 || i > sections[n - 1])), 'home must run hero, hands, routes, parts, how it works, output log, open source, closing');
+const openSection = markup.slice(markup.indexOf('id="open"'), markup.indexOf('id="talk"'));
+for (const href of ['https://rays.a6n.ai', 'https://github.com/a6n-ai/inscribe', 'https://github.com/a6n-ai/rays']) check(openSection.includes(`href="${href}"`), `open source section must link ${href}`);
 check(markup.includes('Tell us what<br>you need.'), 'missing closing call heading');
 check(/Creation of Adam[\s\S]*Public domain/.test(visible), 'hands section must credit Michelangelo, The Creation of Adam');
 check(/A study of a woman's hands[\s\S]*Public domain/.test(visible), 'closing sketch must credit Leonardo');
@@ -55,6 +57,7 @@ const homeJs = [...html.matchAll(/src="(\/_astro\/[^"]+\.js)"/g)].reduce((n, m) 
 check(homeJs < 200 * 1024, `home entry scripts are ${(homeJs / 1024).toFixed(0)} KB raw, limit 200 KB (keep big data in lazy chunks)`);
 const showcase = existsSync('dist/showcase/index.html') ? readFileSync('dist/showcase/index.html', 'utf8') : '';
 for (const repo of ['monarch', 'inscribe', 'relay', 'rays']) check(showcase.includes(`href="https://github.com/a6n-ai/${repo}"`), `showcase must link ${repo}`);
+check(/Quarry/.test(showcase) && !showcase.includes('github.com/a6n-ai/quarry'), 'showcase must list Quarry without a link (private repo)');
 
 if (failures.length) {
 	for (const f of failures) console.error(`FAIL: ${f}`);

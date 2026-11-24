@@ -1,0 +1,15 @@
+---
+import Repos from './Repos.astro';
+import { REPOS } from '../../data/repos';
+
+const items = REPOS.filter((r) => ['Quarry', 'Inscribe', 'Rays'].includes(r.name));
+---
+
+<section class="oss oss-home" id="open" aria-labelledby="open-h">
+  <header>
+    <div><p class="kicker"><b>Open source</b></p><h2 id="open-h">Open from the factory floor.</h2></div>
+    <p>Some of what we build to run the factory, we give away.</p>
+  </header>
+  <Repos items={items} heading="h3" />
+  <p class="oss-more"><a href="/showcase">See everything on Showcase &rarr;</a></p>
+</section>

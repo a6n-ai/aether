@@ -9,11 +9,11 @@ export const GLYPH: Record<string, string> = {A:'0111010001100011111110001100011
   5:'11111100001111000001000011000101110',6:'00110010001000011110100011000101110',7:'11111000010001000100010000100001000',8:'01110100011000101110100011000101110',9:'01110100011000101111000010001001100'};
 
 // each repo's initial in the hero's dot type
-export function repoGlyphs() {
-  document.querySelectorAll<HTMLAnchorElement>('.repo a').forEach((a) => {
-    const g = GLYPH[a.dataset.l!];
+export function repoGlyphs(root: ParentNode = document) {
+  root.querySelectorAll<HTMLElement>('.repo [data-l]').forEach((t) => {
+    const g = GLYPH[t.dataset.l!];
     let r = '';
     for (let k = 0; k < 35; k++) if (g[k] === '1') r += `<rect class="${Math.random() < .2 ? 'k' : ''}" x="${(k % 5) * 12}" y="${Math.floor(k / 5) * 12}" width="10" height="10" rx="2.4"/>`;
-    a.querySelector('.glyph')!.outerHTML = `<svg viewBox="0 0 58 82" aria-hidden="true">${r}</svg>`;
+    t.querySelector('.glyph')!.outerHTML = `<svg viewBox="0 0 58 82" aria-hidden="true">${r}</svg>`;
   });
 }
