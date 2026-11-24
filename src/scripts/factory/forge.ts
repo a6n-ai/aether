@@ -15,6 +15,8 @@ export function createForge() {
   const pickColor = () => Math.random() < .8 ? 0 : 1 + Math.floor(Math.random() * 5);
   const size = () => { const r = forge.getBoundingClientRect(), d = Math.min(devicePixelRatio, 2); W = r.width; H = r.height; forge.width = W * d; forge.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0); };
   const targetsFor = (word: string) => {
+    // narrow screens: the home word stacks into four short lines so its squares can grow
+    if (W < 600 && word === 'SOFTWARE|FACTORY') word = 'SOFT|WARE|FACT|ORY';
     const lines = word.split('|'), cols = Math.max(...lines.map(l => l.length * 6 - 1)), rows = lines.length * 7 + (lines.length - 1) * 2;
     const fr = forge.getBoundingClientRect(), gap = Math.max(24, H * .04);
     const padX = Math.min(100, W * .069), top = $('.hero-head').getBoundingClientRect().bottom - fr.top + gap, bottom = $('.hero .dock').getBoundingClientRect().top - fr.top - gap;

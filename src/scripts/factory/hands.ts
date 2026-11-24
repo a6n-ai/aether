@@ -77,7 +77,10 @@ export function createHands() {
   const size = () => {
     const r = canvas.getBoundingClientRect(); dpr = Math.min(devicePixelRatio, 2);
     W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr;
-    s = Math.min((W * 1.25) / D.w, (H * .72) / D.h); ox = W * .52 - D.split * s; oy = H * .58 - D.h * s / 2;
+    // narrow screens zoom in on the fingertips and let both arms run off the edges
+    const narrow = W < 700;
+    s = narrow ? Math.min((W * 2.3) / D.w, (H * .5) / D.h) : Math.min((W * 1.25) / D.w, (H * .72) / D.h);
+    ox = W * (narrow ? .5 : .52) - D.split * s; oy = H * (narrow ? .6 : .58) - D.h * s / 2;
     ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || ink;
     bake();
   };
