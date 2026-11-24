@@ -16,7 +16,8 @@ const ariaLabels = [...markup.matchAll(/aria-label="([^"]*)"/g)].map((m) => m[1]
 const visible = markup.replace(/<[^>]+>/g, ' ') + ' ' + ariaLabels.join(' ');
 
 const BANNED = ['API', 'LLM', 'agentic', 'platform', 'SaaS', 'tech stack', 'integration', 'backend', 'webhook', 'AI-powered', 'AI-native', 'Realm', 'Aether'];
-const PAGES = ['index.html', 'how-it-works/index.html', ...['tiffingrab', 'puchkaman', 'xplorers', 'copper-cloves'].map((s) => `clients/${s}/index.html`)];
+const clients = [...readFileSync('src/data/clients.ts', 'utf8').matchAll(/slug: '([^']+)',\s*(?:url: '([^']+)',)?/g)].map((m) => ({ slug: m[1], url: m[2] }));
+const PAGES = ['index.html', 'how-it-works/index.html', ...clients.map((c) => `clients/${c.slug}/index.html`)];
 for (const page of PAGES) {
 	const path = `dist/${page}`;
 	if (!existsSync(path)) {
@@ -30,11 +31,8 @@ for (const page of PAGES) {
 	check(/href="mailto:hi@a6n\.ai\?subject=Book%20a%20call/.test(body), `${page}: no Book a call mailto link`);
 	check((body.match(/<h1[\s>]/g) ?? []).length === 1, `${page}: expected exactly one <h1>`);
 	check(/<html[^>]*lang="en"/.test(raw), `${page}: missing <html lang="en">`);
-	// every page is a place on the one sheet: the world canvas, and its stops with real words beside them
-	if (page !== 'index.html') {
-		check(/<canvas[^>]*class="world"/.test(raw), `${page}: missing the world canvas`);
-		check(/data-stop="[^"]+"/.test(body), `${page}: no stops`);
-	}
+	const liveUrl = clients.find((c) => page === `clients/${c.slug}/index.html`)?.url;
+	if (liveUrl) check(body.includes(`href="${liveUrl}"`), `${page}: no link to the live site ${liveUrl}`);
 	for (const img of body.matchAll(/<img[^>]*class="still"[^>]*>/g)) check((img[0].match(/alt="([^"]*)"/)?.[1] ?? '').length >= 40, `${page}: a stop's still needs a 40+ char alt`);
 	for (const phrase of ['until it arrives', 'bookings, delivery and messages are parts']) {
 		check(!text.includes(phrase), `${page}: overpromising copy: "${phrase}"`);

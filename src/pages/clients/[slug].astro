@@ -1,27 +1,43 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import Stop from '../../components/Stop.astro';
+import Factory from '../../layouts/Factory.astro';
+import DotType from '../../components/factory/DotType.astro';
 import { CLIENTS, type Client } from '../../data/clients';
-import { STILLS } from '../../data/world';
 import { BOOK_CALL_HREF } from '../../lib/cta';
 
 export function getStaticPaths() {
-	return CLIENTS.map((client) => ({ params: { slug: client.slug }, props: { client } }));
+	const ACCENTS = ['cobalt', 'coral', 'teal', 'lilac'];
+	return CLIENTS.map((client, i) => ({
+		params: { slug: client.slug },
+		props: { client, next: CLIENTS[(i + 1) % CLIENTS.length], accent: ACCENTS[i % ACCENTS.length] },
+	}));
 }
 
-// Each client is its workshop on the sheet: the camera flies to it, and its story rides beside it.
-const { client } = Astro.props as { client: Client };
+const { client, next, accent } = Astro.props as { client: Client; next: Client; accent: string };
 ---
 
-<Layout title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} Built by a6n.`}>
-	<div class="journey" data-journey>
-		<Stop id={client.slug} side="right" heading={client.name} still={STILLS[`workshop-${client.slug}`]} stillAlt={`A drafting sheet of ${client.name}'s system, step by step.`} first long>
-			<p class="kind">{client.kind}, {client.where}</p>
-			<p>{client.intro}</p>
-			<p>{client.line}</p>
+<Factory title={`${client.name}: ${client.kind}, built by a6n`} description={`${client.intro} Built by a6n.`} current="client">
+	<section class="case-hero" style={`--c:var(--${accent})`}>
+		<p class="kicker"><b>Client</b> {client.kind}, {client.where}</p>
+		<div class="case-title">
+			<h1><span class="vh">{client.name}</span><DotType text={client.name} class="case-name" /></h1>
+			{client.archived && <span class="archived">Archived</span>}
+		</div>
+		<p class="case-line">{client.line}</p>
+		<p class="case-actions">
+			{client.url && <a class="go" href={client.url}>See it live</a>}
+			<a class="case-call" href={BOOK_CALL_HREF}>Book a call</a>
+		</p>
+	</section>
+	<section class="case-section" aria-labelledby="need-h">
+		<h2 id="need-h">What they needed</h2>
+		<p class="case-intro">{client.intro}</p>
+	</section>
+	<section class="case-section" aria-labelledby="built-h">
+		<h2 id="built-h">What we built</h2>
+		<div class="case-parts" style={`--c:var(--${accent})`}>
 			{
 				client.features.map((group) => (
-					<div class="group">
+					<div class="tile case-part">
 						<h3>{group.title}</h3>
 						<ul>
 							{group.items.map((item) => (
@@ -31,39 +47,16 @@ const { client } = Astro.props as { client: Client };
 					</div>
 				))
 			}
-			<p class="actions">
-				<a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a>
-				<a class="back" href="/">Back to the sheet</a>
-			</p>
-		</Stop>
-	</div>
-</Layout>
+		</div>
+	</section>
+	<nav class="case-next" aria-label="Next client">
+		<a href={`/clients/${next.slug}`}>
+			<span class="kicker">Next client</span>
+			<span class="case-next-name">{next.name} &rarr;</span>
+		</a>
+	</nav>
+</Factory>
 
-<style>
-	.kind {
-		color: var(--muted);
-		font-size: var(--t-xs);
-	}
-	.group h3 {
-		font: 500 1.05rem/1.2 var(--font-display);
-		color: var(--sanguine-ink);
-		margin-bottom: 4px;
-	}
-	.group ul {
-		margin: 0;
-		padding-left: 1.1em;
-		display: grid;
-		gap: 4px;
-		color: var(--strong);
-		font-size: 0.95rem;
-	}
-	.actions {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 12px 24px;
-	}
-	.back {
-		color: var(--strong);
-	}
-</style>
+<script>
+	import '../../scripts/factory/clientcase';
+</script>

@@ -1,12 +1,20 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Stop from '../components/Stop.astro';
+import Factory from '../layouts/Factory.astro';
+import DotType from '../components/factory/DotType.astro';
 ---
 
-<Layout title="Out of reach · a6n" description="This page doesn't exist. Head back to the a6n home page, or book a short call about your business.">
-	<div class="journey" data-journey>
-		<Stop id="corner" side="left" heading="This page is just out of reach." href="/" linkText="Back to the front" first>
-			<p>The link you followed runs off the edge of the sheet. Everything else is one step back.</p>
-		</Stop>
-	</div>
-</Layout>
+<Factory title="Out of reach | a6n" description="This page doesn't exist. Head back to the a6n home page, or see what the software factory has built.">
+	<section class="nf">
+		<DotType text="404" class="nf-code" />
+		<h1>This page is just out of reach.</h1>
+		<p class="nf-lead">The link you followed doesn't lead anywhere. Everything else is one step back.</p>
+		<p class="nf-actions">
+			<a class="go" href="/">Back to the front</a>
+			<a class="nf-link" href="/showcase">See the Showcase</a>
+		</p>
+	</section>
+</Factory>
+
+<script>
+	import '../scripts/factory/notfound';
+</script>

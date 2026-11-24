@@ -8,11 +8,14 @@ export interface Client {
 	line: string;
 	intro: string;
 	features: { title: string; items: string[] }[];
+	url?: string;
+	archived?: boolean;
 }
 
 export const CLIENTS: Client[] = [
 	{
 		slug: 'tiffingrab',
+		url: 'https://tiffingrab.ca',
 		name: 'TiffinGrab',
 		pigment: 'var(--ochre)',
 		kind: 'Meal plans, delivered',
@@ -50,6 +53,7 @@ export const CLIENTS: Client[] = [
 	},
 	{
 		slug: 'puchkaman',
+		archived: true,
 		name: 'Puchkaman',
 		pigment: 'var(--verdigris)',
 		kind: 'Restaurant ordering',
@@ -79,6 +83,7 @@ export const CLIENTS: Client[] = [
 	},
 	{
 		slug: 'xplorers',
+		url: 'https://xplorers.life',
 		name: 'Xplorers',
 		pigment: 'var(--lapis)',
 		kind: 'Kids science classes',
@@ -109,6 +114,7 @@ export const CLIENTS: Client[] = [
 	{
 		slug: 'copper-cloves',
 		name: 'Copper + Cloves',
+		url: 'https://copperandcloves.com',
 		pigment: 'var(--sanguine)',
 		kind: 'Boutique studio',
 		where: 'Bangalore',

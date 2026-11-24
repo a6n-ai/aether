@@ -1,58 +1,64 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Stop from '../components/Stop.astro';
-import { STILLS } from '../data/world';
+import Factory from '../layouts/Factory.astro';
+import DotType from '../components/factory/DotType.astro';
 import { FAQ } from '../data/faq';
 import { BOOK_CALL_HREF } from '../lib/cta';
 
 const STEPS = [
-	{ title: 'We talk', body: "A short call about how your business works today, what's slow, and what you wish your customers could do on their own." },
-	{ title: 'We plan', body: 'We write down, in plain words, what we will build first, and show you how it will look before anything is built.' },
-	{ title: 'Built from parts', body: 'Sign-in, payments, loyalty rewards, delivery and messages are parts already running for other businesses. We fit them to yours and build only what is unique to you.' },
-	{ title: 'Goes live', body: 'We move your customers and records across, train your staff, and open it to your customers.' },
-	{ title: 'Kept running', body: 'We keep watch, fix what breaks and add what you need next. Same team, every week.' },
+	{ title: 'Conversation', body: "A short call about how your business works today, what's slow, and what you wish your customers could do on their own.", c: 'lilac' },
+	{ title: 'Plan', body: 'We write down, in plain words, what we will build first, and show you how it will look before anything is built.', c: 'cobalt' },
+	{ title: 'Build', body: 'Sign-in, dashboards, AI assistants, reports and notifications are parts already running inside other businesses. We fit them to yours and build only what is new.', c: 'coral' },
+	{ title: 'Launch', body: 'We move your customers and records across, train your staff, and open it to your customers.', c: 'teal' },
+	{ title: 'Grow', body: 'We keep watch, fix what breaks and add what you need next. Same team, every week.', c: 'butter' },
 ];
+
+const faqLd = {
+	'@context': 'https://schema.org',
+	'@type': 'FAQPage',
+	mainEntity: FAQ.map((n) => ({ '@type': 'Question', name: n.q, acceptedAnswer: { '@type': 'Answer', text: n.a } })),
+};
 ---
 
-<Layout
+<Factory
 	title="How it works: from first call to an app your business runs on | a6n"
 	description="Every a6n project follows the same path: a conversation, a plan, a build from parts that already work, a launch, and then we keep it running."
+	current="how"
 >
-	<div class="journey" data-journey>
-		<Stop id="road" side="right" heading="From first call to open for customers." still={STILLS.road} stillAlt="A chalk drawing of the road a build takes: two people talking, a plan on paper, boxes and a gear, the kiosk open, a month ticked off." first long>
-			<ol class="steps">
-				{STEPS.map((s) => <li><strong>{s.title}.</strong> {s.body}</li>)}
-			</ol>
-			<p><a class="btn-call" href={BOOK_CALL_HREF}>Book a call</a></p>
-		</Stop>
-		<Stop id="questions" side="right" heading="Questions owners ask." long>
-			<dl class="notes">
-				{FAQ.map((n) => (<><dt>{n.q}</dt><dd>{n.a}</dd></>))}
-			</dl>
-		</Stop>
-	</div>
-</Layout>
+	<section class="how-hero">
+		<p class="kicker"><b>The path</b></p>
+		<h1>How it works</h1>
+		<p class="how-lead">Every a6n project follows the same path: a conversation, a plan, a build from parts that already work, a launch, and then we keep it running.</p>
+	</section>
+	<ol class="steps">
+		{STEPS.map((s, i) => (
+			<li class="step" style={`--c:var(--${s.c})`}>
+				<DotType text={String(i + 1)} class="step-no" />
+				<div>
+					<h2>{s.title}.</h2>
+					<p>{s.body}</p>
+				</div>
+			</li>
+		))}
+	</ol>
+	<section class="how-faq" aria-labelledby="faq-h">
+		<h2 id="faq-h">Questions owners ask.</h2>
+		{FAQ.map((n) => (
+			<details>
+				<summary>{n.q}</summary>
+				<p>{n.a}</p>
+			</details>
+		))}
+	</section>
+	<section class="how-close" aria-labelledby="close-h">
+		<h2 id="close-h">Tell us what you need.</h2>
+		<p class="how-actions">
+			<a class="go" href="/#talk">Tell us what you need</a>
+			<a class="how-call" href={BOOK_CALL_HREF}>Book a call</a>
+		</p>
+	</section>
+	<script type="application/ld+json" set:html={JSON.stringify(faqLd)} />
+</Factory>
 
-<style>
-	.steps {
-		margin: 0;
-		padding-left: 1.2em;
-		display: grid;
-		gap: 10px;
-		color: var(--strong);
-	}
-	.notes {
-		display: grid;
-		gap: 6px;
-		margin: 0;
-	}
-	.notes dt {
-		font: italic 400 1.1rem/1.2 var(--font-display);
-		color: var(--sanguine-ink);
-	}
-	.notes dd {
-		margin: 0 0 12px;
-		color: var(--strong);
-		font-size: 0.95rem;
-	}
-</style>
+<script>
+	import '../scripts/factory/howitworks';
+</script>

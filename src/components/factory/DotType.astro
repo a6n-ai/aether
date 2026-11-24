@@ -1,0 +1,28 @@
+---
+import { GLYPH } from '../../scripts/factory/glyphs';
+
+interface Props {
+	text: string;
+	class?: string;
+}
+
+const { text, class: cls } = Astro.props;
+const dots: { x: number; y: number }[] = [];
+let x = 0;
+for (const ch of text.toUpperCase()) {
+	const glyph = GLYPH[ch];
+	if (!glyph) {
+		x += 40;
+		continue;
+	}
+	for (const [k, bit] of [...glyph].entries()) {
+		if (bit === '1') dots.push({ x: x + (k % 5) * 12, y: Math.floor(k / 5) * 12 });
+	}
+	x += 70;
+}
+const width = Math.max(x - 10, 10);
+---
+
+<svg class={cls} viewBox={`0 0 ${width} 82`} aria-hidden="true" focusable="false" data-dot>
+	{dots.map((d) => <rect x={d.x} y={d.y} width="10" height="10" rx="2.4" />)}
+</svg>
