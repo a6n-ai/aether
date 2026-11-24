@@ -1,14 +1,15 @@
 ---
 import Mark from '../Mark.astro';
+import { BOOK_CALL_HREF, CONTACT_EMAIL } from '../../lib/cta';
 interface Props {
 	current?: 'home' | 'factory' | 'how' | 'make' | 'showcase' | 'client';
 }
 const { current = 'home' } = Astro.props;
 const links = [
-	{ key: 'factory', href: '/factory', label: 'Factory' },
-	{ key: 'how', href: '/how-it-works', label: 'How it works' },
-	{ key: 'make', href: '/what-we-make', label: 'What we make' },
-	{ key: 'showcase', href: '/open-source', label: 'Open source' },
+	{ key: 'factory', href: '/factory', label: 'Factory', c: 'cobalt' },
+	{ key: 'how', href: '/how-it-works', label: 'How it works', c: 'coral' },
+	{ key: 'make', href: '/what-we-make', label: 'What we make', c: 'butter' },
+	{ key: 'showcase', href: '/open-source', label: 'Open source', c: 'teal' },
 ];
 ---
 <nav class="nav" aria-label="Main">
@@ -25,8 +26,20 @@ const links = [
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
   </span>
-  <div class="menu" id="site-menu" popover>
-    {links.map((l) => <a href={l.href} aria-current={current === l.key ? 'page' : undefined}>{l.label}</a>)}
-    <a class="go" href="/#talk">Tell us what you need</a>
+  <div class="menu" id="site-menu" popover aria-label="Menu">
+    <div class="menu-top">
+      <a class="logo" href="/" aria-label="a6n home"><Mark class="logo-mark" /><span>a6n</span></a>
+      <button class="menu-close" type="button" popovertarget="site-menu" popovertargetaction="hide" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <nav class="menu-links" aria-label="Pages">
+      <a class="menu-link" href="/" aria-current={current === 'home' ? 'page' : undefined} style="--c:var(--lilac)"><i aria-hidden="true"></i><span>Home</span>{current === 'home' && <small>You are here</small>}</a>
+      {links.map((l) => <a class="menu-link" href={l.href} aria-current={current === l.key ? 'page' : undefined} style={`--c:var(--${l.c})`}><i aria-hidden="true"></i><span>{l.label}</span>{current === l.key && <small>You are here</small>}</a>)}
+    </nav>
+    <div class="menu-foot">
+      <a class="go menu-go" href="/#talk">Tell us what you need</a>
+      <p><a href={BOOK_CALL_HREF}>Book a call</a><a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a></p>
+    </div>
   </div>
 </nav>

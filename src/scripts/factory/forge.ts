@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { $, $$, type Cond, motion } from './dom';
+import { $, $$, type Cond, motion, firstInput } from './dom';
 import { GLYPH } from './glyphs';
 
 type Tile = { x: number; y: number; s: number; c: number; ox: number; oy: number; on: boolean };
@@ -121,15 +121,12 @@ export function createForge() {
     let di = 0;
     const runDemo = () => { if (userTook || !live || motion.paused) return demo!.restart(true); pick(chips[di++ % chips.length], true); demo = gsap.delayedCall(HOLD + 2.5, runDemo); };
     demo = gsap.delayedCall(4.2, runDemo).pause();
-    let woke = false;
-    const wake = () => { if (woke) return; woke = true; stopWake(); if (live) idle.resume(); demo!.restart(true); };
-    const wakeOn = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart', 'scroll'] as const;
-    const stopWake = () => wakeOn.forEach(e => removeEventListener(e, wake));
-    wakeOn.forEach(e => addEventListener(e, wake, { passive: true }));
+    let woke = false, gone = false;
+    firstInput.then(() => { if (gone) return; woke = true; if (live) idle.resume(); demo!.restart(true); });
     ScrollTrigger.create({ trigger: '.hero', start: 'top bottom', end: 'bottom top', onToggle: s => { live = s.isActive; s.isActive && woke ? idle.resume() : idle.pause(); } });
     gsap.from('.hint', { opacity: 0, x: 20, duration: .6, ease: 'expo.out', delay: 2.4 });
     forge.addEventListener('pointerenter', () => gsap.to('.hint', { opacity: 0, duration: .4 }), { once: true });
-    return () => { stopWake(); idle.kill(); demo?.kill(); forge.removeEventListener('pointermove', onMove); forge.removeEventListener('pointerleave', onLeave); gsap.ticker.remove(draw); };
+    return () => { gone = true; idle.kill(); demo?.kill(); forge.removeEventListener('pointermove', onMove); forge.removeEventListener('pointerleave', onLeave); gsap.ticker.remove(draw); };
   };
 
   return { readPal, run };

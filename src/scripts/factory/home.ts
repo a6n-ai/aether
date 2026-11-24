@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { $, $$, type Cond } from './dom';
+import { $, $$, firstInput, type Cond } from './dom';
 import { initTheme } from './theme';
 import { repoGlyphs } from './glyphs';
 import { createForge } from './forge';
@@ -33,8 +33,8 @@ gsap.matchMedia().add({
   toggle.addEventListener('click', forge.readPal);
   cleanups.push(() => toggle.removeEventListener('click', forge.readPal));
   cleanups.push(forge.run(c));
-  // the hero runs now; each section below the fold is built in its own task after the first paint,
-  // so no single start-up task blocks the phone's main thread (was one 276 ms task at 4x CPU)
+  // the hero runs now; the sections below the fold are built on the visitor's first input, each in its own
+  // task, so loading the page does no work nobody can see yet (start-up blocking time on phones)
   const later: (() => void | (() => void))[] = [
     () => hands.run(c),
     () => { routes.run(c); },
@@ -49,6 +49,6 @@ gsap.matchMedia().add({
     // triggers were made out of page order; put them back in order before measuring
     ScrollTrigger.sort(); ScrollTrigger.refresh();
   };
-  requestAnimationFrame(() => { timer = window.setTimeout(step, 0); });
+  firstInput.then(() => { if (alive) timer = window.setTimeout(step, 0); });
   return () => { alive = false; clearTimeout(timer); cleanups.forEach(fn => fn && fn()); };
 });
