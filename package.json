@@ -12,7 +12,7 @@
     "astro": "astro",
     "check:site": "node scripts/check-site.ts",
     "test:world": "node --test src/scripts/world/",
-    "test:factory": "node --test src/scripts/factory/"
+    "test:factory": "node --test src/scripts/factory/hands-data.test.ts"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
