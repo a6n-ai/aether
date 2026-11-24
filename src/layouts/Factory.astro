@@ -52,6 +52,7 @@ const jsonLd = {
 		<meta name="twitter:image" content={ogImage} />
 		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 		<Font cssVariable="--font-factory" preload />
+		<slot name="head" />
 		<script is:inline>
 			const saved = localStorage.getItem('a6n-theme-v2');
 			if (saved) document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', saved);

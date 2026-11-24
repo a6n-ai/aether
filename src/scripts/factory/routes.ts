@@ -21,7 +21,7 @@ export function createRoutes() {
     '<path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4M9 12h6M9 15.5h6M9 19h4"/>',
     '<path d="M2 9.5 12 5l10 4.5L12 14z"/><path d="M6 11.5V16c3 2.5 9 2.5 12 0v-4.5"/>',
   ];
-  $('.runs', core).innerHTML = nodes.map((n, i) => `<i style="--c:${n.style.getPropertyValue('--c')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[i % ICONS.length]}</svg></i>`).join('');
+  $('.runs', core).innerHTML = nodes.map((n, i) => `<i style="--c:${n.style.getPropertyValue('--c')}"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[i % ICONS.length]}</svg></i>`).join('');
   const count = $('.runs-count', core);
   const tally = () => { const n = $$('.runs i.on', core).length; count.textContent = n >= nodes.length ? 'Everything runs here.' : `${n} of ${nodes.length} parts running`; };
   const runDots = $$('.runs i', core);
