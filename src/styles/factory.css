@@ -39,14 +39,14 @@ a { color:inherit; }
 /* phones: the page links move into a popover menu (Escape, outside tap and focus come from the platform) */
 .menu-btn { display:none; width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:none; color:var(--ink); cursor:pointer; place-items:center; }
 .menu-btn svg { width:20px; height:20px; }
-.menu { position:fixed; inset:0; width:100%; max-width:none; height:100dvh; max-height:none; margin:0; padding:0 var(--pad) max(28px, env(safe-area-inset-bottom)); border:0; background:var(--ink); color:var(--paper); overflow:auto; }
+.menu { position:fixed; inset:var(--nav-top,0px) 0 0; width:100%; max-width:none; height:auto; max-height:none; margin:0; padding:0 var(--pad) max(28px, env(safe-area-inset-bottom)); border:0; background:var(--ink); color:var(--paper); overflow:auto; }
 .menu:popover-open { display:flex; flex-direction:column; }
 .menu::backdrop { background:transparent; }
 html:has(.menu:popover-open) { overflow:hidden; }
-.menu-top { display:flex; align-items:center; justify-content:space-between; height:76px; border-bottom:1px solid color-mix(in srgb, var(--paper) 16%, transparent); }
+.menu-top { display:flex; align-items:center; justify-content:space-between; height:76px; margin:0 calc(18px - var(--pad)); border-bottom:1px solid color-mix(in srgb, var(--paper) 16%, transparent); }
 .menu-top .logo { display:inline-flex; align-items:center; gap:10px; font-size:30px; font-weight:700; letter-spacing:-.05em; color:var(--paper); text-decoration:none; }
 .menu-top .logo-mark { width:30px; height:30px; }
-.menu-close { width:44px; height:44px; border-radius:50%; border:1px solid color-mix(in srgb, var(--paper) 30%, transparent); background:none; color:var(--paper); display:grid; place-items:center; cursor:pointer; transition:rotate .5s var(--ease), border-color .2s; }
+.menu-close { width:40px; height:40px; border-radius:50%; border:1px solid color-mix(in srgb, var(--paper) 30%, transparent); background:none; color:var(--paper); display:grid; place-items:center; cursor:pointer; transition:rotate .5s var(--ease), border-color .2s; }
 .menu-close:hover, .menu-close:focus-visible { rotate:90deg; border-color:var(--paper); }
 .menu-close svg { width:20px; height:20px; }
 .menu-links { display:grid; margin:auto 0; padding:28px 0; }

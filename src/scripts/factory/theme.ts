@@ -41,8 +41,13 @@ export function initMenu() {
   if (!menu) return;
   const still = matchMedia('(prefers-reduced-motion: reduce)');
   const links = [...menu.querySelectorAll<HTMLElement>('.menu-link')];
-  const rest = [...menu.querySelectorAll<HTMLElement>('.menu-top, .menu-foot')];
+  const rest = [...menu.querySelectorAll<HTMLElement>('.menu-foot')];
   const close = menu.querySelector<HTMLButtonElement>('.menu-close')!;
+  const nav = menu.closest<HTMLElement>('.nav')!;
+  // the sheet opens from the nav's own line, so the logo and button stay put instead of jumping to the viewport top
+  menu.addEventListener('beforetoggle', (e) => {
+    if ((e as ToggleEvent).newState === 'open') menu.style.setProperty('--nav-top', `${Math.max(0, nav.getBoundingClientRect().top)}px`);
+  });
   menu.addEventListener('toggle', (e) => {
     if ((e as ToggleEvent).newState !== 'open') return;
     close.focus({ preventScroll: true });        // keyboard and screen reader users start inside the sheet
