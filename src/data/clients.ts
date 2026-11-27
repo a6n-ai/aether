@@ -1,6 +1,6 @@
 // Live features only, from the a6n product catalog (status read 12 Oct 2026).
 export interface Client {
-	slug: 'tiffingrab' | 'puchkaman' | 'xplorers' | 'copper-cloves';
+	slug: 'tiffingrab' | 'xplorers' | 'copper-cloves';
 	name: string;
 	pigment: string;
 	kind: string;
@@ -9,7 +9,6 @@ export interface Client {
 	intro: string;
 	features: { title: string; items: string[] }[];
 	url?: string;
-	archived?: boolean;
 }
 
 export const CLIENTS: Client[] = [
@@ -47,36 +46,6 @@ export const CLIENTS: Client[] = [
 					'Every enquiry becomes a lead, followed through to an order',
 					'Coupons and loyalty coins',
 					'Reports on sales, customers, deliveries and the most-picked dishes',
-				],
-			},
-		],
-	},
-	{
-		slug: 'puchkaman',
-		archived: true,
-		name: 'Puchkaman',
-		pigment: 'var(--verdigris)',
-		kind: 'Restaurant ordering',
-		where: 'Scarborough, Ontario',
-		line: 'Their own ordering website that reads the menu from the restaurant till and sends paid orders straight back to it.',
-		intro: 'A restaurant that wanted its own ordering website instead of paying delivery-app commission on every order.',
-		features: [
-			{
-				title: 'For customers',
-				items: [
-					'The same menu as the till, shown as in stock or sold out',
-					'Pickup, or delivery with an address check',
-					'Card payment in a secure form',
-					'Follow the order from a link, no account needed',
-				],
-			},
-			{
-				title: 'For the restaurant',
-				items: [
-					'Menu, prices, stock and taxes come straight from the till',
-					'Paid web orders land on the till, so the kitchen works from one screen',
-					'Catering and event enquiries go to staff',
-					'Email campaigns and loyalty coins to bring customers back',
 				],
 			},
 		],

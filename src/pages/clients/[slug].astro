@@ -20,7 +20,6 @@ const { client, next, accent } = Astro.props as { client: Client; next: Client; 
 		<p class="kicker"><b>Client</b> {client.kind}, {client.where}</p>
 		<div class="case-title">
 			<h1><span class="vh">{client.name}</span><DotType text={client.name} class="case-name" /></h1>
-			{client.archived && <span class="archived">Archived</span>}
 		</div>
 		<p class="case-line">{client.line}</p>
 		<p class="case-actions">

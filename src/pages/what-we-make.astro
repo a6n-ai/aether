@@ -5,7 +5,6 @@ import MakeSheet from '../components/factory/make/MakeSheet.astro';
 import MakeClose from '../components/factory/make/MakeClose.astro';
 import { CLIENTS } from '../data/clients';
 
-const live = CLIENTS.filter((c) => !c.archived);
 const ACCENTS = ['var(--cobalt)', 'var(--teal)', 'var(--coral)'];
 ---
 
@@ -14,10 +13,10 @@ const ACCENTS = ['var(--cobalt)', 'var(--teal)', 'var(--coral)'];
 	description="Spec sheets for the systems a6n built for real businesses: what each one does, who uses it and where it runs."
 	current="make"
 >
-	<MakeHero clients={live} />
+	<MakeHero clients={CLIENTS} />
 	<section class="make-sheets" aria-label="Spec sheets">
-		{live.map((c, i) => (
-			<MakeSheet client={c} n={i + 1} total={live.length} accent={ACCENTS[i % ACCENTS.length]} />
+		{CLIENTS.map((c, i) => (
+			<MakeSheet client={c} n={i + 1} total={CLIENTS.length} accent={ACCENTS[i % ACCENTS.length]} />
 		))}
 	</section>
 	<MakeClose />
