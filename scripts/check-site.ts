@@ -40,7 +40,7 @@ for (const page of PAGES) {
 }
 check(/What is a6n\?/.test(readFileSync('dist/how-it-works/index.html', 'utf8')), 'the "What is a6n?" answer is missing from how it works');
 const mainNav = markup.match(/<nav class="nav"[\s\S]*?<\/nav>/)?.[0] ?? '';
-for (const href of ['/factory', '/how-it-works', '/what-we-make', '/open-source']) check(mainNav.includes(`href="${href}"`), `nav on index must link ${href}`);
+for (const href of ['/factory/', '/how-it-works/', '/what-we-make/', '/open-source/']) check(mainNav.includes(`href="${href}"`), `nav on index must link ${href}`);
 // home: the software factory page
 check(/\(Ai\)ny Management System[\s\S]{0,40}software factory/.test(visible), 'brand line missing');
 const css = [...html.matchAll(/href="(\/_astro\/[^"]+\.css)"/g)].map((m) => readFileSync('dist' + m[1], 'utf8')).join('') + html;

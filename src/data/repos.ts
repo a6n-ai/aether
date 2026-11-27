@@ -48,8 +48,8 @@ export const REPOS: Repo[] = [
 		repo: 'https://github.com/a6n-ai/realm',
 		site: null,
 		runs: [
-			{ name: 'TiffinGrab', href: '/clients/tiffingrab' },
-			{ name: 'Xplorers', href: '/clients/xplorers' },
+			{ name: 'TiffinGrab', href: '/clients/tiffingrab/' },
+			{ name: 'Xplorers', href: '/clients/xplorers/' },
 		],
 	},
 	{
@@ -78,6 +78,6 @@ export const REPOS: Repo[] = [
 		tags: ['BSD-3-Clause', 'TypeScript'],
 		repo: 'https://github.com/a6n-ai/Copper-Cloves',
 		site: null,
-		runs: [{ name: 'Copper + Cloves', href: '/clients/copper-cloves' }],
+		runs: [{ name: 'Copper + Cloves', href: '/clients/copper-cloves/' }],
 	},
 ];

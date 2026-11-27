@@ -50,7 +50,7 @@ const { client, next, accent } = Astro.props as { client: Client; next: Client; 
 		</div>
 	</section>
 	<nav class="case-next" aria-label="Next client">
-		<a href={`/clients/${next.slug}`}>
+		<a href={`/clients/${next.slug}/`}>
 			<span class="kicker">Next client</span>
 			<span class="case-next-name">{next.name} &rarr;</span>
 		</a>
