@@ -260,7 +260,7 @@ html:has(.menu:popover-open) { overflow:hidden; }
 .repo:hover .arr, .repo:focus-within .arr { translate:6px -6px; }
 .repo p { margin-top:8px; font-size:17px; line-height:1.5; color:var(--soft); }
 .repo .tags { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; align-items:center; }
-.repo .tags span { font-size:13px; font-weight:700; padding:4px 10px; border-radius:99px; border:1px solid var(--line); }
+.repo .tags > span { font-size:13px; font-weight:700; padding:4px 10px; border-radius:99px; border:1px solid var(--line); }
 .repo .soon { font-size:13px; font-weight:700; letter-spacing:0; padding:4px 10px; border-radius:99px; border:1px solid var(--soft); color:var(--soft); }
 .repo .site { font-size:13px; font-weight:700; padding:4px 10px; border-radius:99px; border:1px solid var(--ink); color:var(--ink); text-decoration:none; }
 .repo .site:hover { background:var(--ink); color:var(--paper); }
